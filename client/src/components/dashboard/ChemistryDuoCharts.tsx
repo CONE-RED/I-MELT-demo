@@ -182,7 +182,7 @@ export default function ChemistryDuoCharts({ chemSteel, chemSlag }: ChemistryDuo
           return (
             <div key={element} className="text-center">
               <div className="text-cone-gray">{element}</div>
-              <div>{value.toFixed(3)}</div>
+              <div>{value === null ? '—' : value.toLocaleString('de-DE', {minimumFractionDigits: 3, maximumFractionDigits: 3})}</div>
             </div>
           );
         })}

@@ -6,7 +6,7 @@ import { storage } from "./storage";
 // Mock data for a steel heat - based on exact values from the screenshot
 // This is a showroom demo with the exact data from the Markdown tables
 const mockHeatData = {
-  ts: "2019-01-13T03:00:11.000Z",
+  ts: "2019-01-13 03:00:11",
   heat: 93378,
   grade: "13KhFA/9",
   master: "Ivanov",

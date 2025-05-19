@@ -1,0 +1,89 @@
+I’ve translated and reformatted every section of the interface into easy-to-read Markdown tables.
+Copy-paste straight into any Markdown viewer (GitHub, Notion, Confluence, PowerPoint, etc.) and it will render cleanly.
+
+---
+
+### 1 General heat header
+
+```markdown
+| Date & Time        | Heat No. | Grade Set | Shift Supervisor | Furnace Operator |
+|--------------------|:-------:|-----------|------------------|------------------|
+| 2019-01-13 03:00:11|  93378  | 13KhFA/9  | Ivanov           | Petrov           |
+```
+
+---
+
+### 2 Charge materials per bucket (t)
+
+```markdown
+| Material                     | Bucket 1 | Bucket 2 |
+|------------------------------|:--------:|:--------:|
+| Scrap 3AZhD                  | **9,7**  | **9,9**  |
+| Scrap 25A                    | 5,8      | —        |
+| Scrap 3AN                    | 76,1     | 39,5     |
+| Turnings 15A                 | 4,2      | 5,9      |
+| Anthracite                   | 0,8      | 0,8      |
+| HBI (briquetted DRI)         | 4,7      | —        |
+| **Total**                    | **101,3**| **56,1** |
+```
+
+---
+
+### 3 Operating schedule
+
+```markdown
+| Bucket | Stage | Planned Energy | Actual Energy | Planned Time | Actual Time | Profile | Temp | Status  |
+|:------:|:----:|:--------------:|:-------------:|:------------:|:-----------:|:-------:|:----:|---------|
+| 1 | 10 | 0,38 | 0,38 | 00:24 | 00:23 | 3 | N/A | Done |
+| 1 | 12 | 0,19 | 0,20 | 00:09 | 00:10 | 3 | N/A | Done |
+| 1 | 14 | 0,20 | 0,20 | 00:09 | 00:10 | 3 | N/A | Done |
+| 1 | 15 | 0,18 | —    | 00:09 | —     | 5 | N/A | Current |
+| 1 | 16 | 0,20 | —    | 00:08 | —     | 5 | N/A | — |
+| 1 | 18 | 20,02| —    | 15:31 | —     | 5 | N/A | — |
+| 2 | 10 | 0,389| —    | 00:24 | —     | 4 | N/A | — |
+| 2 | 12 | 0,21 | —    | 00:09 | —     | 4 | N/A | — |
+| 2 | 14 | 0,20 | —    | 00:09 | —     | 4 | N/A | — |
+| 2 | 15 | 0,18 | —    | 00:09 | —     | 4 | N/A | — |
+| 2 | 16 | 0,20 | —    | 00:08 | —     | 5 | N/A | — |
+| 2 | 18 | 9,05 | —    | 00:08 | —     | 5 | N/A | — |
+| 2 | 18 | 0,37 | —    | 00:06 | —     | 5 | N/A | — |
+| 2 | 17 | 23,4 | —    | 00:16:42 | —  | 3 | 1590 | — |
+```
+
+---
+
+### 4 Furnace additives
+
+```markdown
+| Bucket | Stage | Additive (name, fraction) | Weight (kg) | Energy (kWh) |
+|:------:|:----:|---------------------------|------------:|-------------:|
+| 1 | 18 | Lime 3-80 mm                  | 3002 | 16,8 |
+| 2 | 17 | Anthracite                    | 706  | 31   |
+| 2 | 17 | Lime 3-80 mm                  | 3006 | 31   |
+| 2 | 17 | Magma                         | 606  | 44,8 |
+| 2 | 17 | Magma                         | 1000 | 50,4 |
+```
+
+---
+
+### 5 Liquid-steel chemistry (EAF product)
+
+```markdown
+| C     | Mn    | Si    | P     | S     | Cr    | Cu    | Ni    | V   | Mo    | N₂  | Sn  |
+|-------|-------|-------|-------|-------|-------|-------|-------|-----|-------|-----|-----|
+| 0,090 | 0,140 | 0,000 | 0,004 | 0,029 | 0,100 | 0,190 | 0,120 | —   | 0,027 | —   | —   |
+```
+
+---
+
+### 6 Slag chemistry
+
+```markdown
+| CaO   | SiO₂  | P₂O₅  | Cr₂O₃ | FeO   | MnO   | MgO   | Al₂O₃ | S   | Mo    | N₂  | Basicity |
+|-------|-------|-------|-------|-------|-------|-------|-------|-----|-------|-----|----------|
+| 0,090 | 0,140 | 0,000 | 0,004 | 0,029 | 0,100 | 0,190 | 0,120 | —   | 0,027 | —   | —        |
+```
+
+---
+
+*All decimals remain exactly as in the source; dashes mark fields that were blank or “Н/И” (not available).*

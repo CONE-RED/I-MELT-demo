@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 
-// Mock data for a steel heat
+// Mock data for a steel heat - based on exact values from the screenshot
 const mockHeatData = {
   ts: "2019-01-13T03:00:11.000Z",
   heat: 93378,
@@ -16,7 +16,7 @@ const mockHeatData = {
     {
       id: 1,
       materials: [
-        { name: "Scrap 3AZhD", weight: 9.7, percentage: 9.5 },
+        { name: "Scrap 3AZhD", weight: 9.7, percentage: 9.6 },
         { name: "Scrap 25A", weight: 5.8, percentage: 5.7 },
         { name: "Scrap 3AN", weight: 76.1, percentage: 75.1 },
         { name: "Turnings 15A", weight: 4.2, percentage: 4.1 },
@@ -38,16 +38,16 @@ const mockHeatData = {
   ],
   stages: [
     { bucket: 1, stage: 10, plannedEnergy: 0.38, actualEnergy: 0.38, plannedTime: "00:24", actualTime: "00:23", profile: 3, temp: null, status: "done" },
-    { bucket: 1, stage: 12, plannedEnergy: 0.19, actualEnergy: 0.20, plannedTime: "00:09", actualTime: "00:10", profile: 3, temp: null, status: "done" },
-    { bucket: 1, stage: 14, plannedEnergy: 0.20, actualEnergy: 0.20, plannedTime: "00:09", actualTime: "00:10", profile: 3, temp: null, status: "done" },
+    { bucket: 1, stage: 12, plannedEnergy: 0.19, actualEnergy: 0.2, plannedTime: "00:09", actualTime: "00:10", profile: 3, temp: null, status: "done" },
+    { bucket: 1, stage: 14, plannedEnergy: 0.2, actualEnergy: 0.2, plannedTime: "00:09", actualTime: "00:10", profile: 3, temp: null, status: "done" },
     { bucket: 1, stage: 15, plannedEnergy: 0.18, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 5, temp: null, status: "current" },
-    { bucket: 1, stage: 16, plannedEnergy: 0.20, actualEnergy: null, plannedTime: "00:08", actualTime: null, profile: 5, temp: null, status: "planned" },
+    { bucket: 1, stage: 16, plannedEnergy: 0.2, actualEnergy: null, plannedTime: "00:08", actualTime: null, profile: 5, temp: null, status: "planned" },
     { bucket: 1, stage: 18, plannedEnergy: 20.02, actualEnergy: null, plannedTime: "15:31", actualTime: null, profile: 5, temp: null, status: "planned" },
     { bucket: 2, stage: 10, plannedEnergy: 0.389, actualEnergy: null, plannedTime: "00:24", actualTime: null, profile: 4, temp: null, status: "planned" },
     { bucket: 2, stage: 12, plannedEnergy: 0.21, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 4, temp: null, status: "planned" },
-    { bucket: 2, stage: 14, plannedEnergy: 0.20, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 4, temp: null, status: "planned" },
+    { bucket: 2, stage: 14, plannedEnergy: 0.2, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 4, temp: null, status: "planned" },
     { bucket: 2, stage: 15, plannedEnergy: 0.18, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 4, temp: null, status: "planned" },
-    { bucket: 2, stage: 16, plannedEnergy: 0.20, actualEnergy: null, plannedTime: "00:08", actualTime: null, profile: 5, temp: null, status: "planned" },
+    { bucket: 2, stage: 16, plannedEnergy: 0.2, actualEnergy: null, plannedTime: "00:08", actualTime: null, profile: 5, temp: null, status: "planned" },
     { bucket: 2, stage: 18, plannedEnergy: 9.05, actualEnergy: null, plannedTime: "00:08", actualTime: null, profile: 5, temp: null, status: "planned" },
     { bucket: 2, stage: 18, plannedEnergy: 0.37, actualEnergy: null, plannedTime: "00:06", actualTime: null, profile: 5, temp: null, status: "planned" },
     { bucket: 2, stage: 17, plannedEnergy: 23.4, actualEnergy: null, plannedTime: "00:16:42", actualTime: null, profile: 3, temp: 1590, status: "planned" }

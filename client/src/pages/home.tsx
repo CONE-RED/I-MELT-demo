@@ -17,12 +17,16 @@ export default function Home() {
 
   // Initialize WebSocket connection
   useEffect(() => {
+    // Set up WebSocket and immediately load heat data for customer demo
     setupWebSocket();
+    
+    // For the customer demo, immediately display heat data 
+    dispatch({ type: 'SET_HEAT_NUMBER', payload: 93378 });
     
     return () => {
       closeWebSocket();
     };
-  }, []);
+  }, [dispatch]);
 
   // Watch for heat number changes to subscribe to specific heat data
   useEffect(() => {

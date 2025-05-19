@@ -147,7 +147,7 @@ export default function ChemistryDuoCharts({ chemSteel, chemSlag }: ChemistryDuo
               dataKey="element" 
               tick={{ fill: '#7A7A7A', fontSize: 11 }} 
             />
-            <PolarRadiusAxis angle={30} domain={[0, 'auto']} tickCount={5} />
+            {/* No PolarRadiusAxis for now */}
             <Radar
               name={labels[lang].targetRange}
               dataKey="targetHigh"

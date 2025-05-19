@@ -101,7 +101,7 @@
   }
   
   .dashboard-card {
-    @apply bg-cone-black text-cone-white rounded-lg p-4 border border-cone-gray/20 shadow-lg;
+    @apply bg-cone-black text-cone-white rounded-lg p-3 border border-cone-gray/20 shadow-lg;
   }
   
   /* Scrollbar styling */

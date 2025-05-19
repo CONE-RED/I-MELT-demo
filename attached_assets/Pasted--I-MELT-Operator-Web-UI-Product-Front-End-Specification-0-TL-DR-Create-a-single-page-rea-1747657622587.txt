@@ -1,0 +1,194 @@
+# I‑MELT Operator Web UI – Product & Front‑End Specification
+
+## 0. TL;DR
+
+Create a single‑page, real‑time web application in **React 18 + TypeScript**, styled with **Tailwind CSS** and Cone Red’s minimalistic brand (black, white, signal‑red, triangular accents).  The UI surfaces live furnace data, AI predictions, and operator actions on one dashboard, backed by a WebSocket event stream.  Key widgets: Heat Header Card, Charge‐Buckets Matrix, Stage Timeline, Additives Ledger, Chemistry Twin Charts, and an **AI Insight Pane** with explainable recommendations.  Code snippets, component contracts, and styling tokens are defined below.
+
+---
+
+## 1. Tech Stack
+
+| Layer          | Choice                             | Rationale                                                            |
+| -------------- | ---------------------------------- | -------------------------------------------------------------------- |
+| SPA Framework  | **React 18** (Vite)                | Industry standard, fast refresh, rich ecosystem                      |
+| Language       | **TypeScript 5.x**                 | Type‑safe data models; catches unit mismatches                       |
+| Styling        | **Tailwind CSS v3** + brand tokens | Utility‑first; easy dark/light; triangle accents via pseudo‑elements |
+| Real‑time Data | **WebSocket (socket.io)**          | ≤ 250 ms latency updates from furnace edge gateway                   |
+| Charts         | **Recharts**                       | Lightweight, composable, exports PNG/SVG                             |
+| State          | **Redux Toolkit** + RTK Query      | Predictable; handles WebSocket actions                               |
+| Testing        | Vitest + React Testing Library     | Fast CI; snapshot dashboards                                         |
+| Build & Deploy | Vite → Docker (nginx‑alpine)       | 55 MB image; k8s‑ready                                               |
+
+---
+
+## 2. Brand & Style Guide
+
+```css
+/* src/styles/brand.css */
+:root {
+  --cone-red: #E30613; /* primary */
+  --cone-black: #000000; /* backgrounds, type */
+  --cone-gray: #7A7A7A; /* gridlines, borders */
+  --cone-white: #FFFFFF;
+  --cone-accent: #FF5740; /* status warn */
+  --radius: 0.625rem; /* 10px, soft */
+  --tri-size: 1.125rem;
+}
+```
+
+* **Font:** Inter, 14 px base; 1.35 line‑height.
+* **Triangle Motif:** Add `after:` pseudo on headings: `content:''; border-left:var(--tri-size) solid var(--cone-red); border-top:var(--tri-size) solid transparent;`.
+
+---
+
+## 3. Information Architecture
+
+```
+┌──────────────── TopBar ────────────────┐
+│ ◭ I‑MELT logo   • Heat ‑ 93378 ▼  03:11│
+└─────────────────────────────────────────┘
+┌──SideNav──┐┌──────── Dashboard (Grid 12) ────────────┐
+│Heat Log   ││ 6 cards:                                │
+│Materials  ││ [A] Heat Header (3×2)                   │
+│AI Insight ││ [B] Charge Buckets (6×4)                │
+│Chemistry  ││ [C] Stage Timeline (12×2)               │
+│Settings   ││ [D] Additives Ledger (6×3)              │
+└───────────┘│ [E] Chemistry Duo (3×3 each)            │
+             │ [F] AI Insight Pane (3×4)               │
+             └──────────────────────────────────────────┘
+```
+
+**Responsive:** Collapse SideNav to icons under 1280 px; cards stack 1‑column under 768 px.
+
+---
+
+## 4. Component Specifications
+
+### 4.1 HeatHeaderCard.tsx
+
+```tsx
+import { BoltIcon } from 'lucide-react';
+
+type HeatHeaderProps = { ts: string; heat: number; grade: string; master: string; operator: string; };
+
+export default function HeatHeaderCard({ ts, heat, grade, master, operator }: HeatHeaderProps) {
+  return (
+    <div className="col-span-3 row-span-2 bg-cone-black text-cone-white rounded-lg p-4 flex flex-col gap-2">
+      <h2 className="text-lg font-semibold relative pl-4 triangle">Heat #{heat}</h2>
+      <p className="text-sm text-cone-gray">{ts}</p>
+      <div className="grid grid-cols-2 text-sm gap-y-1">
+        <span>Steel Grade</span><span className="font-medium">{grade}</span>
+        <span>Shift Supervisor</span><span>{master}</span>
+        <span>Furnace Operator</span><span>{operator}</span>
+      </div>
+    </div>
+  );
+}
+```
+
+*Note:* `triangle` class adds red triangle per Brand guide.
+
+### 4.2 ChargeBucketsMatrix.tsx
+
+Show two buckets side‑by‑side; values animate on update.  Negative deltas flash red.
+
+```tsx
+// Column config array → <DataGrid> from @mui/x-data-grid or DIY table.
+```
+
+### 4.3 StageTimeline.tsx
+
+Horizontal **Gantt‑lite** bar: one bar per stage with plan vs. actual overlay.  Use Recharts `BarChart` + custom `ReferenceLine` at `now`.
+
+### 4.4 AdditivesLedger.tsx
+
+Table with sticky header; rows group by bucket; energy column colored via Tailwind gradient `from-cone-red/20 to-cone-red/80` by kWh.
+
+### 4.5 ChemistryDuoCharts.tsx
+
+Two stacked **RadarCharts** (steel vs. slag).  Toggle absolute vs. delta.  Tooltip shows AI target range.
+
+### 4.6 AIInsightPane.tsx
+
+Rightmost narrow card; tabs:
+
+1. **Insights** (markdown list from LLM)
+2. **Explain** (SHAP waterfall)
+3. **Chat** (operator queries → `/ask_llm` endpoint)
+
+Animated **glowing triangle icon** rotates when model retrains (`modelStatus=='training'`).
+
+```tsx
+<BoltIcon className={cn("animate-spin text-cone-red", modelStatus==='training' && 'block' )} />
+```
+
+---
+
+## 5. Data Contracts (RTK Query)
+
+```ts
+// /api/socket payloads
+interface HeatPayload {
+  ts: string;
+  heat: number;
+  grade: string;
+  master: string;
+  operator: string;
+  buckets: Bucket[];
+  stages: Stage[];
+  additives: Additive[];
+  chemSteel: Record<string, number>;
+  chemSlag: Record<string, number>;
+  insights: string[];
+}
+```
+
+* **WebSocket URL:** `wss://gateway.cone.red/v1/eaf/{furnaceId}`.
+* Heartbeat every 10 s; reconnect exponential back‑off.
+
+---
+
+## 6. AI Touchpoints in UI
+
+| Widget          | AI Feature              | UX Cue                                             |
+| --------------- | ----------------------- | -------------------------------------------------- |
+| AI Insight Pane | LLM summaries & chat    | Pulsing red triangle when new tip arrives          |
+| Chemistry Duo   | Predictive target rings | Faded ring shows prediction; actual animates to it |
+| Stage Timeline  | ETA recalculation       | Bar end animates forward/back; ± ETA label         |
+| Charge Matrix   | Anomaly detection       | Cell background turns red if > σ2 deviation        |
+| Header Card     | Confidence badge        | Small gauge 0‑100 %; spins when model updating     |
+
+---
+
+## 7. Accessibility & UX
+
+* Contrast ≥ 4.5:1 against black using Tailwind `text-cone-white`.
+* Keyboard navigation: `Tab` order follows IA; `Enter` triggers acknowledge.
+* Language toggle RU ↔ EN top‑right; uses `react-i18next`.
+
+---
+
+## 8. Dev Milestones
+
+1. **Sprint 1** – Shell layout, HeatHeaderCard, WebSocket mock.
+2. **Sprint 2** – Charge Matrix + Stage Timeline (static).
+3. **Sprint 3** – Realtime feed integration, AdditivesLedger.
+4. **Sprint 4** – Chemistry charts + AI Insight Pane.
+5. **Sprint 5** – Polish, A11y, cross‑browser QA, docker artefact.
+
+---
+
+## 9. Definition of Done
+
+* All components unit‑ & visual‑regression tested (Percy).
+* Live demo with mocked data in GitHub Pages.
+* Bundle ≤ 500 kB gzip (excl. chart libs).
+* Operator can log in, pick heat, and acknowledge AI tip in ≤ 3 clicks.
+
+---
+
+## 10. References
+
+* Cone Red Brand Book v2.0, p 7 (triangle usage)
+* I‑MELT Data API v1.3 swagger
+* UX best practice: Nucor MeltShop 4.0 dashboard (internal doc)

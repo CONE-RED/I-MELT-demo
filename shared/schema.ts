@@ -1,4 +1,5 @@
 import { pgTable, text, serial, integer, boolean, json, timestamp } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -134,3 +135,61 @@ export type Insight = typeof insights.$inferSelect;
 
 export type InsertChemistry = z.infer<typeof insertChemistrySchema>;
 export type Chemistry = typeof chemistry.$inferSelect;
+
+// Define relationships between tables
+export const usersRelations = relations(users, ({ many }) => ({
+  heats: many(heats),
+}));
+
+export const heatsRelations = relations(heats, ({ many, one }) => ({
+  buckets: many(buckets),
+  stages: many(stages),
+  additives: many(additives),
+  insights: many(insights),
+  chemistry: many(chemistry)
+}));
+
+export const bucketsRelations = relations(buckets, ({ one, many }) => ({
+  heat: one(heats, {
+    fields: [buckets.heatId],
+    references: [heats.id],
+  }),
+  stages: many(stages),
+  additives: many(additives)
+}));
+
+export const stagesRelations = relations(stages, ({ one }) => ({
+  heat: one(heats, {
+    fields: [stages.heatId],
+    references: [heats.id],
+  }),
+  bucket: one(buckets, {
+    fields: [stages.bucketId],
+    references: [buckets.id],
+  })
+}));
+
+export const additivesRelations = relations(additives, ({ one }) => ({
+  heat: one(heats, {
+    fields: [additives.heatId],
+    references: [heats.id],
+  }),
+  bucket: one(buckets, {
+    fields: [additives.bucketId],
+    references: [buckets.id],
+  })
+}));
+
+export const insightsRelations = relations(insights, ({ one }) => ({
+  heat: one(heats, {
+    fields: [insights.heatId],
+    references: [heats.id],
+  })
+}));
+
+export const chemistryRelations = relations(chemistry, ({ one }) => ({
+  heat: one(heats, {
+    fields: [chemistry.heatId],
+    references: [heats.id],
+  })
+}));

@@ -39,8 +39,8 @@ export default function HeatHeaderCard({
   
   const labels = {
     en: {
-      heat: "Heat",
-      grade: "Steel Grade",
+      heat: "Heat No.",
+      grade: "Grade Set",
       master: "Shift Supervisor",
       operator: "Furnace Operator",
       confidence: "AI Confidence",

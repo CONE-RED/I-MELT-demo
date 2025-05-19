@@ -4,6 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 
 // Mock data for a steel heat - based on exact values from the screenshot
+// This is a showroom demo with the exact data from the Markdown tables
 const mockHeatData = {
   ts: "2019-01-13T03:00:11.000Z",
   heat: 93378,
@@ -38,16 +39,16 @@ const mockHeatData = {
   ],
   stages: [
     { bucket: 1, stage: 10, plannedEnergy: 0.38, actualEnergy: 0.38, plannedTime: "00:24", actualTime: "00:23", profile: 3, temp: null, status: "done" },
-    { bucket: 1, stage: 12, plannedEnergy: 0.19, actualEnergy: 0.2, plannedTime: "00:09", actualTime: "00:10", profile: 3, temp: null, status: "done" },
-    { bucket: 1, stage: 14, plannedEnergy: 0.2, actualEnergy: 0.2, plannedTime: "00:09", actualTime: "00:10", profile: 3, temp: null, status: "done" },
+    { bucket: 1, stage: 12, plannedEnergy: 0.19, actualEnergy: 0.20, plannedTime: "00:09", actualTime: "00:10", profile: 3, temp: null, status: "done" },
+    { bucket: 1, stage: 14, plannedEnergy: 0.20, actualEnergy: 0.20, plannedTime: "00:09", actualTime: "00:10", profile: 3, temp: null, status: "done" },
     { bucket: 1, stage: 15, plannedEnergy: 0.18, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 5, temp: null, status: "current" },
-    { bucket: 1, stage: 16, plannedEnergy: 0.2, actualEnergy: null, plannedTime: "00:08", actualTime: null, profile: 5, temp: null, status: "planned" },
+    { bucket: 1, stage: 16, plannedEnergy: 0.20, actualEnergy: null, plannedTime: "00:08", actualTime: null, profile: 5, temp: null, status: "planned" },
     { bucket: 1, stage: 18, plannedEnergy: 20.02, actualEnergy: null, plannedTime: "15:31", actualTime: null, profile: 5, temp: null, status: "planned" },
     { bucket: 2, stage: 10, plannedEnergy: 0.389, actualEnergy: null, plannedTime: "00:24", actualTime: null, profile: 4, temp: null, status: "planned" },
     { bucket: 2, stage: 12, plannedEnergy: 0.21, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 4, temp: null, status: "planned" },
-    { bucket: 2, stage: 14, plannedEnergy: 0.2, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 4, temp: null, status: "planned" },
+    { bucket: 2, stage: 14, plannedEnergy: 0.20, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 4, temp: null, status: "planned" },
     { bucket: 2, stage: 15, plannedEnergy: 0.18, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 4, temp: null, status: "planned" },
-    { bucket: 2, stage: 16, plannedEnergy: 0.2, actualEnergy: null, plannedTime: "00:08", actualTime: null, profile: 5, temp: null, status: "planned" },
+    { bucket: 2, stage: 16, plannedEnergy: 0.20, actualEnergy: null, plannedTime: "00:08", actualTime: null, profile: 5, temp: null, status: "planned" },
     { bucket: 2, stage: 18, plannedEnergy: 9.05, actualEnergy: null, plannedTime: "00:08", actualTime: null, profile: 5, temp: null, status: "planned" },
     { bucket: 2, stage: 18, plannedEnergy: 0.37, actualEnergy: null, plannedTime: "00:06", actualTime: null, profile: 5, temp: null, status: "planned" },
     { bucket: 2, stage: 17, plannedEnergy: 23.4, actualEnergy: null, plannedTime: "00:16:42", actualTime: null, profile: 3, temp: 1590, status: "planned" }
@@ -68,9 +69,10 @@ const mockHeatData = {
     "Cr": 0.100,
     "Cu": 0.190,
     "Ni": 0.120,
+    "V": null,
     "Mo": 0.027,
-    "N2": 0.000,
-    "Sn": 0.000
+    "N2": null,
+    "Sn": null
   },
   chemSlag: {
     "CaO": 0.090,
@@ -81,10 +83,10 @@ const mockHeatData = {
     "MnO": 0.100,
     "MgO": 0.190,
     "Al2O3": 0.120,
-    "S": 0.000,
+    "S": null,
     "Mo": 0.027,
-    "N2": 0.000,
-    "Basicity": 0.000
+    "N2": null,
+    "Basicity": null
   },
   insights: [
     {

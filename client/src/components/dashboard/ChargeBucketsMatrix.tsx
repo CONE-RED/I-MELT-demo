@@ -47,7 +47,8 @@ export default function ChargeBucketsMatrix({ buckets }: ChargeBucketsMatrixProp
   
   const formatNumber = (num: number | null) => {
     if (num === null) return "—";
-    return num.toLocaleString(lang === 'en' ? 'en-US' : 'ru-RU', {
+    // Format with comma as decimal separator to match the Markdown table format
+    return num.toLocaleString(lang === 'en' ? 'de-DE' : 'ru-RU', {
       minimumFractionDigits: 1,
       maximumFractionDigits: 1
     });

@@ -42,7 +42,8 @@ export default function AdditivesLedger({ additives }: AdditivesLedgerProps) {
   
   // Format number with language-specific separators
   const formatNumber = (num: number) => {
-    return num.toLocaleString(lang === 'en' ? 'en-US' : 'ru-RU', {
+    // Use comma as decimal separator to match the Markdown table format
+    return num.toLocaleString(lang === 'en' ? 'de-DE' : 'ru-RU', {
       minimumFractionDigits: 1,
       maximumFractionDigits: 1
     });

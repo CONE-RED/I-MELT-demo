@@ -191,10 +191,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           clientsByHeat.get(newHeatId)?.add(ws);
           
-          // Send heat data
+          // Send heat data with exact values from Markdown tables
           ws.send(JSON.stringify({
             type: 'heat_data',
-            payload: { ...mockHeatData, heat: newHeatId }
+            payload: mockHeatData
           }));
         }
         

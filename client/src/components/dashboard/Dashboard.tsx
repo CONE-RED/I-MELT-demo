@@ -44,7 +44,7 @@ export default function Dashboard() {
   }
   
   return (
-    <div className={cn("grid gap-4", isMobile ? "grid-cols-1" : "grid-cols-12")}>
+    <div className={cn("grid gap-3", isMobile ? "grid-cols-1" : "grid-cols-12")}>
       {/* [A] Heat Header Card (3×2) */}
       <div className={cn(isMobile ? "col-span-1" : "col-span-3 row-span-2")}>
         <HeatHeaderCard
@@ -63,6 +63,11 @@ export default function Dashboard() {
         <ChargeBucketsMatrix buckets={heat.buckets} />
       </div>
       
+      {/* [F] AI Insight Pane (3×4) */}
+      <div className={cn(isMobile ? "col-span-1" : "col-span-3 row-span-4")}>
+        <AIInsightPane insights={heat.insights} />
+      </div>
+      
       {/* [C] Stage Timeline (12×2) */}
       <div className={cn(isMobile ? "col-span-1" : "col-span-12 row-span-2")}>
         <StageTimeline stages={heat.stages} />
@@ -74,13 +79,8 @@ export default function Dashboard() {
       </div>
       
       {/* [E] Chemistry Duo (3×3 each) */}
-      <div className={cn(isMobile ? "col-span-1" : "col-span-3 row-span-3")}>
+      <div className={cn(isMobile ? "col-span-1" : "col-span-6 row-span-3")}>
         <ChemistryDuoCharts chemSteel={heat.chemSteel} chemSlag={heat.chemSlag} />
-      </div>
-      
-      {/* [F] AI Insight Pane (3×4) */}
-      <div className={cn(isMobile ? "col-span-1" : "col-span-3 row-span-4")}>
-        <AIInsightPane insights={heat.insights} />
       </div>
     </div>
   );

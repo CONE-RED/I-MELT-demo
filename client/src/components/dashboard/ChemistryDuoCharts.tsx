@@ -139,14 +139,15 @@ export default function ChemistryDuoCharts({ chemSteel, chemSlag }: ChemistryDuo
       </div>
       
       {/* Chemistry Radar Chart */}
-      <div className="h-48 mt-4 mb-3">
+      <div className="h-60 mt-2 mb-2">
         <ResponsiveContainer width="100%" height="100%">
-          <RadarChart outerRadius={80} data={chartData}>
+          <RadarChart outerRadius={90} data={chartData}>
             <PolarGrid stroke="#444" />
             <PolarAngleAxis 
               dataKey="element" 
-              tick={{ fill: '#7A7A7A', fontSize: 9 }} 
+              tick={{ fill: '#7A7A7A', fontSize: 11 }} 
             />
+            <PolarRadiusAxis angle={30} domain={[0, 'auto']} tickCount={5} />
             <Radar
               name={labels[lang].targetRange}
               dataKey="targetHigh"
@@ -167,22 +168,26 @@ export default function ChemistryDuoCharts({ chemSteel, chemSlag }: ChemistryDuo
                 backgroundColor: '#222', 
                 border: '1px solid #444',
                 borderRadius: '5px'
-              }} 
+              }}
+              formatter={(value: any, name: string) => [
+                value === null ? '—' : value.toLocaleString('de-DE', {minimumFractionDigits: 3, maximumFractionDigits: 3}),
+                name
+              ]}
             />
           </RadarChart>
         </ResponsiveContainer>
       </div>
       
-      <div className="grid grid-cols-3 gap-1 text-xs mt-1">
+      <div className="grid grid-cols-4 gap-x-1 gap-y-2 text-xs mt-1">
         {displayElements.map(element => {
           const value = chemActiveView === 'steel' 
             ? chemSteel[element] 
             : chemSlag[element];
             
           return (
-            <div key={element} className="text-center">
-              <div className="text-cone-gray">{element}</div>
-              <div>{value === null ? '—' : value.toLocaleString('de-DE', {minimumFractionDigits: 3, maximumFractionDigits: 3})}</div>
+            <div key={element} className="text-center rounded px-1 py-0.5 hover:bg-cone-gray/10">
+              <div className="text-cone-gray font-medium">{element}</div>
+              <div className="font-mono">{value === null ? '—' : value.toLocaleString('de-DE', {minimumFractionDigits: 3, maximumFractionDigits: 3})}</div>
             </div>
           );
         })}

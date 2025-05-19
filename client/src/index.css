@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --muted: 0 0% 48%;
+    --muted-foreground: 0 0% 48%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
+    --border: 0 0% 48%;
+    --input: 0 0% 48%;
+    --primary: 358 98% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 48%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 9 100% 62%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 358 98% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --ring: 358 98% 45%;
+    --radius: 0.625rem;
+    --tri-size: 1.125rem;
+    
+    /* Brand Colors */
+    --cone-red: 358 98% 45%;
+    --cone-black: 0 0% 0%;
+    --cone-gray: 0 0% 48%;
+    --cone-white: 0 0% 100%;
+    --cone-accent: 9 100% 62%;
+    
+    /* Chart Colors */
+    --chart-1: 358 98% 45%;
+    --chart-2: 9 100% 62%;
+    --chart-3: 0 0% 48%;
+    --chart-4: 0 0% 20%;
+    --chart-5: 0 0% 70%;
+  }
+  
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --muted: 0 0% 48%;
+    --muted-foreground: 0 0% 70%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 100%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 100%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --primary: 358 98% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 25%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 9 100% 62%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 358 98% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --ring: 358 98% 45%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-cone-black text-cone-white font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    font-size: 14px;
+    line-height: 1.35;
+  }
+}
+
+@layer components {
+  .triangle {
+    @apply relative pl-6;
+  }
+  
+  .triangle::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.25rem;
+    border-left: var(--tri-size) solid hsl(var(--cone-red));
+    border-top: var(--tri-size) solid transparent;
+    border-bottom: var(--tri-size) solid transparent;
+  }
+  
+  .triangle-accent::after {
+    content: '';
+    display: inline-block;
+    margin-left: 0.5rem;
+    border-left: calc(var(--tri-size) * 0.8) solid hsl(var(--cone-red));
+    border-top: calc(var(--tri-size) * 0.8) solid transparent;
+    border-bottom: calc(var(--tri-size) * 0.8) solid transparent;
+    animation: glow 2s ease-in-out infinite;
+  }
+  
+  .dashboard-card {
+    @apply bg-cone-black text-cone-white rounded-lg p-4 border border-cone-gray/20 shadow-lg;
+  }
+  
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-cone-black/80 rounded-md;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-cone-red/80 rounded-md hover:bg-cone-red;
+  }
+}
+
+@keyframes glow {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}

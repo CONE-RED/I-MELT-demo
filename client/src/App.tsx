@@ -9,6 +9,7 @@ import Materials from "@/pages/materials";
 import AIInsight from "@/pages/ai-insight";
 import Chemistry from "@/pages/chemistry";
 import SettingsPage from "@/pages/settings";
+import ReportsPage from "@/pages/reports";
 
 function Router() {
   return (
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/materials" component={Materials} />
       <Route path="/ai" component={AIInsight} />
       <Route path="/chemistry" component={Chemistry} />
+      <Route path="/reports" component={ReportsPage} />
       <Route path="/settings" component={SettingsPage} />
       <Route component={NotFound} />
     </Switch>

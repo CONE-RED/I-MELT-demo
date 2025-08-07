@@ -368,5 +368,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reports API endpoints
+  app.post('/api/reports/generate', async (req, res) => {
+    try {
+      const { reportType, format, heatRange, dateRange } = req.body;
+      
+      // Simulate report generation
+      const reportData = {
+        id: `report-${Date.now()}`,
+        type: reportType,
+        format: format,
+        generatedAt: new Date().toISOString(),
+        status: 'completed',
+        downloadUrl: `/api/reports/download/${reportType}-${Date.now()}.${format}`,
+        metadata: {
+          heatRange,
+          dateRange,
+          recordCount: Math.floor(Math.random() * 1000) + 100,
+          fileSize: `${(Math.random() * 5 + 1).toFixed(1)}MB`
+        }
+      };
+
+      res.json(reportData);
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: `Failed to generate report: ${error.message}` 
+      });
+    }
+  });
+
+  app.get('/api/reports/download/:filename', async (req, res) => {
+    try {
+      const { filename } = req.params;
+      
+      // In a real application, this would serve the actual file
+      res.json({
+        message: `Report ${filename} would be downloaded in a real system`,
+        downloadUrl: `/downloads/${filename}`,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: `Failed to download report: ${error.message}` 
+      });
+    }
+  });
+
   return httpServer;
 }

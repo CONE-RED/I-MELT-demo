@@ -4,6 +4,7 @@ import { RootState } from '@/lib/store';
 import HeatHeaderCard from './HeatHeaderCard';
 import ChargeBucketsMatrix from './ChargeBucketsMatrix';
 import StageTimeline from './StageTimeline';
+import LazyFlowStageTimeline from './LazyFlowStageTimeline';
 import AdditivesLedger from './AdditivesLedger';
 import ChemistryDuoCharts from './ChemistryDuoCharts';
 import AIInsightPane from './AIInsightPane';
@@ -27,6 +28,7 @@ export default function Dashboard() {
   const [showAnomalyDetector, setShowAnomalyDetector] = useState(true);
   const [showContextualActions, setShowContextualActions] = useState(true);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [useLazyFlowTimeline, setUseLazyFlowTimeline] = useState(true);
 
   // Determine system status based on heat data
   const getSystemStatus = () => {
@@ -173,9 +175,13 @@ export default function Dashboard() {
         <AIInsightPane insights={heat.insights} />
       </div>
       
-      {/* [C] Stage Timeline (12×2) */}
+      {/* [C] Stage Timeline (12×2) - LazyFlow Enhanced */}
       <div className={cn(isMobile ? "col-span-1" : "col-span-12 row-span-2")}>
-        <StageTimeline stages={heat.stages} />
+        {useLazyFlowTimeline ? (
+          <LazyFlowStageTimeline stages={heat.stages} />
+        ) : (
+          <StageTimeline stages={heat.stages} />
+        )}
       </div>
       
       {/* [D] Additives Ledger (6×3) */}

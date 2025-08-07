@@ -4,10 +4,9 @@ import { RootState } from '@/lib/store';
 import { Insight } from '@/types';
 import { sendMessage } from '@/lib/socket';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StatusIndicator, SystemHealth } from '@/components/ui/status-indicator';
-import { Zap, ArrowRight, AlertTriangle, TrendingUp, Clock } from 'lucide-react';
+import { Zap, AlertTriangle, TrendingUp, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AIInsightPaneProps {
@@ -17,12 +16,11 @@ interface AIInsightPaneProps {
 export default function AIInsightPane({ insights }: AIInsightPaneProps) {
   const dispatch = useDispatch();
   const { language, selectedTab } = useSelector((state: RootState) => state);
-  const [chatInput, setChatInput] = useState('');
   
   const handleTabChange = (value: string) => {
     dispatch({ 
       type: 'SET_SELECTED_TAB', 
-      payload: value as 'insights' | 'explain' | 'chat' 
+      payload: value as 'insights' | 'explain'
     });
   };
   
@@ -45,16 +43,7 @@ export default function AIInsightPane({ insights }: AIInsightPaneProps) {
     });
   };
   
-  const handleSendChat = () => {
-    if (!chatInput.trim()) return;
-    
-    sendMessage({
-      type: 'chat_message',
-      payload: { message: chatInput }
-    });
-    
-    setChatInput('');
-  };
+
   
   const formatTimestamp = (ts: string) => {
     return new Date(ts).toLocaleTimeString(
@@ -67,20 +56,16 @@ export default function AIInsightPane({ insights }: AIInsightPaneProps) {
     en: {
       title: "AI Insights",
       insights: "Insights",
-      explain: "Explain",
-      chat: "Chat",
+      explain: "Explain", 
       acknowledge: "Acknowledge",
-      apply: "Apply",
-      chatPlaceholder: "Ask AI Assistant a question..."
+      apply: "Apply"
     },
     ru: {
       title: "ИИ-аналитика",
       insights: "Аналитика",
       explain: "Объяснение",
-      chat: "Чат",
       acknowledge: "Принять",
-      apply: "Применить",
-      chatPlaceholder: "Задайте вопрос ИИ-ассистенту..."
+      apply: "Применить"
     }
   };
   
@@ -111,12 +96,6 @@ export default function AIInsightPane({ insights }: AIInsightPaneProps) {
             className="px-3 py-2 text-sm data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-cone-red data-[state=active]:shadow-none rounded-none"
           >
             {labels[lang].explain}
-          </TabsTrigger>
-          <TabsTrigger 
-            value="chat" 
-            className="px-3 py-2 text-sm data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-cone-red data-[state=active]:shadow-none rounded-none"
-          >
-            {labels[lang].chat}
           </TabsTrigger>
         </TabsList>
         
@@ -191,32 +170,7 @@ export default function AIInsightPane({ insights }: AIInsightPaneProps) {
           </div>
         </TabsContent>
         
-        <TabsContent value="chat" className="flex-1 m-0 flex flex-col">
-          <div className="flex-1 overflow-y-auto mb-4">
-            <div className="p-3 text-center text-cone-gray">
-              <p>Ask the AI assistant about your heat or furnace operations</p>
-            </div>
-          </div>
-          
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder={labels[lang].chatPlaceholder}
-              className="w-full rounded bg-cone-gray/20 border border-cone-gray/30 px-3 py-2 text-sm focus:outline-none focus-visible:border-cone-red"
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendChat()}
-            />
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-cone-gray hover:text-cone-white hover:bg-transparent"
-              onClick={handleSendChat}
-            >
-              <ArrowRight className="h-5 w-5" />
-            </Button>
-          </div>
-        </TabsContent>
+
       </Tabs>
     </div>
   );

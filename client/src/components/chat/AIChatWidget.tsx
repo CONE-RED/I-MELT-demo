@@ -67,112 +67,115 @@ export default function AIChatWidget({ heatData, className = "" }: AIChatWidgetP
 
   if (!isExpanded) {
     return (
-      <Card className={`${className} border-cone-red/20`}>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Bot className="w-4 h-4 text-cone-red" />
-              <span className="text-sm font-medium text-gray-900">AI Assistant</span>
-              <Badge variant="outline" className="text-xs bg-green-50 text-green-700">
-                Active
-              </Badge>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsExpanded(true)}
-              className="h-6 w-6 p-0"
-            >
-              <Maximize2 className="w-3 h-3" />
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-2">
-            {[
-              "Analyze chemistry",
-              "Energy insights",
-              "Process status"
-            ].map((query) => (
+      <div className={`fixed bottom-6 right-6 z-50 ${className}`}>
+        <Card className="border-2 border-cone-red/30 bg-white shadow-2xl">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Bot className="w-4 h-4 text-cone-red" />
+                <span className="text-sm font-bold text-gray-900">AI Assistant</span>
+                <Badge variant="outline" className="text-xs bg-cone-red/10 text-cone-red border-cone-red/30 font-medium">
+                  Active
+                </Badge>
+              </div>
               <Button
-                key={query}
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                onClick={() => sendQuickQuery(query)}
-                disabled={isLoading}
-                className="text-xs h-7 justify-start text-gray-700 hover:text-cone-red"
+                onClick={() => setIsExpanded(true)}
+                className="h-6 w-6 p-0 hover:bg-cone-red/10"
               >
-                <MessageCircle className="w-3 h-3 mr-1" />
-                {query}
+                <Maximize2 className="w-3 h-3 text-gray-700" />
               </Button>
-            ))}
-          </div>
-
-          {lastResponse && (
-            <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-700 border-l-2 border-cone-red">
-              <div className="font-medium mb-1">Latest AI Response:</div>
-              <div className="line-clamp-2">{lastResponse}</div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            
+            <div className="grid grid-cols-1 gap-2">
+              {[
+                "Analyze chemistry",
+                "Energy insights",
+                "Process status"
+              ].map((query) => (
+                <Button
+                  key={query}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => sendQuickQuery(query)}
+                  disabled={isLoading}
+                  className="text-xs h-7 justify-start text-gray-800 border-gray-300 hover:border-cone-red hover:text-cone-red hover:bg-cone-red/5 font-medium"
+                >
+                  <MessageCircle className="w-3 h-3 mr-1" />
+                  {query}
+                </Button>
+              ))}
+            </div>
+
+            {lastResponse && (
+              <div className="mt-3 p-3 bg-cone-red/5 rounded border border-cone-red/20 text-xs text-gray-800">
+                <div className="font-bold mb-1 text-cone-red">Latest AI Response:</div>
+                <div className="line-clamp-2 text-gray-700">{lastResponse}</div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <Card className={`${className} border-cone-red/20`}>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center justify-between text-base">
-          <div className="flex items-center gap-2">
-            <Bot className="w-4 h-4 text-cone-red" />
-            AI Quick Chat
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsExpanded(false)}
-            className="h-6 w-6 p-0"
-          >
-            <Minimize2 className="w-3 h-3" />
-          </Button>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        {lastResponse && (
-          <div className="mb-3 p-3 bg-gray-50 rounded text-sm text-gray-700 border-l-2 border-cone-red max-h-24 overflow-y-auto">
-            <div className="font-medium mb-1 text-xs text-gray-500">AI Response:</div>
-            <div>{lastResponse}</div>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about current heat, chemistry, energy, or process..."
-            className="w-full px-3 py-2 border rounded-md text-sm text-gray-900 placeholder-gray-500 resize-none"
-            rows={2}
-            disabled={isLoading}
-          />
-          
-          <div className="flex gap-2">
+    <div className={`fixed bottom-6 right-6 z-50 w-80 ${className}`}>
+      <Card className="border-2 border-cone-red/30 bg-white shadow-2xl">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center justify-between text-base">
+            <div className="flex items-center gap-2">
+              <Bot className="w-5 h-5 text-cone-red" />
+              <span className="font-bold text-gray-900">AI Quick Chat</span>
+            </div>
             <Button
-              type="submit"
-              disabled={!input.trim() || isLoading}
-              className="flex-1 bg-cone-red hover:bg-cone-red/90 text-white text-sm h-8"
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsExpanded(false)}
+              className="h-6 w-6 p-0 hover:bg-cone-red/10"
             >
-              {isLoading ? (
-                <>Processing...</>
-              ) : (
-                <>
-                  <Send className="w-3 h-3 mr-1" />
-                  Ask AI
-                </>
-              )}
+              <Minimize2 className="w-3 h-3 text-gray-700" />
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setInput('')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          {lastResponse && (
+            <div className="mb-3 p-3 bg-cone-red/5 rounded border border-cone-red/20 text-sm text-gray-800 max-h-24 overflow-y-auto">
+              <div className="font-bold mb-1 text-xs text-cone-red">AI Response:</div>
+              <div className="text-gray-700">{lastResponse}</div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask about current heat, chemistry, energy, or process..."
+              className="w-full px-3 py-2 border-2 border-gray-300 rounded-md text-sm text-gray-900 placeholder-gray-500 resize-none focus:border-cone-red focus:ring-0 focus:outline-none"
+              rows={2}
+              disabled={isLoading}
+            />
+            
+            <div className="flex gap-2">
+              <Button
+                type="submit"
+                disabled={!input.trim() || isLoading}
+                className="flex-1 bg-cone-red hover:bg-cone-red/90 text-white text-sm h-8 font-medium"
+              >
+                {isLoading ? (
+                  <>Processing...</>
+                ) : (
+                  <>
+                    <Send className="w-3 h-3 mr-1" />
+                    Ask AI
+                  </>
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setInput('')}
               className="text-sm h-8"
               disabled={isLoading}
             >
@@ -201,5 +204,6 @@ export default function AIChatWidget({ heatData, className = "" }: AIChatWidgetP
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 }

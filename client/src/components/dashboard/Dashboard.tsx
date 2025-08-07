@@ -200,10 +200,8 @@ export default function Dashboard() {
         <PerformanceMetrics metrics={performanceMetrics} />
       </div>
       
-      {/* AI Chat Widget - Quick Access */}
-      <div className={cn(isMobile ? "col-span-1" : "col-span-3")}>
-        <AIChatWidget heatData={heat} />
-      </div>
+      {/* AI Chat Widget - Now Floating */}
+      <AIChatWidget heatData={heat} />
         </div>
       </ErrorBoundary>
     </IndustrialLayout>

@@ -135,7 +135,20 @@ export function ContextualActions({ heatData, currentStage }: ContextualActionsP
 
   const suggestions = getSmartSuggestions();
 
-  if (suggestions.length === 0) return null;
+  // Always show at least one suggestion for testing
+  if (suggestions.length === 0) {
+    suggestions.push({
+      id: 'test-suggestion',
+      icon: Zap,
+      title: 'Test Clear Screen',
+      description: 'Click Apply to test the clear screen functionality',
+      priority: 'low',
+      action: () => {
+        console.log('Test action executed');
+        alert('Apply button works! Screen should clear now.');
+      }
+    });
+  }
 
   return (
     <div className="fixed top-20 right-4 z-40 space-y-2">
@@ -161,13 +174,16 @@ export function ContextualActions({ heatData, currentStage }: ContextualActionsP
                 <div className="font-medium text-sm">{suggestion.title}</div>
                 <div className="text-xs opacity-80 mt-1">{suggestion.description}</div>
                 <button
-                  onClick={() => {
-                    console.log('Applying suggestion:', suggestion.title);
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Apply button clicked for:', suggestion.title);
+                    alert(`Applied: ${suggestion.title}`);
                     suggestion.action();
                     // Clear the screen after applying
                     window.dispatchEvent(new CustomEvent('clearScreen'));
                   }}
-                  className="mt-2 text-xs bg-white/20 hover:bg-white/30 px-2 py-1 rounded transition-colors"
+                  className="mt-2 text-xs bg-white/20 hover:bg-white/30 px-2 py-1 rounded transition-colors cursor-pointer"
                 >
                   Apply
                 </button>

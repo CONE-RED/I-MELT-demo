@@ -138,7 +138,8 @@ export function AnomalyDetector({ heatData, onAnomalyDetected }: AnomalyDetector
     }
   };
 
-  if (detectedAnomalies.length === 0) return null;
+  // Always show the component for testing, even with no anomalies
+  const hasAnomalies = detectedAnomalies.length > 0;
 
   return (
     <div className="fixed top-32 left-4 z-40 max-w-md">
@@ -149,8 +150,11 @@ export function AnomalyDetector({ heatData, onAnomalyDetected }: AnomalyDetector
             AI Anomaly Detection
           </h3>
           <button
-            onClick={() => {
-              console.log('Toggling anomaly monitoring:', !isMonitoring);
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('Eye button clicked. Current state:', isMonitoring);
+              alert(`Anomaly monitoring ${!isMonitoring ? 'enabled' : 'disabled'}`);
               setIsMonitoring(!isMonitoring);
               // Visual feedback for the user
               if (!isMonitoring) {
@@ -159,7 +163,7 @@ export function AnomalyDetector({ heatData, onAnomalyDetected }: AnomalyDetector
                 console.log('Anomaly detection disabled');
               }
             }}
-            className="text-cone-gray hover:text-cone-white transition-colors"
+            className="text-cone-gray hover:text-cone-white transition-colors cursor-pointer"
             title={isMonitoring ? 'Disable monitoring' : 'Enable monitoring'}
           >
             {isMonitoring ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
@@ -167,6 +171,12 @@ export function AnomalyDetector({ heatData, onAnomalyDetected }: AnomalyDetector
         </div>
 
         <div className="space-y-3">
+          {!hasAnomalies && (
+            <div className="text-sm text-cone-gray">
+              <div className="text-cone-white">Monitoring Status: {isMonitoring ? 'Active' : 'Disabled'}</div>
+              <div className="text-xs mt-1">No anomalies detected. System operating normally.</div>
+            </div>
+          )}
           {detectedAnomalies.slice(0, 3).map((anomaly) => (
             <div
               key={anomaly.id}

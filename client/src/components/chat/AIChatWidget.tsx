@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Bot, MessageCircle, Send, Minimize2, Maximize2 } from 'lucide-react';
+import { Bot, MessageCircle, Send, Minimize2, Maximize2, X, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface AIChatWidgetProps {
@@ -12,6 +12,7 @@ interface AIChatWidgetProps {
 
 export default function AIChatWidget({ heatData, className = "" }: AIChatWidgetProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [lastResponse, setLastResponse] = useState<string>('');
@@ -65,6 +66,21 @@ export default function AIChatWidget({ heatData, className = "" }: AIChatWidgetP
     }
   };
 
+  // If widget is hidden, show only a small floating eye icon to restore it
+  if (!isVisible) {
+    return (
+      <div className={`fixed bottom-6 right-6 z-50 ${className}`}>
+        <Button
+          onClick={() => setIsVisible(true)}
+          className="w-12 h-12 rounded-full bg-cone-red hover:bg-cone-red/90 text-white shadow-2xl border-2 border-white"
+          size="icon"
+        >
+          <Eye className="w-5 h-5" />
+        </Button>
+      </div>
+    );
+  }
+
   if (!isExpanded) {
     return (
       <div className={`fixed bottom-6 right-6 z-50 ${className}`}>
@@ -78,14 +94,24 @@ export default function AIChatWidget({ heatData, className = "" }: AIChatWidgetP
                   Active
                 </Badge>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsExpanded(true)}
-                className="h-6 w-6 p-0 hover:bg-cone-red/10"
-              >
-                <Maximize2 className="w-3 h-3 text-gray-700" />
-              </Button>
+              <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsExpanded(true)}
+                  className="h-6 w-6 p-0 hover:bg-cone-red/10"
+                >
+                  <Maximize2 className="w-3 h-3 text-gray-700" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsVisible(false)}
+                  className="h-6 w-6 p-0 hover:bg-red-100"
+                >
+                  <X className="w-3 h-3 text-gray-700" />
+                </Button>
+              </div>
             </div>
             
             <div className="grid grid-cols-1 gap-2">
@@ -129,14 +155,24 @@ export default function AIChatWidget({ heatData, className = "" }: AIChatWidgetP
               <Bot className="w-5 h-5 text-cone-red" />
               <span className="font-bold text-gray-900">AI Quick Chat</span>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsExpanded(false)}
-              className="h-6 w-6 p-0 hover:bg-cone-red/10"
-            >
-              <Minimize2 className="w-3 h-3 text-gray-700" />
-            </Button>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsExpanded(false)}
+                className="h-6 w-6 p-0 hover:bg-cone-red/10"
+              >
+                <Minimize2 className="w-3 h-3 text-gray-700" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsVisible(false)}
+                className="h-6 w-6 p-0 hover:bg-red-100"
+              >
+                <X className="w-3 h-3 text-gray-700" />
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">

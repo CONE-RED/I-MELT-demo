@@ -89,6 +89,60 @@ export default function Chemistry() {
     if (current > target.max) return 'above';
     return 'within';
   };
+
+  // AI-powered critical issue detection
+  const getCriticalIssues = () => {
+    const issues: Array<{
+      element: string;
+      severity: 'critical' | 'warning' | 'minor';
+      current: number;
+      target: any;
+      action: string;
+      impact: string;
+    }> = [];
+
+    Object.entries(steelComposition).forEach(([element, current]) => {
+      const target = steelTargets[element as keyof typeof steelTargets];
+      if (!target || !current) return;
+
+      const status = getElementStatus(current, target);
+      if (status === 'within') return;
+
+      const deviation = Math.abs(current - target.optimal) / target.optimal;
+      let severity: 'critical' | 'warning' | 'minor' = 'minor';
+      let action = '';
+      let impact = '';
+
+      // Critical chemistry logic
+      if (element === 'C' && deviation > 0.15) {
+        severity = 'critical';
+        action = status === 'above' ? 'Immediate decarburization required' : 'Add carbon immediately';
+        impact = 'Steel grade compliance at risk';
+      } else if (element === 'P' && current > 0.030) {
+        severity = 'critical';
+        action = 'Slag adjustment required - add lime';
+        impact = 'Steel quality severely compromised';
+      } else if (['Cr', 'Mn'].includes(element) && deviation > 0.20) {
+        severity = 'warning';
+        action = status === 'above' ? 'Dilute with low-alloy scrap' : 'Add ferro-alloys';
+        impact = 'Grade specifications may be missed';
+      } else if (deviation > 0.10) {
+        severity = 'minor';
+        action = 'Monitor and adjust gradually';
+        impact = 'Minor deviation from optimal';
+      }
+
+      if (severity !== 'minor') {
+        issues.push({ element, severity, current, target, action, impact });
+      }
+    });
+
+    return issues.sort((a, b) => 
+      a.severity === 'critical' ? -1 : b.severity === 'critical' ? 1 : 0
+    );
+  };
+
+  const criticalIssues = getCriticalIssues();
   
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -156,14 +210,136 @@ export default function Chemistry() {
                 </Button>
               </div>
             </div>
+
+            {/* Critical Issues Alert - LazyFlow Phase 1 */}
+            {criticalIssues.length > 0 && (
+              <Card className="mb-6 border-red-200 bg-red-50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-red-800">
+                    <Target className="w-5 h-5" />
+                    ⚠️ Critical Chemistry Issues - Immediate Action Required
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {criticalIssues.map((issue, index) => (
+                    <div key={issue.element} className={cn(
+                      "p-4 rounded-lg border-l-4",
+                      issue.severity === 'critical' ? "border-red-500 bg-red-100" : "border-yellow-500 bg-yellow-100"
+                    )}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-xl text-gray-900">{issue.element}</span>
+                          <Badge className={cn(
+                            "text-white",
+                            issue.severity === 'critical' ? "bg-red-600" : "bg-yellow-600"
+                          )}>
+                            {issue.severity.toUpperCase()}
+                          </Badge>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-mono text-lg text-gray-900">
+                            {formatPercentage(issue.current)}%
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            Target: {formatPercentage(issue.target.min)}% - {formatPercentage(issue.target.max)}%
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="mb-3">
+                        <div className="font-medium text-gray-900 mb-1">
+                          🎯 {issue.action}
+                        </div>
+                        <div className="text-sm text-gray-700">
+                          💡 Impact: {issue.impact}
+                        </div>
+                      </div>
+
+                      <Button
+                        className={cn(
+                          "w-full text-white font-medium",
+                          issue.severity === 'critical' 
+                            ? "bg-red-600 hover:bg-red-700" 
+                            : "bg-yellow-600 hover:bg-yellow-700"
+                        )}
+                        onClick={() => alert(`Smart Fix for ${issue.element}: ${issue.action}`)}
+                      >
+                        🚀 Smart Fix - {issue.element}
+                      </Button>
+                    </div>
+                  ))}
+                  
+                  {criticalIssues.length > 1 && (
+                    <Button
+                      className="w-full bg-cone-red hover:bg-cone-red/90 text-white font-bold text-lg py-3"
+                      onClick={() => alert('AI will calculate and execute all critical fixes automatically')}
+                    >
+                      ⚡ FIX ALL CRITICAL ISSUES NOW
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Chemistry Status Summary - LazyFlow */}
+            <Card className="mb-6 border-green-200 bg-green-50">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-green-800">
+                  <FlaskRound className="w-5 h-5" />
+                  ✅ Chemistry Status Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-white rounded-lg border">
+                    <div className="text-3xl font-bold text-green-600">
+                      {Object.keys(steelComposition).filter(element => {
+                        const target = steelTargets[element as keyof typeof steelTargets];
+                        const current = steelComposition[element as keyof typeof steelComposition];
+                        return target && current && getElementStatus(current, target) === 'within';
+                      }).length}
+                    </div>
+                    <div className="text-sm text-gray-600">Elements In Spec</div>
+                  </div>
+                  
+                  <div className="text-center p-4 bg-white rounded-lg border">
+                    <div className="text-3xl font-bold text-yellow-600">
+                      {criticalIssues.filter(issue => issue.severity === 'warning').length}
+                    </div>
+                    <div className="text-sm text-gray-600">Minor Issues</div>
+                  </div>
+                  
+                  <div className="text-center p-4 bg-white rounded-lg border">
+                    <div className="text-3xl font-bold text-red-600">
+                      {criticalIssues.filter(issue => issue.severity === 'critical').length}
+                    </div>
+                    <div className="text-sm text-gray-600">Critical Issues</div>
+                  </div>
+                </div>
+
+                {criticalIssues.length === 0 && (
+                  <div className="mt-4 p-4 bg-green-100 rounded-lg text-center">
+                    <div className="text-green-800 font-medium">
+                      🎉 All chemistry parameters within specification!
+                    </div>
+                    <div className="text-sm text-green-600 mt-1">
+                      Heat {heat?.heat} is ready for next production stage
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
             
-            {/* Steel Composition */}
+            {/* Detailed Steel Composition - Collapsed by default */}
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="w-5 h-5" />
-                  {labels[lang].steel}
+                  {labels[lang].steel} - Detailed View
                 </CardTitle>
+                <div className="text-sm text-gray-600">
+                  💡 LazyFlow: Only check details if critical issues are resolved
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

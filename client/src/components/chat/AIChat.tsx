@@ -186,7 +186,7 @@ export default function AIChat({ heatData, className = "" }: AIChatProps) {
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="Ask about the current heat, chemistry, energy efficiency, or any production insights..."
-          className="flex-1 px-3 py-2 border rounded-md text-gray-900 placeholder-gray-500 resize-none"
+          className="flex-1 px-3 py-2 border-2 border-gray-300 rounded-md text-gray-900 placeholder-gray-500 resize-none focus:border-cone-red focus:ring-0 focus:outline-none"
           rows={2}
           disabled={isLoading}
         />
@@ -219,7 +219,7 @@ export default function AIChat({ heatData, className = "" }: AIChatProps) {
               sendMessage();
             }}
             disabled={isLoading}
-            className="text-xs"
+            className="text-xs text-gray-800 border-gray-300 bg-white hover:bg-cone-red/5 hover:text-cone-red hover:border-cone-red font-medium"
           >
             {question}
           </Button>

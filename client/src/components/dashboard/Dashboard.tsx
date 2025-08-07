@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/lib/store';
 import HeatHeaderCard from './HeatHeaderCard';
@@ -10,6 +11,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { LoadingState } from '@/components/ui/loading-spinner';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { SmartDefaults, AutoInsightPrioritizer, SmartAlertManager } from '@/components/ui/smart-defaults';
+import { IndustrialLayout } from '@/components/industrial/status-first-layout';
+import { OperatorShortcuts, ContextualActions, PerformanceMetrics } from '@/components/industrial/operator-efficiency';
+import { AnomalyDetector, PredictiveInsights } from '@/components/industrial/anomaly-detection';
+import { OneClickReport } from '@/components/industrial/export-reporting';
 import useMobile from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +22,7 @@ export default function Dashboard() {
   const heat = useSelector((state: RootState) => state.heat);
   const loading = useSelector((state: RootState) => state.loading);
   const isMobile = useMobile();
+  const [shortcutsVisible, setShortcutsVisible] = useState(false);
 
   // Determine system status based on heat data
   const getSystemStatus = () => {
@@ -25,6 +31,23 @@ export default function Dashboard() {
     if (criticalInsights.length > 2) return 'critical';
     if (criticalInsights.length > 0 || heat.confidence < 70) return 'warning';
     return 'normal';
+  };
+
+  // Operator shortcuts for industrial efficiency
+  const operatorShortcuts = [
+    { key: 'Ctrl+1', description: 'Focus Heat Header', action: () => console.log('Focus heat header') },
+    { key: 'Ctrl+2', description: 'Open Materials', action: () => console.log('Focus materials') },
+    { key: 'Ctrl+3', description: 'View Timeline', action: () => console.log('Focus timeline') },
+    { key: 'Ctrl+A', description: 'Acknowledge All Alerts', action: () => console.log('Acknowledge alerts') },
+    { key: 'Ctrl+E', description: 'Export Report', action: () => console.log('Export report') },
+  ];
+
+  // Performance metrics for operator feedback
+  const performanceMetrics = {
+    efficiency: 94,
+    accuracy: 97,
+    timeToTarget: '12:34',
+    energySavings: 8.7
   };
   
   const renderSkeletonDashboard = () => (
@@ -57,9 +80,45 @@ export default function Dashboard() {
   }
   
   return (
-    <SmartAlertManager systemStatus={getSystemStatus()}>
+    <IndustrialLayout 
+      heatNumber={heat?.heat}
+      alerts={heat?.insights || []}
+      systemData={{
+        furnaceTemp: 1590,
+        powerLevel: heat?.confidence || 85,
+        processStage: "Melting",
+        confidence: heat?.confidence || 85
+      }}
+    >
       <SmartDefaults />
       {heat && <AutoInsightPrioritizer insights={heat.insights || []} />}
+      
+      {/* Operator Efficiency Tools */}
+      <OperatorShortcuts
+        shortcuts={operatorShortcuts}
+        isVisible={shortcutsVisible}
+        onToggle={() => setShortcutsVisible(!shortcutsVisible)}
+      />
+      
+      <ContextualActions
+        heatData={heat}
+        currentStage="Melting"
+      />
+      
+      {/* Advanced AI Features - Phase 3 */}
+      <AnomalyDetector
+        heatData={heat}
+        onAnomalyDetected={(anomaly) => console.log('Anomaly detected:', anomaly)}
+      />
+      
+      <PredictiveInsights
+        heatData={heat}
+      />
+      
+      <OneClickReport
+        heatData={heat}
+        onExport={(options) => console.log('Export options:', options)}
+      />
       
       <ErrorBoundary>
         <div className={cn("grid gap-3", isMobile ? "grid-cols-1" : "grid-cols-12")}>
@@ -102,8 +161,13 @@ export default function Dashboard() {
       <div className={cn(isMobile ? "col-span-1" : "col-span-6 row-span-3")}>
         <ChemistryDuoCharts chemSteel={heat.chemSteel} chemSlag={heat.chemSlag} />
       </div>
+      
+      {/* Performance Metrics - Industrial Enhancement */}
+      <div className={cn(isMobile ? "col-span-1" : "col-span-3")}>
+        <PerformanceMetrics metrics={performanceMetrics} />
+      </div>
         </div>
       </ErrorBoundary>
-    </SmartAlertManager>
+    </IndustrialLayout>
   );
 }

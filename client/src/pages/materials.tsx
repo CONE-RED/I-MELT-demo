@@ -132,7 +132,7 @@ export default function Materials() {
                 <CardContent>
                   <div className="space-y-4">
                     {materials.map((material, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg bg-white">
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-2">
                             <span className="font-medium text-gray-900">
@@ -149,7 +149,7 @@ export default function Materials() {
                                 className="h-2"
                               />
                             </div>
-                            <span className="text-sm text-gray-700">{material.location}</span>
+                            <span className="text-sm text-gray-900">{material.location}</span>
                           </div>
                         </div>
                         {material.status === 'critical' && (

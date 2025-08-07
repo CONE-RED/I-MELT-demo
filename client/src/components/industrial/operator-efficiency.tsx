@@ -86,9 +86,12 @@ export function OperatorShortcuts({ shortcuts, isVisible, onToggle }: OperatorSh
 interface ContextualActionsProps {
   heatData: any;
   currentStage: string;
+  onHide?: () => void;
 }
 
-export function ContextualActions({ heatData, currentStage }: ContextualActionsProps) {
+export function ContextualActions({ heatData, currentStage, onHide }: ContextualActionsProps) {
+  const [isVisible, setIsVisible] = useState(true);
+  
   const getSmartSuggestions = () => {
     if (!heatData) return [];
 
@@ -150,6 +153,9 @@ export function ContextualActions({ heatData, currentStage }: ContextualActionsP
     });
   }
 
+  // Don't render if not visible
+  if (!isVisible) return null;
+
   return (
     <div className="fixed top-20 right-4 z-40 space-y-2">
       {suggestions.map((suggestion) => {
@@ -177,9 +183,11 @@ export function ContextualActions({ heatData, currentStage }: ContextualActionsP
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Apply button clicked for:', suggestion.title);
-                    alert(`Applied: ${suggestion.title}`);
+                    console.log('Apply button clicked - hiding suggestions panel');
+                    alert(`Applied: ${suggestion.title} - Panel hidden. Use "Show Suggestions" to restore.`);
                     suggestion.action();
+                    setIsVisible(false);
+                    onHide?.();
                     // Clear the screen after applying
                     window.dispatchEvent(new CustomEvent('clearScreen'));
                   }}

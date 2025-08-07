@@ -18,11 +18,13 @@ interface AnomalyPattern {
 interface AnomalyDetectorProps {
   heatData: any;
   onAnomalyDetected: (anomaly: AnomalyPattern) => void;
+  onHide?: () => void;
 }
 
-export function AnomalyDetector({ heatData, onAnomalyDetected }: AnomalyDetectorProps) {
+export function AnomalyDetector({ heatData, onAnomalyDetected, onHide }: AnomalyDetectorProps) {
   const [detectedAnomalies, setDetectedAnomalies] = useState<AnomalyPattern[]>([]);
   const [isMonitoring, setIsMonitoring] = useState(true);
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
     if (!heatData || !isMonitoring) return;
@@ -141,6 +143,9 @@ export function AnomalyDetector({ heatData, onAnomalyDetected }: AnomalyDetector
   // Always show the component for testing, even with no anomalies
   const hasAnomalies = detectedAnomalies.length > 0;
 
+  // Don't render if not visible
+  if (!isVisible) return null;
+
   return (
     <div className="fixed top-32 left-4 z-40 max-w-md">
       <div className="bg-cone-black/90 backdrop-blur-sm border border-cone-gray/30 rounded-lg p-4">
@@ -153,20 +158,15 @@ export function AnomalyDetector({ heatData, onAnomalyDetected }: AnomalyDetector
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log('Eye button clicked. Current state:', isMonitoring);
-              alert(`Anomaly monitoring ${!isMonitoring ? 'enabled' : 'disabled'}`);
-              setIsMonitoring(!isMonitoring);
-              // Visual feedback for the user
-              if (!isMonitoring) {
-                console.log('Anomaly detection enabled');
-              } else {
-                console.log('Anomaly detection disabled');
-              }
+              console.log('Eye button clicked - hiding anomaly detector');
+              setIsVisible(false);
+              onHide?.();
+              alert('Anomaly detector hidden - use "Show Anomaly" button to restore');
             }}
             className="text-cone-gray hover:text-cone-white transition-colors cursor-pointer"
-            title={isMonitoring ? 'Disable monitoring' : 'Enable monitoring'}
+            title="Hide anomaly detector"
           >
-            {isMonitoring ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            <Eye className="w-4 h-4" />
           </button>
         </div>
 

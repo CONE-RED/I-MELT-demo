@@ -23,6 +23,8 @@ export default function Dashboard() {
   const loading = useSelector((state: RootState) => state.loading);
   const isMobile = useMobile();
   const [shortcutsVisible, setShortcutsVisible] = useState(false);
+  const [showAnomalyDetector, setShowAnomalyDetector] = useState(true);
+  const [showContextualActions, setShowContextualActions] = useState(true);
 
   // Determine system status based on heat data
   const getSystemStatus = () => {
@@ -100,16 +102,44 @@ export default function Dashboard() {
         onToggle={() => setShortcutsVisible(!shortcutsVisible)}
       />
       
-      <ContextualActions
-        heatData={heat}
-        currentStage="Melting"
-      />
+      {showContextualActions && (
+        <ContextualActions
+          heatData={heat}
+          currentStage="Melting"
+          onHide={() => setShowContextualActions(false)}
+        />
+      )}
       
       {/* Advanced AI Features - Phase 3 */}
-      <AnomalyDetector
-        heatData={heat}
-        onAnomalyDetected={(anomaly) => console.log('Anomaly detected:', anomaly)}
-      />
+      {showAnomalyDetector && (
+        <AnomalyDetector
+          heatData={heat}
+          onAnomalyDetected={(anomaly) => console.log('Anomaly detected:', anomaly)}
+          onHide={() => setShowAnomalyDetector(false)}
+        />
+      )}
+      
+      {/* Control buttons for floating windows */}
+      <div className="fixed top-4 right-4 z-50 flex gap-2">
+        {!showAnomalyDetector && (
+          <button
+            onClick={() => setShowAnomalyDetector(true)}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
+            title="Show Anomaly Detector"
+          >
+            Show Anomaly
+          </button>
+        )}
+        {!showContextualActions && (
+          <button
+            onClick={() => setShowContextualActions(true)}
+            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
+            title="Show Suggestions"
+          >
+            Show Suggestions
+          </button>
+        )}
+      </div>
       
       <PredictiveInsights
         heatData={heat}

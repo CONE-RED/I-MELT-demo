@@ -26,11 +26,11 @@
     --radius: 0.625rem;
     --tri-size: 1.125rem;
     
-    /* Brand Colors */
+    /* Brand Colors - Light Theme */
     --cone-red: 358 98% 45%;
-    --cone-black: 0 0% 0%;
-    --cone-gray: 0 0% 48%;
-    --cone-white: 0 0% 100%;
+    --cone-black: 0 0% 95%;     /* Light background */
+    --cone-gray: 0 0% 40%;      /* Dark text on light bg */
+    --cone-white: 0 0% 20%;     /* Dark text */
     --cone-accent: 9 100% 62%;
     
     /* Chart Colors */
@@ -68,7 +68,7 @@
   }
 
   body {
-    @apply bg-cone-black text-cone-white font-sans antialiased;
+    @apply bg-white text-gray-900 font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
     font-size: 14px;
     line-height: 1.35;
@@ -101,7 +101,7 @@
   }
   
   .dashboard-card {
-    @apply bg-cone-black text-cone-white rounded-lg p-3 border border-cone-gray/20 shadow-lg;
+    @apply bg-white text-gray-900 rounded-lg p-3 border border-gray-200 shadow-lg;
   }
   
   /* Scrollbar styling */
@@ -111,7 +111,7 @@
   }
   
   ::-webkit-scrollbar-track {
-    @apply bg-cone-black/80 rounded-md;
+    @apply bg-gray-100 rounded-md;
   }
   
   ::-webkit-scrollbar-thumb {

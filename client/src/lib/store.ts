@@ -213,6 +213,20 @@ function reducer(state: AppState = initialState, action: AppAction): AppState {
           insights: updatedInsights
         }
       };
+    
+    case 'CLEAR_SCREEN':
+      // Clear screen action - reset dashboard to clean state
+      if (!state.heat) return state;
+      return {
+        ...state,
+        heat: {
+          ...state.heat,
+          insights: []
+        },
+        selectedTab: 'insights' as const,
+        error: null
+      };
+      
     default:
       return state;
   }

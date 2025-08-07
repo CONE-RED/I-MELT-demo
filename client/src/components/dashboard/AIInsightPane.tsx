@@ -27,7 +27,18 @@ export default function AIInsightPane({ insights }: AIInsightPaneProps) {
   };
   
   const handleAcknowledge = (insightId: string) => {
+    // Mark insight as acknowledged and remove from list
+    console.log('Acknowledged insight:', insightId);
     dispatch({ type: 'ACKNOWLEDGE_INSIGHT', payload: insightId });
+    
+    // For "apply" actions, clear the screen/reset view
+    const insight = insights.find(i => i.id === insightId);
+    if (insight && insight.type !== 'critical') {
+      // Clear screen action - reset dashboard to clean state
+      console.log('Applying action and clearing screen');
+      dispatch({ type: 'CLEAR_SCREEN' });
+    }
+    
     sendMessage({
       type: 'acknowledge_insight',
       payload: { insightId }

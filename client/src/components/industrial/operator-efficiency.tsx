@@ -161,7 +161,12 @@ export function ContextualActions({ heatData, currentStage }: ContextualActionsP
                 <div className="font-medium text-sm">{suggestion.title}</div>
                 <div className="text-xs opacity-80 mt-1">{suggestion.description}</div>
                 <button
-                  onClick={suggestion.action}
+                  onClick={() => {
+                    console.log('Applying suggestion:', suggestion.title);
+                    suggestion.action();
+                    // Clear the screen after applying
+                    window.dispatchEvent(new CustomEvent('clearScreen'));
+                  }}
                   className="mt-2 text-xs bg-white/20 hover:bg-white/30 px-2 py-1 rounded transition-colors"
                 >
                   Apply

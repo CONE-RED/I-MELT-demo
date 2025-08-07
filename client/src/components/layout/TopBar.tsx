@@ -31,7 +31,7 @@ export default function TopBar() {
   const availableHeats = [93378, 93379, 93380, 93381];
   
   return (
-    <header className="flex items-center justify-between px-4 py-2 bg-cone-black border-b border-cone-gray/30">
+    <header className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200 shadow-sm">
       {/* Logo */}
       <div className="flex items-center">
         <div className="text-cone-red font-bold text-xl flex items-center">
@@ -45,7 +45,7 @@ export default function TopBar() {
           <span>{language === 'en' ? 'Heat' : 'Плавка'}</span>
           <DropdownMenu open={openHeatSelector} onOpenChange={setOpenHeatSelector}>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="bg-cone-gray/20 text-cone-white border-cone-gray/30">
+              <Button variant="outline" className="bg-gray-100 text-gray-900 border-gray-300 hover:bg-gray-200">
                 {heatNumber || '-'}
                 <ChevronDown className="ml-1 h-4 w-4" />
               </Button>
@@ -59,7 +59,7 @@ export default function TopBar() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <div className="text-cone-gray">
+        <div className="text-gray-600">
           {heat?.ts ? new Date(heat.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
         </div>
       </div>

@@ -68,7 +68,7 @@ export default function HeatHeaderCard({
     <div className="dashboard-card h-full">
       {/* Primary Information - Heat Number & Status */}
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-xl font-bold triangle text-cone-white">
+        <h2 className="text-xl font-bold triangle text-gray-900">
           #{heat}
         </h2>
         <div className="flex items-center gap-2">
@@ -88,11 +88,11 @@ export default function HeatHeaderCard({
       
       {/* Secondary Information - Grade & Confidence */}
       <div className="mb-4">
-        <div className="text-lg font-medium text-cone-white mb-1">{grade}</div>
+        <div className="text-lg font-medium text-gray-900 mb-1">{grade}</div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-cone-gray">{labels[lang].confidence}</span>
+          <span className="text-xs text-gray-600">{labels[lang].confidence}</span>
           <Progress value={confidence} className="h-1.5 flex-1" />
-          <span className="text-xs font-medium text-cone-white">{confidence}%</span>
+          <span className="text-xs font-medium text-gray-900">{confidence}%</span>
         </div>
       </div>
       

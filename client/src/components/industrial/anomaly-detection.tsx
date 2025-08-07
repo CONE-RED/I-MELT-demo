@@ -149,8 +149,18 @@ export function AnomalyDetector({ heatData, onAnomalyDetected }: AnomalyDetector
             AI Anomaly Detection
           </h3>
           <button
-            onClick={() => setIsMonitoring(!isMonitoring)}
-            className="text-cone-gray hover:text-cone-white"
+            onClick={() => {
+              console.log('Toggling anomaly monitoring:', !isMonitoring);
+              setIsMonitoring(!isMonitoring);
+              // Visual feedback for the user
+              if (!isMonitoring) {
+                console.log('Anomaly detection enabled');
+              } else {
+                console.log('Anomaly detection disabled');
+              }
+            }}
+            className="text-cone-gray hover:text-cone-white transition-colors"
+            title={isMonitoring ? 'Disable monitoring' : 'Enable monitoring'}
           >
             {isMonitoring ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
           </button>

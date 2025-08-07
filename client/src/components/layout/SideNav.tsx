@@ -30,8 +30,8 @@ function NavItem({ icon, label, labelRu, active, onClick }: NavItemProps) {
         "flex items-center gap-2 py-2 px-3 rounded-md transition",
         isMobile && "flex-col items-center px-1",
         active 
-          ? "text-cone-white bg-cone-red/20 border-l-2 border-cone-red" 
-          : "text-cone-gray hover:text-cone-white hover:bg-cone-gray/20"
+          ? "text-cone-red bg-red-50 border-l-2 border-cone-red" 
+          : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
       )}
       onClick={(e) => {
         e.preventDefault();
@@ -52,7 +52,7 @@ export default function SideNav() {
   
   return (
     <nav className={cn(
-      "border-r border-cone-gray/30 p-4 flex flex-col gap-4",
+      "border-r border-gray-200 p-4 flex flex-col gap-4 bg-gray-50",
       isMobile ? "w-16 p-2" : "w-48"
     )}>
       <NavItem 

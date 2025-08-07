@@ -145,7 +145,7 @@ export default function Materials() {
                           <div className="flex items-center gap-4">
                             <div className="flex-1">
                               <Progress
-                                value={(material.current / material.target) * 100}
+                                value={material.current && material.target ? (material.current / material.target) * 100 : 0}
                                 className="h-2"
                               />
                             </div>
@@ -198,34 +198,52 @@ export default function Materials() {
             </div>
             
             {/* Charge Buckets from Heat Data */}
-            {heat?.buckets && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Package className="w-5 h-5" />
-                    {labels[lang].buckets} - Heat #{heat.heat}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    {heat.buckets.map((bucket: any, index: number) => (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="w-5 h-5" />
+                  {labels[lang].buckets} - Heat #{heat?.heat || 'Current'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  {heat?.buckets && heat.buckets.length > 0 ? (
+                    heat.buckets.map((bucket: any, index: number) => (
                       <div key={index} className="p-4 border rounded-lg bg-gray-50">
                         <div className="text-center">
-                          <div className="font-bold text-lg text-gray-900">#{bucket.bucket}</div>
-                          <div className="text-sm text-gray-600 mt-1">{bucket.material}</div>
+                          <div className="font-bold text-lg text-gray-900">#{bucket?.bucket || index + 1}</div>
+                          <div className="text-sm text-gray-600 mt-1">{bucket?.material || 'Unknown'}</div>
                           <div className="text-lg font-medium text-cone-red mt-2">
-                            {bucket.weight.toFixed(1)}t
+                            {bucket?.weight?.toFixed(1) || '0.0'}t
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
-                            {bucket.composition}
+                            {bucket?.composition || 'Standard'}
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                    ))
+                  ) : (
+                    // Demo buckets when no heat data available
+                    [1, 2, 3, 4, 5].map((bucketNum) => (
+                      <div key={bucketNum} className="p-4 border rounded-lg bg-gray-50">
+                        <div className="text-center">
+                          <div className="font-bold text-lg text-gray-900">#{bucketNum}</div>
+                          <div className="text-sm text-gray-600 mt-1">
+                            {bucketNum <= 2 ? 'Steel Scrap' : bucketNum <= 4 ? 'Pig Iron' : 'Additives'}
+                          </div>
+                          <div className="text-lg font-medium text-cone-red mt-2">
+                            {bucketNum <= 2 ? '24.5' : bucketNum <= 4 ? '8.2' : '1.8'}t
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {bucketNum <= 2 ? 'High Carbon' : bucketNum <= 4 ? 'Standard' : 'Special'}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </main>
       </div>

@@ -13,7 +13,9 @@ import {
   Download,
   FileText,
   Share2,
-  Calendar
+  Calendar,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 
 interface NavItemProps {
@@ -110,6 +112,7 @@ export default function SideNav() {
   const [location, setLocation] = useLocation();
   const { heat } = useSelector((state: RootState) => state);
   const isMobile = useMobile();
+  const [reportsExpanded, setReportsExpanded] = useState(false);
   
   const isActive = (path: string) => {
     return location === path;
@@ -255,53 +258,106 @@ End of Report`;
       {!isMobile && <div className="border-t border-gray-300 my-2" />}
 
       {/* Quick Reports Section */}
-      <div className="space-y-2">
-        {!isMobile && (
-          <div className="flex items-center gap-2 px-3 py-1">
-            <Download className="h-4 w-4 text-cone-red" />
-            <span className="text-sm font-medium text-gray-900">Quick Reports</span>
+      <div className="space-y-1">
+        <button
+          onClick={() => setReportsExpanded(!reportsExpanded)}
+          className={cn(
+            "w-full flex items-center gap-2 py-2 px-3 rounded-md transition text-left",
+            isMobile && "flex-col items-center px-1",
+            "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+          )}
+        >
+          <Download className={cn("h-5 w-5", isMobile && "h-4 w-4")} />
+          {!isMobile && (
+            <>
+              <span className="flex-1">Quick Reports</span>
+              {reportsExpanded ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </>
+          )}
+          {isMobile && <span className="text-xs">Reports</span>}
+        </button>
+        
+        {reportsExpanded && !isMobile && (
+          <div className="ml-4 space-y-1 border-l-2 border-gray-200 pl-3">
+            <ReportItem
+              icon={<FileText className="h-4 w-4" />}
+              label="Production Summary"
+              labelRu="Сводка производства"
+              description="Key metrics and status overview"
+              descriptionRu="Ключевые показатели и обзор статуса"
+              format="pdf"
+              onClick={() => generateQuickReport('production-summary', 'pdf')}
+            />
+            
+            <ReportItem
+              icon={<Download className="h-4 w-4" />}
+              label="Complete Heat Report"
+              labelRu="Полный отчет по плавке"
+              description="All data including timeline and materials"
+              descriptionRu="Все данные включая хронологию и материалы"
+              format="pdf"
+              onClick={() => generateQuickReport('full-report', 'pdf')}
+            />
+            
+            <ReportItem
+              icon={<Share2 className="h-4 w-4" />}
+              label="Chemistry Export"
+              labelRu="Экспорт химии"
+              description="Steel and slag composition data"
+              descriptionRu="Данные состава стали и шлака"
+              format="excel"
+              onClick={() => generateQuickReport('chemistry-data', 'excel')}
+            />
+            
+            <ReportItem
+              icon={<Calendar className="h-4 w-4" />}
+              label="Shift Handover"
+              labelRu="Передача смены"
+              description="Critical information for next operator"
+              descriptionRu="Критическая информация для следующего оператора"
+              format="pdf"
+              onClick={() => generateQuickReport('shift-handover', 'pdf')}
+            />
           </div>
         )}
         
-        <ReportItem
-          icon={<FileText className="h-4 w-4" />}
-          label="Production Summary"
-          labelRu="Сводка производства"
-          description="Key metrics and status overview"
-          descriptionRu="Ключевые показатели и обзор статуса"
-          format="pdf"
-          onClick={() => generateQuickReport('production-summary', 'pdf')}
-        />
-        
-        <ReportItem
-          icon={<Download className="h-4 w-4" />}
-          label="Complete Heat Report"
-          labelRu="Полный отчет по плавке"
-          description="All data including timeline and materials"
-          descriptionRu="Все данные включая хронологию и материалы"
-          format="pdf"
-          onClick={() => generateQuickReport('full-report', 'pdf')}
-        />
-        
-        <ReportItem
-          icon={<Share2 className="h-4 w-4" />}
-          label="Chemistry Export"
-          labelRu="Экспорт химии"
-          description="Steel and slag composition data"
-          descriptionRu="Данные состава стали и шлака"
-          format="excel"
-          onClick={() => generateQuickReport('chemistry-data', 'excel')}
-        />
-        
-        <ReportItem
-          icon={<Calendar className="h-4 w-4" />}
-          label="Shift Handover"
-          labelRu="Передача смены"
-          description="Critical information for next operator"
-          descriptionRu="Критическая информация для следующего оператора"
-          format="pdf"
-          onClick={() => generateQuickReport('shift-handover', 'pdf')}
-        />
+        {/* Mobile expanded view */}
+        {reportsExpanded && isMobile && (
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => generateQuickReport('production-summary', 'pdf')}
+              className="flex flex-col items-center p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition"
+            >
+              <FileText className="h-4 w-4" />
+              <span className="text-xs">PDF</span>
+            </button>
+            <button
+              onClick={() => generateQuickReport('full-report', 'pdf')}
+              className="flex flex-col items-center p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition"
+            >
+              <Download className="h-4 w-4" />
+              <span className="text-xs">PDF</span>
+            </button>
+            <button
+              onClick={() => generateQuickReport('chemistry-data', 'excel')}
+              className="flex flex-col items-center p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition"
+            >
+              <Share2 className="h-4 w-4" />
+              <span className="text-xs">XLS</span>
+            </button>
+            <button
+              onClick={() => generateQuickReport('shift-handover', 'pdf')}
+              className="flex flex-col items-center p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition"
+            >
+              <Calendar className="h-4 w-4" />
+              <span className="text-xs">PDF</span>
+            </button>
+          </div>
+        )}
       </div>
     </nav>
   );

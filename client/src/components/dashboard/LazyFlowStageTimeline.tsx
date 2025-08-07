@@ -8,18 +8,15 @@ import { Progress } from '@/components/ui/progress';
 import { Clock, AlertTriangle, CheckCircle, TrendingUp, Zap, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface Stage {
-  id: string;
-  bucket: number;
-  stage: string;
-  plannedTime: string;
-  actualTime?: string;
+import { Stage as ImportedStage } from '@/types';
+
+interface LazyFlowStage extends ImportedStage {
   status: 'completed' | 'current' | 'pending' | 'delayed';
   delay?: number;
 }
 
 interface LazyFlowStageTimelineProps {
-  stages: Stage[];
+  stages: ImportedStage[];
 }
 
 export default function LazyFlowStageTimeline({ stages }: LazyFlowStageTimelineProps) {
@@ -36,12 +33,29 @@ export default function LazyFlowStageTimeline({ stages }: LazyFlowStageTimelineP
     return () => clearInterval(interval);
   }, []);
 
+  // Convert imported stages to LazyFlow format
+  const convertToLazyFlowStages = (importedStages: ImportedStage[]): LazyFlowStage[] => {
+    return importedStages.map((stage, index) => ({
+      ...stage,
+      id: `stage-${stage.bucket}-${stage.stage}`,
+      stage: `Stage ${stage.stage}`,
+      status: stage.status === 'done' ? 'completed' as const :
+              stage.status === 'current' ? 'current' as const :
+              'pending' as const,
+      delay: stage.actualTime && stage.plannedTime ? 
+        Math.max(0, new Date(`1970-01-01T${stage.actualTime}`).getTime() - new Date(`1970-01-01T${stage.plannedTime}`).getTime()) / 60000 : 
+        undefined
+    }));
+  };
+
+  const lazyFlowStages = convertToLazyFlowStages(stages);
+
   // LazyFlow Phase 1: Instant Critical Detection
   const getCriticalInsights = () => {
     const insights = [];
     const now = new Date();
-    const currentStage = stages.find(s => s.status === 'current');
-    const delayedStages = stages.filter(s => s.status === 'delayed');
+    const currentStage = lazyFlowStages.find(s => s.status === 'current');
+    const delayedStages = lazyFlowStages.filter(s => s.status === 'delayed');
     
     // Immediate critical alerts
     if (delayedStages.length > 0) {
@@ -67,8 +81,8 @@ export default function LazyFlowStageTimeline({ stages }: LazyFlowStageTimelineP
     }
 
     // Efficiency optimization opportunities
-    const completedOnTime = stages.filter(s => s.status === 'completed' && !s.delay).length;
-    const totalCompleted = stages.filter(s => s.status === 'completed').length;
+    const completedOnTime = lazyFlowStages.filter(s => s.status === 'completed' && !s.delay).length;
+    const totalCompleted = lazyFlowStages.filter(s => s.status === 'completed').length;
     const efficiency = totalCompleted > 0 ? (completedOnTime / totalCompleted) * 100 : 100;
     
     if (efficiency < 85) {
@@ -99,9 +113,9 @@ export default function LazyFlowStageTimeline({ stages }: LazyFlowStageTimelineP
 
   // LazyFlow Phase 3: Ambient Timeline Intelligence
   const getTimelineHealth = () => {
-    const completed = stages.filter(s => s.status === 'completed').length;
-    const total = stages.length;
-    const onTimeStages = stages.filter(s => s.status === 'completed' && !s.delay).length;
+    const completed = lazyFlowStages.filter(s => s.status === 'completed').length;
+    const total = lazyFlowStages.length;
+    const onTimeStages = lazyFlowStages.filter(s => s.status === 'completed' && !s.delay).length;
     
     return {
       progress: Math.round((completed / total) * 100),
@@ -112,16 +126,16 @@ export default function LazyFlowStageTimeline({ stages }: LazyFlowStageTimelineP
   };
 
   const calculateETA = () => {
-    const remaining = stages.filter(s => s.status === 'pending').length;
+    const remaining = lazyFlowStages.filter(s => s.status === 'pending').length;
     const avgTimePerStage = 8; // minutes
-    const currentDelays = stages.filter(s => s.delay).reduce((sum, s) => sum + (s.delay || 0), 0);
+    const currentDelays = lazyFlowStages.filter(s => s.delay).reduce((sum, s) => sum + (s.delay || 0), 0);
     const eta = remaining * avgTimePerStage + currentDelays;
     
     return `${Math.floor(eta / 60)}:${(eta % 60).toString().padStart(2, '0')}`;
   };
 
   const getOverallStatus = () => {
-    const delayed = stages.filter(s => s.status === 'delayed').length;
+    const delayed = lazyFlowStages.filter(s => s.status === 'delayed').length;
     if (delayed > 2) return 'critical';
     if (delayed > 0) return 'warning';
     return 'optimal';
@@ -131,15 +145,15 @@ export default function LazyFlowStageTimeline({ stages }: LazyFlowStageTimelineP
 
   // Only show critical stages + next upcoming (LazyFlow: reduce cognitive load)
   const getFocusedStages = () => {
-    if (!autoFocusEnabled) return stages;
+    if (!autoFocusEnabled) return lazyFlowStages;
     
     const criticalStages = [
-      ...stages.filter(s => s.status === 'delayed'),
-      ...stages.filter(s => s.status === 'current'),
-      ...stages.filter(s => s.status === 'pending').slice(0, 2) // Next 2 upcoming
+      ...lazyFlowStages.filter(s => s.status === 'delayed'),
+      ...lazyFlowStages.filter(s => s.status === 'current'),
+      ...lazyFlowStages.filter(s => s.status === 'pending').slice(0, 2) // Next 2 upcoming
     ];
     
-    return criticalStages.length > 0 ? criticalStages : stages.slice(0, 5);
+    return criticalStages.length > 0 ? criticalStages : lazyFlowStages.slice(0, 5);
   };
 
   const focusedStages = getFocusedStages();
@@ -306,7 +320,7 @@ export default function LazyFlowStageTimeline({ stages }: LazyFlowStageTimelineP
             ))}
           </div>
 
-          {autoFocusEnabled && stages.length > focusedStages.length && (
+          {autoFocusEnabled && lazyFlowStages.length > focusedStages.length && (
             <div className="mt-3 text-center">
               <Button
                 variant="outline"
@@ -314,7 +328,7 @@ export default function LazyFlowStageTimeline({ stages }: LazyFlowStageTimelineP
                 onClick={() => setAutoFocusEnabled(false)}
                 className="text-xs"
               >
-                Show {stages.length - focusedStages.length} more stages
+                Show {lazyFlowStages.length - focusedStages.length} more stages
               </Button>
             </div>
           )}

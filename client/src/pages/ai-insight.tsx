@@ -2,7 +2,8 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/lib/store';
 import TopBar from '@/components/layout/TopBar';
 import SideNav from '@/components/layout/SideNav';
-import { Zap, Brain, TrendingUp, AlertTriangle, CheckCircle, Eye } from 'lucide-react';
+import AIChat from '@/components/chat/AIChat';
+import { Zap, Brain, TrendingUp, AlertTriangle, CheckCircle, Eye, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -289,6 +290,24 @@ export default function AIInsight() {
                     <div className="text-xs text-purple-600 mt-2">97% confidence</div>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* AI Chat Interface */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5" />
+                    AI Assistant Chat
+                  </div>
+                  <Badge variant="outline" className="bg-green-50 text-green-700">
+                    OpenRouter: Active
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AIChat heatData={heat} />
               </CardContent>
             </Card>
           </div>

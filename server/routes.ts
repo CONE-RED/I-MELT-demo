@@ -322,6 +322,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ ...mockHeatData, heat: heatId });
   });
 
+  // AI Chat API endpoint  
+  app.post('/api/ai/chat', async (req, res) => {
+    try {
+      const { message, heatData } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ error: 'Message is required' });
+      }
+
+      const result = await aiService.chatCompletion(message, heatData || mockHeatData);
+      
+      // Return either the AI response or fallback
+      const responseText = result.response || result.fallbackResponse;
+      
+      res.json({
+        response: responseText,
+        confidence: result.confidence,
+        fallbackUsed: !result.response
+      });
+    } catch (error: any) {
+      console.error('AI Chat API Error:', error);
+      res.status(500).json({ 
+        error: 'Failed to process AI chat request',
+        fallbackResponse: 'I apologize, but I cannot process your request at the moment. Please check the OpenRouter API configuration.'
+      });
+    }
+  });
+
   // AI Insights API endpoint
   app.post('/api/ai/generate-insight', async (req, res) => {
     try {
@@ -342,31 +370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Chat API endpoint
-  app.post('/api/ai/chat', async (req, res) => {
-    try {
-      const { message, heatData } = req.body;
-      
-      if (!aiService.isConfigured()) {
-        return res.status(503).json({ 
-          error: 'AI service not configured. Please provide OpenRouter API key.',
-          fallbackResponse: `I received your message: "${message}". Please configure the AI service to enable intelligent responses.`
-        });
-      }
 
-      const insight = await aiService.generateInsight(heatData || mockHeatData, 'process');
-      res.json({
-        response: `Regarding your query "${message}": ${insight.message}`,
-        confidence: 85,
-        timestamp: new Date().toISOString()
-      });
-    } catch (error: any) {
-      res.status(500).json({ 
-        error: `AI chat error: ${error.message}`,
-        fallbackResponse: `I received your message: "${req.body.message}". AI service is temporarily unavailable.`
-      });
-    }
-  });
 
   // Reports API endpoints
   app.post('/api/reports/generate', async (req, res) => {

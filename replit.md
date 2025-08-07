@@ -39,6 +39,7 @@ Preferred communication style: Simple, everyday language.
 - **Real-time Updates**: WebSocket messages for live data synchronization
 - **Type Safety**: Shared TypeScript interfaces between client and server
 - **Data Flow**: Redux actions triggered by WebSocket events
+- **AI Integration**: OpenRouter API with fallback responses for steel production insights and recommendations
 
 ### Development Workflow
 - **Build Process**: Separate client and server builds with shared type definitions
@@ -63,10 +64,11 @@ Preferred communication style: Simple, everyday language.
 - **tsx**: TypeScript execution engine for development server
 - **esbuild**: Fast JavaScript bundler for production builds
 
-### Communication
+### Communication & AI Integration
 - **WebSocket (ws)**: Real-time bidirectional communication for live data
 - **TanStack React Query**: Server state management and caching
 - **Redux Toolkit**: Predictable state container with modern patterns
+- **OpenRouter API**: AI-powered chat and insights using Claude 3.5 Sonnet for steel production analysis
 
 ### Utilities
 - **date-fns**: Date manipulation and formatting

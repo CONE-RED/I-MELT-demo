@@ -17,6 +17,7 @@ import { OperatorShortcuts, ContextualActions, PerformanceMetrics } from '@/comp
 import { AnomalyDetector, PredictiveInsights } from '@/components/industrial/anomaly-detection';
 import { OneClickReport } from '@/components/industrial/export-reporting';
 import NotificationCenter, { Notification } from '@/components/ui/notification-center';
+import AIChatWidget from '@/components/chat/AIChatWidget';
 import useMobile from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
@@ -197,6 +198,11 @@ export default function Dashboard() {
       {/* Performance Metrics - Industrial Enhancement */}
       <div className={cn(isMobile ? "col-span-1" : "col-span-3")}>
         <PerformanceMetrics metrics={performanceMetrics} />
+      </div>
+      
+      {/* AI Chat Widget - Quick Access */}
+      <div className={cn(isMobile ? "col-span-1" : "col-span-3")}>
+        <AIChatWidget heatData={heat} />
       </div>
         </div>
       </ErrorBoundary>

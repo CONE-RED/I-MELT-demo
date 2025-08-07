@@ -146,7 +146,7 @@ export default function Dashboard() {
       
       <OneClickReport
         heatData={heat}
-        onExport={(options) => console.log('Export options:', options)}
+        onExport={(options) => console.log('✅ Report exported:', options)}
       />
       
       <ErrorBoundary>

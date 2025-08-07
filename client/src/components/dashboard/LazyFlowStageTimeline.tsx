@@ -10,9 +10,18 @@ import { cn } from '@/lib/utils';
 
 import { Stage as ImportedStage } from '@/types';
 
-interface LazyFlowStage extends ImportedStage {
+interface LazyFlowStage {
+  id: string;
+  bucket: number;
+  stage: string;
+  plannedTime: string;
+  actualTime?: string;
   status: 'completed' | 'current' | 'pending' | 'delayed';
   delay?: number;
+  plannedEnergy: number;
+  actualEnergy: number | null;
+  profile: number;
+  temp: number | null;
 }
 
 interface LazyFlowStageTimelineProps {
@@ -36,9 +45,15 @@ export default function LazyFlowStageTimeline({ stages }: LazyFlowStageTimelineP
   // Convert imported stages to LazyFlow format
   const convertToLazyFlowStages = (importedStages: ImportedStage[]): LazyFlowStage[] => {
     return importedStages.map((stage, index) => ({
-      ...stage,
       id: `stage-${stage.bucket}-${stage.stage}`,
+      bucket: stage.bucket,
       stage: `Stage ${stage.stage}`,
+      plannedTime: stage.plannedTime,
+      actualTime: stage.actualTime,
+      plannedEnergy: stage.plannedEnergy,
+      actualEnergy: stage.actualEnergy,
+      profile: stage.profile,
+      temp: stage.temp,
       status: stage.status === 'done' ? 'completed' as const :
               stage.status === 'current' ? 'current' as const :
               'pending' as const,

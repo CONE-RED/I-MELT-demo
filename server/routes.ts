@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
+import { aiService } from "./ai-service";
 
 // Mock data for a steel heat - based on exact values from the screenshot
 // This is a showroom demo with the exact data from the Markdown tables
@@ -203,18 +204,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Insight ${parsedMessage.payload.insightId} acknowledged`);
         }
         
-        // Handle chat message
+        // Handle chat message with real AI service
         if (parsedMessage.type === 'chat_message' && parsedMessage.payload?.message) {
-          // In a real application, this would call an API or LLM
-          const response = {
-            type: 'chat_response',
-            payload: {
-              message: `AI response to: "${parsedMessage.payload.message}"`,
-              timestamp: new Date().toISOString()
-            }
-          };
-          
-          ws.send(JSON.stringify(response));
+          if (aiService.isConfigured()) {
+            // Use real AI service when API key is available
+            aiService.generateInsight(mockHeatData, 'process')
+              .then(insight => {
+                const response = {
+                  type: 'chat_response',
+                  payload: {
+                    message: `AI Analysis: ${insight.message}`,
+                    timestamp: new Date().toISOString(),
+                    confidence: 85
+                  }
+                };
+                ws.send(JSON.stringify(response));
+              })
+              .catch(error => {
+                const response = {
+                  type: 'chat_response',
+                  payload: {
+                    message: `AI service error: ${error.message}. Your message: "${parsedMessage.payload.message}"`,
+                    timestamp: new Date().toISOString()
+                  }
+                };
+                ws.send(JSON.stringify(response));
+              });
+          } else {
+            const response = {
+              type: 'chat_response',
+              payload: {
+                message: `Please configure OpenRouter API key to enable AI chat functionality. Your message: "${parsedMessage.payload.message}"`,
+                timestamp: new Date().toISOString()
+              }
+            };
+            ws.send(JSON.stringify(response));
+          }
         }
       } catch (error) {
         console.error('Error processing message:', error);
@@ -295,6 +320,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/heats/:id', async (req, res) => {
     const heatId = parseInt(req.params.id);
     res.json({ ...mockHeatData, heat: heatId });
+  });
+
+  // AI Insights API endpoint
+  app.post('/api/ai/generate-insight', async (req, res) => {
+    try {
+      const { heatData, type } = req.body;
+      
+      if (!aiService.isConfigured()) {
+        return res.status(503).json({ 
+          error: 'AI service not configured. Please provide OpenRouter API key.' 
+        });
+      }
+
+      const insight = await aiService.generateInsight(heatData || mockHeatData, type || 'process');
+      res.json(insight);
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: `Failed to generate AI insight: ${error.message}` 
+      });
+    }
+  });
+
+  // AI Chat API endpoint
+  app.post('/api/ai/chat', async (req, res) => {
+    try {
+      const { message, heatData } = req.body;
+      
+      if (!aiService.isConfigured()) {
+        return res.status(503).json({ 
+          error: 'AI service not configured. Please provide OpenRouter API key.',
+          fallbackResponse: `I received your message: "${message}". Please configure the AI service to enable intelligent responses.`
+        });
+      }
+
+      const insight = await aiService.generateInsight(heatData || mockHeatData, 'process');
+      res.json({
+        response: `Regarding your query "${message}": ${insight.message}`,
+        confidence: 85,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: `AI chat error: ${error.message}`,
+        fallbackResponse: `I received your message: "${req.body.message}". AI service is temporarily unavailable.`
+      });
+    }
   });
 
   return httpServer;

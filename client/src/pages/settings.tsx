@@ -151,10 +151,10 @@ export default function SettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label>{labels[lang].languageLabel}</Label>
+                      <Label className="text-gray-800 font-medium">{labels[lang].languageLabel}</Label>
                       <Select value={language} onValueChange={handleLanguageChange}>
-                        <SelectTrigger>
-                          <SelectValue />
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-800">
+                          <SelectValue placeholder="Select language" className="text-gray-800" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="en">English</SelectItem>
@@ -164,10 +164,10 @@ export default function SettingsPage() {
                     </div>
                     
                     <div className="space-y-2">
-                      <Label>{labels[lang].dateFormat}</Label>
+                      <Label className="text-gray-800 font-medium">{labels[lang].dateFormat}</Label>
                       <Select value={dateFormat} onValueChange={setDateFormat}>
-                        <SelectTrigger>
-                          <SelectValue />
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-800">
+                          <SelectValue placeholder="Select time format" className="text-gray-800" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="24h">24-hour</SelectItem>
@@ -177,10 +177,10 @@ export default function SettingsPage() {
                     </div>
                     
                     <div className="space-y-2">
-                      <Label>{labels[lang].tempUnit}</Label>
+                      <Label className="text-gray-800 font-medium">{labels[lang].tempUnit}</Label>
                       <Select value={temperatureUnit} onValueChange={setTemperatureUnit}>
-                        <SelectTrigger>
-                          <SelectValue />
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-800">
+                          <SelectValue placeholder="Select temperature unit" className="text-gray-800" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="celsius">Celsius (°C)</SelectItem>
@@ -203,10 +203,10 @@ export default function SettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label>{labels[lang].theme}</Label>
+                      <Label className="text-gray-800 font-medium">{labels[lang].theme}</Label>
                       <Select value={theme} onValueChange={setTheme}>
-                        <SelectTrigger>
-                          <SelectValue />
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-800">
+                          <SelectValue placeholder="Select theme" className="text-gray-800" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="light">Light</SelectItem>
@@ -227,10 +227,10 @@ export default function SettingsPage() {
                       
                       {autoRefresh && (
                         <div className="space-y-2">
-                          <Label>{labels[lang].refreshInterval}</Label>
+                          <Label className="text-gray-800 font-medium">{labels[lang].refreshInterval}</Label>
                           <Select value={refreshInterval} onValueChange={setRefreshInterval}>
-                            <SelectTrigger>
-                              <SelectValue />
+                            <SelectTrigger className="bg-white border-gray-300 text-gray-800">
+                              <SelectValue placeholder="Select refresh interval" className="text-gray-800" />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="10">10 {labels[lang].seconds}</SelectItem>
@@ -299,10 +299,10 @@ export default function SettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>{labels[lang].dataRetention}</Label>
+                      <Label className="text-gray-800 font-medium">{labels[lang].dataRetention}</Label>
                       <Select defaultValue="30">
-                        <SelectTrigger>
-                          <SelectValue />
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-800">
+                          <SelectValue placeholder="Select data retention period" className="text-gray-800" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="7">7 days</SelectItem>
@@ -314,10 +314,10 @@ export default function SettingsPage() {
                     </div>
                     
                     <div className="space-y-2">
-                      <Label>{labels[lang].exportFormat}</Label>
+                      <Label className="text-gray-800 font-medium">{labels[lang].exportFormat}</Label>
                       <Select defaultValue="xlsx">
-                        <SelectTrigger>
-                          <SelectValue />
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-800">
+                          <SelectValue placeholder="Select export format" className="text-gray-800" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="xlsx">Excel (.xlsx)</SelectItem>

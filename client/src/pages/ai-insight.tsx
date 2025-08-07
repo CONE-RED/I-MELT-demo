@@ -42,39 +42,62 @@ export default function AIInsight() {
   
   const lang = language === 'en' ? 'en' : 'ru';
   
-  const aiInsights = heat?.insights || [
+  interface AIInsight {
+    id: string;
+    type: 'recommendation' | 'optimization' | 'alert' | 'trend';
+    title: string;
+    titleRu: string;
+    description: string;
+    descriptionRu: string;
+    confidence: number;
+    priority: 'critical' | 'high' | 'medium' | 'low';
+    category: 'chemistry' | 'energy' | 'process';
+  }
+
+  const aiInsights: AIInsight[] = heat?.insights ? heat.insights.map(insight => ({
+    id: insight.id,
+    type: insight.type === 'critical' ? 'alert' as const : 
+          insight.type === 'optimization' ? 'optimization' as const : 'trend' as const,
+    title: insight.title,
+    titleRu: insight.title,
+    description: insight.message,
+    descriptionRu: insight.message,
+    confidence: 85,
+    priority: insight.type === 'critical' ? 'critical' as const : 'medium' as const,
+    category: 'process' as const
+  })) : [
     {
       id: 'carbon-optimization',
-      type: 'recommendation',
+      type: 'recommendation' as const,
       title: 'Carbon Content Optimization',
       titleRu: 'Оптимизация содержания углерода',
       description: 'Add 0.42t carbon to reach target composition for grade 13KhFA/9',
       descriptionRu: 'Добавить 0,42т углерода для достижения целевого состава марки 13KhFA/9',
       confidence: 94,
-      priority: 'high',
-      category: 'chemistry'
+      priority: 'high' as const,
+      category: 'chemistry' as const
     },
     {
       id: 'energy-efficiency',
-      type: 'optimization',
+      type: 'optimization' as const,
       title: 'Energy Profile Adjustment',
       titleRu: 'Настройка энергетического профиля',
       description: 'Switch to profile 4 to reduce energy consumption by 8.7%',
       descriptionRu: 'Переключиться на профиль 4 для снижения энергопотребления на 8,7%',
       confidence: 89,
-      priority: 'medium',
-      category: 'energy'
+      priority: 'medium' as const,
+      category: 'energy' as const
     },
     {
       id: 'temperature-warning',
-      type: 'alert',
+      type: 'alert' as const,
       title: 'Temperature Deviation',
       titleRu: 'Отклонение температуры',
       description: 'Furnace temperature 45°C above target. Consider adjusting power settings.',
       descriptionRu: 'Температура печи на 45°C выше целевой. Рассмотрите настройку мощности.',
       confidence: 96,
-      priority: 'critical',
-      category: 'process'
+      priority: 'critical' as const,
+      category: 'process' as const
     }
   ];
   
@@ -83,6 +106,7 @@ export default function AIInsight() {
       case 'alert': return <AlertTriangle className="w-5 h-5" />;
       case 'recommendation': return <TrendingUp className="w-5 h-5" />;
       case 'optimization': return <Zap className="w-5 h-5" />;
+      case 'trend': return <TrendingUp className="w-5 h-5" />;
       default: return <Brain className="w-5 h-5" />;
     }
   };
@@ -218,10 +242,10 @@ export default function AIInsight() {
                               {labels[lang].acknowledge}
                             </Button>
                             
-                            {insight.type === 'recommendation' && (
+                            {(insight.type === 'recommendation' || insight.type === 'optimization') && (
                               <Button
                                 size="sm"
-                                onClick={() => alert(`Applied: ${insight.title}`)}
+                                onClick={() => alert(`Applied: ${insight.title} - This would execute the recommended action in a real system.`)}
                                 className="bg-cone-red hover:bg-cone-red/90 text-white"
                               >
                                 <TrendingUp className="w-4 h-4 mr-1" />

@@ -259,7 +259,7 @@ export default function SettingsPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <Label>{labels[lang].enableNotifications}</Label>
-                        <p className="text-sm text-gray-500">Receive real-time notifications for heat status changes</p>
+                        <p className="text-sm text-gray-700">Receive real-time notifications for heat status changes</p>
                       </div>
                       <Switch
                         checked={notifications}
@@ -272,7 +272,7 @@ export default function SettingsPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <Label>{labels[lang].criticalAlerts}</Label>
-                        <p className="text-sm text-gray-500">High priority alerts for critical system events</p>
+                        <p className="text-sm text-gray-700">High priority alerts for critical system events</p>
                       </div>
                       <Switch defaultChecked />
                     </div>

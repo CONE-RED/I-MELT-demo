@@ -166,7 +166,7 @@ export default function AIInsight() {
                       <span>{labels[lang].processing}</span>
                       <span>12ms</span>
                     </div>
-                    <div className="text-xs text-gray-500">Avg response time</div>
+                    <div className="text-xs text-gray-800">Avg response time</div>
                   </div>
                 </CardContent>
               </Card>
@@ -177,7 +177,7 @@ export default function AIInsight() {
                   <CardTitle className="flex items-center gap-2">
                     <Brain className="w-5 h-5" />
                     {labels[lang].insights}
-                    {heat && <span className="text-sm font-normal text-gray-500">- Heat #{heat.heat}</span>}
+                    {heat && <span className="text-sm font-normal text-gray-700">- Heat #{heat.heat}</span>}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -203,7 +203,7 @@ export default function AIInsight() {
                               {insight.confidence}% confidence
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-600 mb-3">
+                          <p className="text-sm text-gray-800 mb-3">
                             {lang === 'en' ? insight.description : insight.descriptionRu}
                           </p>
                           
@@ -248,19 +248,19 @@ export default function AIInsight() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="p-4 bg-blue-50 rounded-lg">
                     <div className="font-medium text-gray-900">Next Stage Transition</div>
-                    <div className="text-sm text-gray-600 mt-1">Predicted in 8.5 minutes</div>
+                    <div className="text-sm text-gray-800 mt-1">Predicted in 8.5 minutes</div>
                     <div className="text-xs text-blue-600 mt-2">89% confidence</div>
                   </div>
                   
                   <div className="p-4 bg-green-50 rounded-lg">
                     <div className="font-medium text-gray-900">Energy Optimization</div>
-                    <div className="text-sm text-gray-600 mt-1">Potential 12% reduction</div>
+                    <div className="text-sm text-gray-800 mt-1">Potential 12% reduction</div>
                     <div className="text-xs text-green-600 mt-2">94% confidence</div>
                   </div>
                   
                   <div className="p-4 bg-purple-50 rounded-lg">
                     <div className="font-medium text-gray-900">Final Chemistry</div>
-                    <div className="text-sm text-gray-600 mt-1">Target composition achievable</div>
+                    <div className="text-sm text-gray-800 mt-1">Target composition achievable</div>
                     <div className="text-xs text-purple-600 mt-2">97% confidence</div>
                   </div>
                 </div>

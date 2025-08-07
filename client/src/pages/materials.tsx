@@ -149,7 +149,7 @@ export default function Materials() {
                                 className="h-2"
                               />
                             </div>
-                            <span className="text-sm text-gray-500">{material.location}</span>
+                            <span className="text-sm text-gray-700">{material.location}</span>
                           </div>
                         </div>
                         {material.status === 'critical' && (
@@ -173,13 +173,13 @@ export default function Materials() {
                   <div className="space-y-3">
                     <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
                       <div className="font-medium text-gray-900">Ferro Chrome</div>
-                      <div className="text-sm text-gray-600">2.9t {labels[lang].requested}</div>
+                      <div className="text-sm text-gray-800">2.9t {labels[lang].requested}</div>
                       <div className="text-xs text-yellow-600 mt-1">ETA: 45 min</div>
                     </div>
                     
                     <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                       <div className="font-medium text-gray-900">Steel Scrap</div>
-                      <div className="text-sm text-gray-600">8.5t {labels[lang].inTransit}</div>
+                      <div className="text-sm text-gray-800">8.5t {labels[lang].inTransit}</div>
                       <div className="text-xs text-blue-600 mt-1">ETA: 15 min</div>
                     </div>
                     
@@ -212,11 +212,11 @@ export default function Materials() {
                       <div key={index} className="p-4 border rounded-lg bg-gray-50">
                         <div className="text-center">
                           <div className="font-bold text-lg text-gray-900">#{bucket?.bucket || index + 1}</div>
-                          <div className="text-sm text-gray-600 mt-1">{bucket?.material || 'Unknown'}</div>
+                          <div className="text-sm text-gray-800 mt-1">{bucket?.material || 'Unknown'}</div>
                           <div className="text-lg font-medium text-cone-red mt-2">
                             {bucket?.weight?.toFixed(1) || '0.0'}t
                           </div>
-                          <div className="text-xs text-gray-500 mt-1">
+                          <div className="text-xs text-gray-700 mt-1">
                             {bucket?.composition || 'Standard'}
                           </div>
                         </div>
@@ -228,13 +228,13 @@ export default function Materials() {
                       <div key={bucketNum} className="p-4 border rounded-lg bg-gray-50">
                         <div className="text-center">
                           <div className="font-bold text-lg text-gray-900">#{bucketNum}</div>
-                          <div className="text-sm text-gray-600 mt-1">
+                          <div className="text-sm text-gray-800 mt-1">
                             {bucketNum <= 2 ? 'Steel Scrap' : bucketNum <= 4 ? 'Pig Iron' : 'Additives'}
                           </div>
                           <div className="text-lg font-medium text-cone-red mt-2">
                             {bucketNum <= 2 ? '24.5' : bucketNum <= 4 ? '8.2' : '1.8'}t
                           </div>
-                          <div className="text-xs text-gray-500 mt-1">
+                          <div className="text-xs text-gray-700 mt-1">
                             {bucketNum <= 2 ? 'High Carbon' : bucketNum <= 4 ? 'Standard' : 'Special'}
                           </div>
                         </div>

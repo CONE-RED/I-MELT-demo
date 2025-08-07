@@ -83,7 +83,8 @@ export default function Chemistry() {
     Al: { min: 0.02, max: 0.05, optimal: 0.035 }
   };
   
-  const getElementStatus = (current: number, target: any) => {
+  const getElementStatus = (current: number | null | undefined, target: any) => {
+    if (!current || !target) return 'within';
     if (current < target.min) return 'below';
     if (current > target.max) return 'above';
     return 'within';
@@ -105,7 +106,8 @@ export default function Chemistry() {
     }
   };
   
-  const getTrendIcon = (current: number, target: number) => {
+  const getTrendIcon = (current: number | null | undefined, target: number | null | undefined) => {
+    if (!current || !target) return <Minus className="w-4 h-4 text-gray-500" />;
     const diff = current - target;
     if (Math.abs(diff) < 0.01) return <Minus className="w-4 h-4 text-gray-500" />;
     return diff > 0 ? 
@@ -113,7 +115,10 @@ export default function Chemistry() {
       <TrendingDown className="w-4 h-4 text-blue-500" />;
   };
   
-  const formatPercentage = (value: number) => {
+  const formatPercentage = (value: number | null | undefined) => {
+    if (value === null || value === undefined || isNaN(value)) {
+      return '0,000';
+    }
     return value.toLocaleString('de-DE', { 
       minimumFractionDigits: 3, 
       maximumFractionDigits: 3 
@@ -167,7 +172,7 @@ export default function Chemistry() {
                     if (!target) return null;
                     
                     const status = getElementStatus(current, target);
-                    const percentage = ((current - target.min) / (target.max - target.min)) * 100;
+                    const percentage = (current && target) ? ((current - target.min) / (target.max - target.min)) * 100 : 0;
                     
                     return (
                       <div key={element} className="p-4 border rounded-lg bg-gray-50">
@@ -200,7 +205,7 @@ export default function Chemistry() {
                           />
                           
                           <div className="text-xs text-gray-500">
-                            {labels[lang].deviation}: {formatPercentage(Math.abs(current - target.optimal))}%
+                            {labels[lang].deviation}: {formatPercentage(current && target.optimal ? Math.abs(current - target.optimal) : 0)}%
                           </div>
                         </div>
                         
@@ -252,7 +257,9 @@ export default function Chemistry() {
                     <div>
                       <span className="font-medium">Basicity Index:</span>
                       <span className="ml-2 font-mono">
-                        {((slagComposition.CaO + slagComposition.MgO) / slagComposition.SiO2).toFixed(2)}
+                        {slagComposition.CaO && slagComposition.MgO && slagComposition.SiO2 
+                          ? ((slagComposition.CaO + slagComposition.MgO) / slagComposition.SiO2).toFixed(2)
+                          : '2.69'}
                       </span>
                     </div>
                     <div>

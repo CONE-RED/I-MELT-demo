@@ -50,6 +50,10 @@ export default function SideNav() {
   const [location, setLocation] = useLocation();
   const isMobile = useMobile();
   
+  const isActive = (path: string) => {
+    return location === path;
+  };
+  
   return (
     <nav className={cn(
       "border-r border-gray-200 p-4 flex flex-col gap-4 bg-gray-50",
@@ -59,31 +63,35 @@ export default function SideNav() {
         icon={<BarChart3 className="h-5 w-5" />} 
         label="Heat Log" 
         labelRu="Журнал плавок"
-        active={true}
+        active={isActive('/')}
         onClick={() => setLocation('/')}
       />
       <NavItem 
         icon={<Package className="h-5 w-5" />} 
         label="Materials" 
         labelRu="Материалы"
+        active={isActive('/materials')}
         onClick={() => setLocation('/materials')}
       />
       <NavItem 
         icon={<Zap className="h-5 w-5" />} 
         label="AI Insight" 
         labelRu="AI анализ"
+        active={isActive('/ai')}
         onClick={() => setLocation('/ai')}
       />
       <NavItem 
         icon={<FlaskRound className="h-5 w-5" />} 
         label="Chemistry" 
         labelRu="Химический состав"
+        active={isActive('/chemistry')}
         onClick={() => setLocation('/chemistry')}
       />
       <NavItem 
         icon={<Settings className="h-5 w-5" />} 
         label="Settings" 
         labelRu="Настройки"
+        active={isActive('/settings')}
         onClick={() => setLocation('/settings')}
       />
     </nav>

@@ -5,11 +5,19 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
+import Materials from "@/pages/materials";
+import AIInsight from "@/pages/ai-insight";
+import Chemistry from "@/pages/chemistry";
+import SettingsPage from "@/pages/settings";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/materials" component={Materials} />
+      <Route path="/ai" component={AIInsight} />
+      <Route path="/chemistry" component={Chemistry} />
+      <Route path="/settings" component={SettingsPage} />
       <Route component={NotFound} />
     </Switch>
   );

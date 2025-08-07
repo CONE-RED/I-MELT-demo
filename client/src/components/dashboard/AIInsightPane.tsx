@@ -89,9 +89,6 @@ export default function AIInsightPane({ insights }: AIInsightPaneProps) {
   return (
     <div className="dashboard-card h-full overflow-hidden flex flex-col">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold triangle">
-          {labels[lang].title}
-        </h2>
         <div className="flex items-center">
           <Zap className="h-5 w-5 text-cone-red animate-pulse" />
         </div>

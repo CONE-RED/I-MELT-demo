@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Bot, MessageCircle, Send, Minimize2, Maximize2, X, Eye } from 'lucide-react';
+import { Bot, MessageCircle, Send, Minimize2, Maximize2, X, Eye, Minus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface AIChatWidgetProps {
@@ -13,6 +13,7 @@ interface AIChatWidgetProps {
 export default function AIChatWidget({ heatData, className = "" }: AIChatWidgetProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [isDot, setIsDot] = useState(false);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [lastResponse, setLastResponse] = useState<string>('');
@@ -66,16 +67,21 @@ export default function AIChatWidget({ heatData, className = "" }: AIChatWidgetP
     }
   };
 
-  // If widget is hidden, show only a small floating eye icon to restore it
+  // If widget is hidden completely, don't render anything
   if (!isVisible) {
+    return null;
+  }
+
+  // If widget is in dot mode, show only a small red dot
+  if (isDot) {
     return (
       <div className={`fixed bottom-6 right-6 z-50 ${className}`}>
         <Button
-          onClick={() => setIsVisible(true)}
-          className="w-12 h-12 rounded-full bg-cone-red hover:bg-cone-red/90 text-white shadow-2xl border-2 border-white"
+          onClick={() => setIsDot(false)}
+          className="w-8 h-8 rounded-full bg-cone-red hover:bg-cone-red/90 text-white shadow-lg border border-white/50 transition-all duration-200 hover:w-10 hover:h-10"
           size="icon"
         >
-          <Eye className="w-5 h-5" />
+          <Bot className="w-4 h-4" />
         </Button>
       </div>
     );
@@ -106,10 +112,11 @@ export default function AIChatWidget({ heatData, className = "" }: AIChatWidgetP
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setIsVisible(false)}
-                  className="h-6 w-6 p-0 hover:bg-red-100"
+                  onClick={() => setIsDot(true)}
+                  className="h-6 w-6 p-0 hover:bg-gray-100"
+                  title="Minimize to dot"
                 >
-                  <X className="w-3 h-3 text-gray-700" />
+                  <Minus className="w-3 h-3 text-gray-700" />
                 </Button>
               </div>
             </div>
@@ -167,10 +174,11 @@ export default function AIChatWidget({ heatData, className = "" }: AIChatWidgetP
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsVisible(false)}
-                className="h-6 w-6 p-0 hover:bg-red-100"
+                onClick={() => setIsDot(true)}
+                className="h-6 w-6 p-0 hover:bg-gray-100"
+                title="Minimize to dot"
               >
-                <X className="w-3 h-3 text-gray-700" />
+                <Minus className="w-3 h-3 text-gray-700" />
               </Button>
             </div>
           </CardTitle>

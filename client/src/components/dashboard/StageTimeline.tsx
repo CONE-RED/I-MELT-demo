@@ -92,7 +92,7 @@ export default function StageTimeline({ stages }: StageTimelineProps) {
                     {labels[lang].bucket} {bucketId}
                   </div>
                   <div className="flex-1">
-                    {bucketStages.map(stage => {
+                    {bucketStages.map((stage, stageIndex) => {
                       const startPercentage = calculatePercentage(stage.plannedTime) - 
                         (stage.status === 'done' ? 0 : 5);
                       const width = stage.status === 'planned' ? 0 : 
@@ -100,7 +100,7 @@ export default function StageTimeline({ stages }: StageTimelineProps) {
                       
                       return (
                         <div 
-                          key={`stage-${bucketId}-${stage.stage}`} 
+                          key={`stage-${bucketId}-${stage.stage}-${stageIndex}`} 
                           className={cn(
                             "relative h-5 my-1 rounded-md overflow-hidden",
                             stage.status === 'planned' ? "bg-cone-gray/30" : "bg-cone-gray/80"

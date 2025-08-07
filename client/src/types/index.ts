@@ -59,7 +59,7 @@ export interface Insight {
 
 // WebSocket message types
 export interface WebSocketMessage {
-  type: 'heat_data' | 'insight' | 'model_update' | 'error';
+  type: 'heat_data' | 'insight' | 'model_update' | 'available_heats' | 'error';
   payload: any;
 }
 

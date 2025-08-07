@@ -7,11 +7,14 @@ import AdditivesLedger from './AdditivesLedger';
 import ChemistryDuoCharts from './ChemistryDuoCharts';
 import AIInsightPane from './AIInsightPane';
 import { Skeleton } from '@/components/ui/skeleton';
+import { LoadingState } from '@/components/ui/loading-spinner';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import useMobile from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
 export default function Dashboard() {
-  const { heat, loading } = useSelector((state: RootState) => state);
+  const heat = useSelector((state: RootState) => state.heat);
+  const loading = useSelector((state: RootState) => state.loading);
   const isMobile = useMobile();
   
   const renderSkeletonDashboard = () => (
@@ -36,7 +39,7 @@ export default function Dashboard() {
   );
   
   if (loading) {
-    return renderSkeletonDashboard();
+    return <LoadingState message="Loading heat data..." />;
   }
   
   if (!heat) {
@@ -44,19 +47,22 @@ export default function Dashboard() {
   }
   
   return (
-    <div className={cn("grid gap-3", isMobile ? "grid-cols-1" : "grid-cols-12")}>
-      {/* [A] Heat Header Card (3×2) */}
-      <div className={cn(isMobile ? "col-span-1" : "col-span-3 row-span-2")}>
-        <HeatHeaderCard
-          ts={heat.ts}
-          heat={heat.heat}
-          grade={heat.grade}
-          master={heat.master}
-          operator={heat.operator}
-          modelStatus={heat.modelStatus}
-          confidence={heat.confidence}
-        />
-      </div>
+    <ErrorBoundary>
+      <div className={cn("grid gap-3", isMobile ? "grid-cols-1" : "grid-cols-12")}>
+        {/* [A] Heat Header Card (3×2) */}
+        <div className={cn(isMobile ? "col-span-1" : "col-span-3 row-span-2")}>
+          <ErrorBoundary>
+            <HeatHeaderCard
+              ts={heat.ts}
+              heat={heat.heat}
+              grade={heat.grade}
+              master={heat.master}
+              operator={heat.operator}
+              modelStatus={heat.modelStatus}
+              confidence={heat.confidence}
+            />
+          </ErrorBoundary>
+        </div>
       
       {/* [B] Charge Buckets Matrix (6×4) */}
       <div className={cn(isMobile ? "col-span-1" : "col-span-6 row-span-4")}>
@@ -82,6 +88,7 @@ export default function Dashboard() {
       <div className={cn(isMobile ? "col-span-1" : "col-span-6 row-span-3")}>
         <ChemistryDuoCharts chemSteel={heat.chemSteel} chemSlag={heat.chemSlag} />
       </div>
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }

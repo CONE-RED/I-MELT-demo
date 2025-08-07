@@ -45,6 +45,10 @@ export function setupWebSocket(heatId?: number): WebSocket {
         case 'model_update':
           store.dispatch({ type: 'UPDATE_MODEL_STATUS', payload: message.payload });
           break;
+        case 'available_heats':
+          // Handle available heats list - could be used for heat selector
+          console.log('Available heats:', message.payload);
+          break;
         case 'error':
           store.dispatch({ type: 'SET_ERROR', payload: message.payload.message });
           break;

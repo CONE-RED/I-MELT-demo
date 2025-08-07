@@ -15,6 +15,7 @@ import { IndustrialLayout } from '@/components/industrial/status-first-layout';
 import { OperatorShortcuts, ContextualActions, PerformanceMetrics } from '@/components/industrial/operator-efficiency';
 import { AnomalyDetector, PredictiveInsights } from '@/components/industrial/anomaly-detection';
 import { OneClickReport } from '@/components/industrial/export-reporting';
+import NotificationCenter, { Notification } from '@/components/ui/notification-center';
 import useMobile from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
@@ -25,6 +26,7 @@ export default function Dashboard() {
   const [shortcutsVisible, setShortcutsVisible] = useState(false);
   const [showAnomalyDetector, setShowAnomalyDetector] = useState(true);
   const [showContextualActions, setShowContextualActions] = useState(true);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   // Determine system status based on heat data
   const getSystemStatus = () => {
@@ -50,6 +52,35 @@ export default function Dashboard() {
     accuracy: 97,
     timeToTarget: '12:34',
     energySavings: 8.7
+  };
+
+  // Handle notifications
+  const handleAnomalyDetected = (anomaly: any) => {
+    const notification: Notification = {
+      id: anomaly.id || `anomaly-${Date.now()}`,
+      type: 'anomaly',
+      severity: anomaly.severity,
+      title: `${anomaly.parameter} ${anomaly.type.charAt(0).toUpperCase() + anomaly.type.slice(1)}`,
+      message: `${anomaly.parameter} deviation detected`,
+      parameter: anomaly.parameter,
+      currentValue: anomaly.currentValue,
+      expectedValue: anomaly.expectedValue,
+      deviation: anomaly.deviation,
+      recommendation: anomaly.recommendation,
+      confidence: anomaly.confidence,
+      timestamp: new Date(),
+      acknowledged: false
+    };
+    
+    setNotifications(prev => [notification, ...prev.slice(0, 9)]); // Keep only latest 10
+  };
+
+  const handleAcknowledge = (id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, acknowledged: true } : n));
+  };
+
+  const handleDismiss = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
   };
   
   const renderSkeletonDashboard = () => (
@@ -102,44 +133,12 @@ export default function Dashboard() {
         onToggle={() => setShortcutsVisible(!shortcutsVisible)}
       />
       
-      {showContextualActions && (
-        <ContextualActions
-          heatData={heat}
-          currentStage="Melting"
-          onHide={() => setShowContextualActions(false)}
-        />
-      )}
-      
-      {/* Advanced AI Features - Phase 3 */}
-      {showAnomalyDetector && (
-        <AnomalyDetector
-          heatData={heat}
-          onAnomalyDetected={(anomaly) => console.log('Anomaly detected:', anomaly)}
-          onHide={() => setShowAnomalyDetector(false)}
-        />
-      )}
-      
-      {/* Control buttons for floating windows */}
-      <div className="fixed top-4 right-4 z-50 flex gap-2">
-        {!showAnomalyDetector && (
-          <button
-            onClick={() => setShowAnomalyDetector(true)}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
-            title="Show Anomaly Detector"
-          >
-            Show Anomaly
-          </button>
-        )}
-        {!showContextualActions && (
-          <button
-            onClick={() => setShowContextualActions(true)}
-            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
-            title="Show Suggestions"
-          >
-            Show Suggestions
-          </button>
-        )}
-      </div>
+      {/* AI monitoring runs in background - notifications show in TopBar */}
+      <AnomalyDetector
+        heatData={heat}
+        onAnomalyDetected={handleAnomalyDetected}
+        onHide={() => setShowAnomalyDetector(false)}
+      />
       
       <PredictiveInsights
         heatData={heat}

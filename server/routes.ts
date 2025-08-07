@@ -286,6 +286,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json([93378, 93379, 93380, 93381]);
   });
   
+  // Fix: Add both singular and plural endpoints for compatibility
+  app.get('/api/heat/:id', async (req, res) => {
+    const heatId = parseInt(req.params.id);
+    res.json({ ...mockHeatData, heat: heatId });
+  });
+  
   app.get('/api/heats/:id', async (req, res) => {
     const heatId = parseInt(req.params.id);
     res.json({ ...mockHeatData, heat: heatId });

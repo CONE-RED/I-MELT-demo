@@ -6,45 +6,42 @@ interface CollapsibleSectionProps {
   title: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  priority?: 'critical' | 'high' | 'medium' | 'low';
   className?: string;
-  priority?: 'high' | 'medium' | 'low';
 }
 
 export function CollapsibleSection({ 
   title, 
   children, 
-  defaultOpen = false, 
-  className,
-  priority = 'medium'
+  defaultOpen = true, 
+  priority = 'medium',
+  className 
 }: CollapsibleSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
-  const priorityStyles = {
-    high: 'border-cone-red/30 bg-cone-red/5',
-    medium: 'border-cone-gray/30 bg-cone-black',
-    low: 'border-cone-gray/20 bg-cone-gray/5'
+  const priorityColors = {
+    critical: 'text-red-500 border-red-500/20',
+    high: 'text-cone-red border-cone-red/20',
+    medium: 'text-cone-white border-cone-gray/20',
+    low: 'text-cone-gray border-cone-gray/10'
   };
 
   return (
-    <div className={cn(
-      "border rounded-lg overflow-hidden transition-all duration-200",
-      priorityStyles[priority],
-      className
-    )}>
+    <div className={cn('border rounded-lg', priorityColors[priority], className)}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between p-3 text-left hover:bg-cone-gray/10 transition-colors"
       >
-        <span className="font-medium text-cone-white">{title}</span>
+        <span className="font-medium">{title}</span>
         {isOpen ? (
-          <ChevronDown className="w-4 h-4 text-cone-gray transition-transform" />
+          <ChevronDown className="w-4 h-4" />
         ) : (
-          <ChevronRight className="w-4 h-4 text-cone-gray transition-transform" />
+          <ChevronRight className="w-4 h-4" />
         )}
       </button>
       
       {isOpen && (
-        <div className="p-3 border-t border-cone-gray/20 animate-in slide-in-from-top-2 duration-200">
+        <div className="p-3 pt-0 border-t border-cone-gray/20">
           {children}
         </div>
       )}
@@ -53,35 +50,50 @@ export function CollapsibleSection({
 }
 
 interface ProgressiveDetailsProps {
-  summary: React.ReactNode;
-  details: React.ReactNode;
-  expandText?: string;
-  collapseText?: string;
+  primary: React.ReactNode;
+  secondary?: React.ReactNode;
+  tertiary?: React.ReactNode;
+  collapsible?: boolean;
 }
 
 export function ProgressiveDetails({ 
-  summary, 
-  details, 
-  expandText = "Show details", 
-  collapseText = "Hide details" 
+  primary, 
+  secondary, 
+  tertiary, 
+  collapsible = true 
 }: ProgressiveDetailsProps) {
   const [showDetails, setShowDetails] = useState(false);
 
+  if (!collapsible) {
+    return (
+      <div className="space-y-2">
+        <div className="text-lg font-semibold">{primary}</div>
+        {secondary && <div className="text-sm text-cone-gray">{secondary}</div>}
+        {tertiary && <div className="text-xs text-cone-gray/70">{tertiary}</div>}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-2">
-      {summary}
+      <div className="text-lg font-semibold">{primary}</div>
       
-      <button
-        onClick={() => setShowDetails(!showDetails)}
-        className="text-xs text-cone-red hover:text-cone-red/80 transition-colors"
-      >
-        {showDetails ? collapseText : expandText}
-      </button>
-      
-      {showDetails && (
-        <div className="animate-in slide-in-from-top-2 duration-200">
-          {details}
-        </div>
+      {(secondary || tertiary) && (
+        <>
+          <button
+            onClick={() => setShowDetails(!showDetails)}
+            className="text-xs text-cone-red hover:text-cone-white transition-colors"
+          >
+            {showDetails ? 'Show less' : 'Show details'}
+          </button>
+          
+          {showDetails && (
+            <div className="space-y-1 animate-in slide-in-from-top-2">
+              {secondary && <div className="text-sm text-cone-gray">{secondary}</div>}
+              {tertiary && <div className="text-xs text-cone-gray/70">{tertiary}</div>}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

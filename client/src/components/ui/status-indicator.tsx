@@ -1,117 +1,144 @@
-import { cn } from "@/lib/utils";
-import { AlertTriangle, CheckCircle, Clock, Zap } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Clock, Zap, XCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+export type SystemStatus = 'optimal' | 'normal' | 'warning' | 'critical' | 'offline';
 
 interface StatusIndicatorProps {
-  status: 'critical' | 'warning' | 'normal' | 'optimal';
-  label: string;
-  value?: string | number;
-  className?: string;
+  status: SystemStatus;
   size?: 'sm' | 'md' | 'lg';
+  showText?: boolean;
+  className?: string;
 }
 
-export function StatusIndicator({ status, label, value, className, size = 'md' }: StatusIndicatorProps) {
-  const statusConfig = {
+export function StatusIndicator({ 
+  status, 
+  size = 'md', 
+  showText = false, 
+  className 
+}: StatusIndicatorProps) {
+  const configs = {
+    optimal: {
+      icon: CheckCircle,
+      color: 'text-green-500',
+      bg: 'bg-green-500/20',
+      text: 'Optimal',
+      pulse: false
+    },
+    normal: {
+      icon: Zap,
+      color: 'text-blue-500',
+      bg: 'bg-blue-500/20',
+      text: 'Normal',
+      pulse: false
+    },
+    warning: {
+      icon: AlertTriangle,
+      color: 'text-yellow-500',
+      bg: 'bg-yellow-500/20',
+      text: 'Warning',
+      pulse: false
+    },
     critical: {
       icon: AlertTriangle,
       color: 'text-red-500',
-      bg: 'bg-red-500/10',
-      border: 'border-red-500/30'
+      bg: 'bg-red-500/20',
+      text: 'Critical',
+      pulse: true
     },
-    warning: {
-      icon: Clock,
-      color: 'text-yellow-500',
-      bg: 'bg-yellow-500/10',
-      border: 'border-yellow-500/30'
-    },
-    normal: {
-      icon: CheckCircle,
-      color: 'text-blue-500',
-      bg: 'bg-blue-500/10',
-      border: 'border-blue-500/30'
-    },
-    optimal: {
-      icon: Zap,
-      color: 'text-green-500',
-      bg: 'bg-green-500/10',
-      border: 'border-green-500/30'
+    offline: {
+      icon: XCircle,
+      color: 'text-gray-500',
+      bg: 'bg-gray-500/20',
+      text: 'Offline',
+      pulse: false
     }
   };
 
-  const config = statusConfig[status];
+  const config = configs[status];
   const Icon = config.icon;
 
-  const sizeClasses = {
-    sm: 'h-4 w-4',
-    md: 'h-5 w-5',
-    lg: 'h-6 w-6'
+  const sizes = {
+    sm: 'w-3 h-3',
+    md: 'w-4 h-4',
+    lg: 'w-5 h-5'
   };
 
   return (
-    <div className={cn(
-      "flex items-center gap-2 px-3 py-2 rounded-lg border",
-      config.bg,
-      config.border,
-      className
-    )}>
-      <Icon className={cn(config.color, sizeClasses[size])} />
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium text-cone-white">{label}</div>
-        {value && (
-          <div className={cn("text-xs", config.color)}>{value}</div>
-        )}
+    <div className={cn('flex items-center gap-2', className)}>
+      <div className={cn(
+        'rounded-full p-1',
+        config.bg,
+        config.pulse && 'animate-pulse'
+      )}>
+        <Icon className={cn(sizes[size], config.color)} />
       </div>
+      {showText && (
+        <span className={cn('text-sm font-medium', config.color)}>
+          {config.text}
+        </span>
+      )}
     </div>
   );
 }
 
 interface SystemHealthProps {
-  furnaceTemp?: number;
+  temperature?: number;
   powerLevel?: number;
-  processStage?: string;
-  alerts?: number;
+  confidence?: number;
+  className?: string;
 }
 
-export function SystemHealth({ furnaceTemp = 1590, powerLevel = 85, processStage = "Melting", alerts = 1 }: SystemHealthProps) {
-  const getHealthStatus = () => {
-    if (alerts > 2) return 'critical';
-    if (alerts > 0) return 'warning';
-    if (powerLevel > 90) return 'optimal';
+export function SystemHealth({ 
+  temperature = 1590, 
+  powerLevel = 85, 
+  confidence = 85,
+  className 
+}: SystemHealthProps) {
+  const getOverallStatus = (): SystemStatus => {
+    if (confidence < 60 || powerLevel < 50) return 'critical';
+    if (confidence < 80 || powerLevel < 70) return 'warning';
+    if (confidence > 95 && powerLevel > 90) return 'optimal';
+    return 'normal';
+  };
+
+  const getTemperatureStatus = (): SystemStatus => {
+    if (temperature < 1400 || temperature > 1700) return 'critical';
+    if (temperature < 1500 || temperature > 1650) return 'warning';
+    return 'normal';
+  };
+
+  const getPowerStatus = (): SystemStatus => {
+    if (powerLevel < 50) return 'critical';
+    if (powerLevel < 70) return 'warning';
+    if (powerLevel > 95) return 'optimal';
     return 'normal';
   };
 
   return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-medium text-cone-white mb-3">System Status</h3>
+    <div className={cn('grid grid-cols-3 gap-4', className)}>
+      <div className="flex items-center gap-2">
+        <StatusIndicator status={getTemperatureStatus()} size="sm" />
+        <div className="text-xs">
+          <div className="text-cone-gray">Temperature</div>
+          <div className="font-medium">{temperature}°C</div>
+        </div>
+      </div>
       
-      <StatusIndicator
-        status={furnaceTemp > 1600 ? 'warning' : 'normal'}
-        label="Furnace Temperature"
-        value={`${furnaceTemp}°C`}
-        size="sm"
-      />
+      <div className="flex items-center gap-2">
+        <StatusIndicator status={getPowerStatus()} size="sm" />
+        <div className="text-xs">
+          <div className="text-cone-gray">Power</div>
+          <div className="font-medium">{powerLevel}%</div>
+        </div>
+      </div>
       
-      <StatusIndicator
-        status={powerLevel > 90 ? 'optimal' : powerLevel > 70 ? 'normal' : 'warning'}
-        label="Power Level"
-        value={`${powerLevel}%`}
-        size="sm"
-      />
-      
-      <StatusIndicator
-        status={getHealthStatus()}
-        label="Process Stage"
-        value={processStage}
-        size="sm"
-      />
-      
-      {alerts > 0 && (
-        <StatusIndicator
-          status="warning"
-          label="Active Alerts"
-          value={`${alerts} pending`}
-          size="sm"
-        />
-      )}
+      <div className="flex items-center gap-2">
+        <StatusIndicator status={getOverallStatus()} size="sm" />
+        <div className="text-xs">
+          <div className="text-cone-gray">AI Confidence</div>
+          <div className="font-medium">{confidence}%</div>
+        </div>
+      </div>
     </div>
   );
 }

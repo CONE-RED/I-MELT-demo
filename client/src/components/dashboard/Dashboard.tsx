@@ -144,10 +144,7 @@ export default function Dashboard() {
         heatData={heat}
       />
       
-      <OneClickReport
-        heatData={heat}
-        onExport={(options) => console.log('✅ Report exported:', options)}
-      />
+      {/* Quick Reports moved to sidebar navigation */}
       
       <ErrorBoundary>
         <div className={cn("grid gap-3", isMobile ? "grid-cols-1" : "grid-cols-12")}>

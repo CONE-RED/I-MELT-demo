@@ -177,7 +177,7 @@ export default function Chemistry() {
                     return (
                       <div key={element} className="p-4 border rounded-lg bg-gray-50">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="font-bold text-lg">{element}</span>
+                          <span className="font-bold text-lg text-gray-900">{element}</span>
                           <div className="flex items-center gap-2">
                             {getTrendIcon(current, target.optimal)}
                             <Badge className={getStatusColor(status)}>
@@ -187,14 +187,14 @@ export default function Chemistry() {
                         </div>
                         
                         <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
+                          <div className="flex justify-between text-sm text-gray-700">
                             <span>{labels[lang].current}:</span>
-                            <span className="font-mono">{formatPercentage(current)}%</span>
+                            <span className="font-mono text-gray-900">{formatPercentage(current)}%</span>
                           </div>
                           
-                          <div className="flex justify-between text-sm">
+                          <div className="flex justify-between text-sm text-gray-700">
                             <span>{labels[lang].target}:</span>
-                            <span className="font-mono">
+                            <span className="font-mono text-gray-900">
                               {formatPercentage(target.min)}% - {formatPercentage(target.max)}%
                             </span>
                           </div>
@@ -204,7 +204,7 @@ export default function Chemistry() {
                             className="h-2"
                           />
                           
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-gray-600">
                             {labels[lang].deviation}: {formatPercentage(current && target.optimal ? Math.abs(current - target.optimal) : 0)}%
                           </div>
                         </div>
@@ -213,7 +213,7 @@ export default function Chemistry() {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="w-full mt-3"
+                            className="w-full mt-3 text-gray-900 border-gray-300 hover:bg-gray-100"
                             onClick={() => alert(`Action for ${element}: ${status === 'below' ? 'Add material' : 'Reduce input'}`)}
                           >
                             {labels[lang].action}
@@ -243,7 +243,7 @@ export default function Chemistry() {
                         <div className="text-2xl font-mono text-cone-red mt-2">
                           {formatPercentage(value)}%
                         </div>
-                        <div className="text-sm text-gray-500 mt-1">
+                        <div className="text-sm text-gray-600 mt-1">
                           Current composition
                         </div>
                       </div>
@@ -253,22 +253,22 @@ export default function Chemistry() {
                 
                 <div className="mt-6 p-4 bg-blue-50 rounded-lg">
                   <h4 className="font-medium text-blue-900 mb-2">Slag Quality Assessment</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-800">
                     <div>
-                      <span className="font-medium">Basicity Index:</span>
-                      <span className="ml-2 font-mono">
+                      <span className="font-medium text-gray-900">Basicity Index:</span>
+                      <span className="ml-2 font-mono text-gray-900">
                         {slagComposition.CaO && slagComposition.MgO && slagComposition.SiO2 
                           ? ((slagComposition.CaO + slagComposition.MgO) / slagComposition.SiO2).toFixed(2)
                           : '2.69'}
                       </span>
                     </div>
                     <div>
-                      <span className="font-medium">Fluidity:</span>
-                      <span className="ml-2 text-green-600">Good</span>
+                      <span className="font-medium text-gray-900">Fluidity:</span>
+                      <span className="ml-2 text-green-700 font-medium">Good</span>
                     </div>
                     <div>
-                      <span className="font-medium">Desulfurization:</span>
-                      <span className="ml-2 text-green-600">Effective</span>
+                      <span className="font-medium text-gray-900">Desulfurization:</span>
+                      <span className="ml-2 text-green-700 font-medium">Effective</span>
                     </div>
                   </div>
                 </div>

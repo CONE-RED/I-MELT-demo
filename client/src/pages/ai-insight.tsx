@@ -212,6 +212,7 @@ export default function AIInsight() {
                               size="sm"
                               onClick={() => alert(`Acknowledged: ${insight.title}`)}
                               variant="outline"
+                              className="text-gray-900 border-gray-300 hover:bg-gray-50"
                             >
                               <CheckCircle className="w-4 h-4 mr-1" />
                               {labels[lang].acknowledge}
@@ -221,7 +222,7 @@ export default function AIInsight() {
                               <Button
                                 size="sm"
                                 onClick={() => alert(`Applied: ${insight.title}`)}
-                                className="bg-cone-red hover:bg-cone-red/90"
+                                className="bg-cone-red hover:bg-cone-red/90 text-white"
                               >
                                 <TrendingUp className="w-4 h-4 mr-1" />
                                 {labels[lang].apply}

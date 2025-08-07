@@ -139,7 +139,7 @@ export default function Materials() {
                               {lang === 'en' ? material.name : material.nameRu}
                             </span>
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(material.status)}`}>
-                              {material.current.toFixed(1)}{material.unit} / {material.target.toFixed(1)}{material.unit}
+                              {material.current?.toFixed(1) || '0.0'}{material.unit} / {material.target?.toFixed(1) || '0.0'}{material.unit}
                             </span>
                           </div>
                           <div className="flex items-center gap-4">

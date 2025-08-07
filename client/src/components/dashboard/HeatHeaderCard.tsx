@@ -1,7 +1,9 @@
 import { useSelector } from 'react-redux';
 import { RootState } from '@/lib/store';
-import { Zap } from 'lucide-react';
+import { Zap, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { SystemHealth } from '@/components/ui/status-indicator';
+import { ProgressiveDetails } from '@/components/ui/collapsible-section';
 import { cn } from '@/lib/utils';
 
 interface HeatHeaderProps {
@@ -56,37 +58,66 @@ export default function HeatHeaderCard({
   
   const lang = language === 'en' ? 'en' : 'ru';
   
+  const getSystemStatus = () => {
+    if (confidence < 70) return 'warning';
+    if (confidence > 90) return 'optimal';
+    return 'normal';
+  };
+
   return (
     <div className="dashboard-card h-full">
-      <h2 className="text-lg font-semibold triangle mb-2">
-        {labels[lang].heat} #{heat}
-      </h2>
-      <p className="text-sm text-cone-gray mb-3">{formattedDate}</p>
-      
-      <div className="grid grid-cols-2 text-sm gap-y-2">
-        <span className="text-cone-gray">{labels[lang].grade}</span>
-        <span className="font-medium">{grade}</span>
-        <span className="text-cone-gray">{labels[lang].master}</span>
-        <span>{master}</span>
-        <span className="text-cone-gray">{labels[lang].operator}</span>
-        <span>{operator}</span>
-      </div>
-      
-      <div className="mt-4 flex items-center">
-        <div className="flex-1">
-          <div className="text-xs text-cone-gray">{labels[lang].confidence}</div>
-          <Progress value={confidence} className="h-2 mt-1" />
-        </div>
-        <div className="flex items-center justify-center ml-3">
-          <Zap 
-            className={cn(
-              "h-5 w-5 text-cone-red",
+      {/* Primary Information - Heat Number & Status */}
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-xl font-bold triangle text-cone-white">
+          #{heat}
+        </h2>
+        <div className="flex items-center gap-2">
+          {confidence > 90 ? (
+            <CheckCircle className="w-5 h-5 text-green-500" />
+          ) : confidence < 70 ? (
+            <AlertTriangle className="w-5 h-5 text-yellow-500" />
+          ) : (
+            <Zap className={cn(
+              "w-5 h-5 text-cone-red",
               modelStatus === 'training' && "animate-spin",
               modelStatus === 'predicting' && "animate-pulse"
-            )} 
-          />
+            )} />
+          )}
         </div>
       </div>
+      
+      {/* Secondary Information - Grade & Confidence */}
+      <div className="mb-4">
+        <div className="text-lg font-medium text-cone-white mb-1">{grade}</div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-cone-gray">{labels[lang].confidence}</span>
+          <Progress value={confidence} className="h-1.5 flex-1" />
+          <span className="text-xs font-medium text-cone-white">{confidence}%</span>
+        </div>
+      </div>
+      
+      {/* Progressive Details - Personnel Info */}
+      <ProgressiveDetails
+        summary={
+          <div className="text-xs text-cone-gray">
+            {formattedDate}
+          </div>
+        }
+        details={
+          <div className="grid grid-cols-1 gap-2 text-xs">
+            <div className="flex justify-between">
+              <span className="text-cone-gray">{labels[lang].master}</span>
+              <span className="font-medium">{master}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-cone-gray">{labels[lang].operator}</span>
+              <span className="font-medium">{operator}</span>
+            </div>
+          </div>
+        }
+        expandText="Show personnel"
+        collapseText="Hide personnel"
+      />
     </div>
   );
 }

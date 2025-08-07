@@ -9,6 +9,7 @@ import AIInsightPane from './AIInsightPane';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LoadingState } from '@/components/ui/loading-spinner';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { SmartDefaults, AutoInsightPrioritizer, SmartAlertManager } from '@/components/ui/smart-defaults';
 import useMobile from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
@@ -16,6 +17,15 @@ export default function Dashboard() {
   const heat = useSelector((state: RootState) => state.heat);
   const loading = useSelector((state: RootState) => state.loading);
   const isMobile = useMobile();
+
+  // Determine system status based on heat data
+  const getSystemStatus = () => {
+    if (!heat) return 'normal';
+    const criticalInsights = heat.insights?.filter(i => i.type === 'critical' && !i.acknowledged) || [];
+    if (criticalInsights.length > 2) return 'critical';
+    if (criticalInsights.length > 0 || heat.confidence < 70) return 'warning';
+    return 'normal';
+  };
   
   const renderSkeletonDashboard = () => (
     <div className={cn("grid gap-4", isMobile ? "grid-cols-1" : "grid-cols-12")}>
@@ -47,12 +57,16 @@ export default function Dashboard() {
   }
   
   return (
-    <ErrorBoundary>
-      <div className={cn("grid gap-3", isMobile ? "grid-cols-1" : "grid-cols-12")}>
-        {/* [A] Heat Header Card (3×2) */}
-        <div className={cn(isMobile ? "col-span-1" : "col-span-3 row-span-2")}>
-          <ErrorBoundary>
-            <HeatHeaderCard
+    <SmartAlertManager systemStatus={getSystemStatus()}>
+      <SmartDefaults />
+      {heat && <AutoInsightPrioritizer insights={heat.insights || []} />}
+      
+      <ErrorBoundary>
+        <div className={cn("grid gap-3", isMobile ? "grid-cols-1" : "grid-cols-12")}>
+          {/* [A] Heat Header Card (3×2) - Primary Information */}
+          <div className={cn(isMobile ? "col-span-1" : "col-span-3 row-span-2")}>
+            <ErrorBoundary>
+              <HeatHeaderCard
               ts={heat.ts}
               heat={heat.heat}
               grade={heat.grade}
@@ -88,7 +102,8 @@ export default function Dashboard() {
       <div className={cn(isMobile ? "col-span-1" : "col-span-6 row-span-3")}>
         <ChemistryDuoCharts chemSteel={heat.chemSteel} chemSlag={heat.chemSlag} />
       </div>
-      </div>
-    </ErrorBoundary>
+        </div>
+      </ErrorBoundary>
+    </SmartAlertManager>
   );
 }

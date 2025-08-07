@@ -6,7 +6,8 @@ import { sendMessage } from '@/lib/socket';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Zap, ArrowRight } from 'lucide-react';
+import { StatusIndicator, SystemHealth } from '@/components/ui/status-indicator';
+import { Zap, ArrowRight, AlertTriangle, TrendingUp, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AIInsightPaneProps {

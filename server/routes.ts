@@ -3,9 +3,12 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { aiService } from "./ai-service";
+import { HeatSim } from "./demo/heat-sim";
 
 // Mock data for a steel heat - based on exact values from the screenshot
 // This is a showroom demo with the exact data from the Markdown tables
+// Heat simulator instances for deterministic, physics-based simulation
+const sims = new Map<string, HeatSim>();
 const mockHeatData = {
   ts: "2019-01-13 03:00:11",
   heat: 93378,
@@ -414,6 +417,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       res.status(500).json({ 
         error: `Failed to download report: ${error.message}` 
+      });
+    }
+  });
+
+  // Deterministic Heat Simulator endpoints for physics-based demo
+  app.get('/api/demo/start', (req, res) => {
+    const seed = Number(req.query.seed ?? 42);
+    const clientId = req.ip || 'default';
+    
+    // Stop existing simulation if any
+    const existingSim = sims.get(clientId);
+    if (existingSim) {
+      existingSim.removeAllListeners();
+    }
+    
+    // Create new seeded simulation
+    const sim = new HeatSim(seed);
+    sims.set(clientId, sim);
+    
+    // Send periodic updates via WebSocket
+    const interval = setInterval(() => {
+      const tick = sim.tick();
+      
+      // Broadcast to connected clients for this IP
+      if (clientsByHeat.size > 0) {
+        const message = JSON.stringify({
+          type: 'simulation_tick',
+          payload: tick
+        });
+        
+        clientsByHeat.forEach((clients) => {
+          clients.forEach((ws) => {
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(message);
+            }
+          });
+        });
+      }
+      
+      // Stop simulation after TAP stage
+      if (tick.stage === 'TAP' && sim.getStatus().time > 1200) {
+        clearInterval(interval);
+        sims.delete(clientId);
+      }
+    }, 1000);
+    
+    res.json({ ok: true, seed, status: 'started' });
+  });
+
+  app.get('/api/demo/stop', (req, res) => {
+    const clientId = req.ip || 'default';
+    const sim = sims.get(clientId);
+    
+    if (sim) {
+      sim.removeAllListeners();
+      sims.delete(clientId);
+      res.json({ ok: true, status: 'stopped' });
+    } else {
+      res.json({ ok: false, error: 'No simulation running' });
+    }
+  });
+
+  app.get('/api/demo/status', (req, res) => {
+    const clientId = req.ip || 'default';
+    const sim = sims.get(clientId);
+    
+    if (sim) {
+      res.json({ 
+        ok: true, 
+        running: true,
+        ...sim.getStatus()
+      });
+    } else {
+      res.json({ 
+        ok: true, 
+        running: false 
       });
     }
   });

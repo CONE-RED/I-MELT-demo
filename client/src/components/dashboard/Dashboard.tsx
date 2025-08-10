@@ -18,6 +18,7 @@ import { AnomalyDetector, PredictiveInsights } from '@/components/industrial/ano
 import { OneClickReport } from '@/components/industrial/export-reporting';
 import NotificationCenter, { Notification } from '@/components/ui/notification-center';
 import AIChatWidget from '@/components/chat/AIChatWidget';
+import SimulatorControls from '@/components/demo/SimulatorControls';
 import useMobile from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
@@ -198,6 +199,11 @@ export default function Dashboard() {
       {/* Performance Metrics - Industrial Enhancement */}
       <div className={cn(isMobile ? "col-span-1" : "col-span-3")}>
         <PerformanceMetrics metrics={performanceMetrics} />
+      </div>
+      
+      {/* Physics Simulator Controls */}
+      <div className={cn(isMobile ? "col-span-1" : "col-span-3")}>
+        <SimulatorControls />
       </div>
       
       {/* AI Chat Widget - Now Floating */}

@@ -201,8 +201,8 @@ export default function Dashboard() {
         <PerformanceMetrics metrics={performanceMetrics} />
       </div>
       
-      {/* Physics Simulator Controls */}
-      <div className={cn(isMobile ? "col-span-1" : "col-span-3")}>
+      {/* Physics Simulator - Prominent Position */}
+      <div className={cn(isMobile ? "col-span-1" : "col-span-6")}>
         <SimulatorControls />
       </div>
       

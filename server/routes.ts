@@ -436,21 +436,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const sim = new HeatSim(seed);
     sims.set(clientId, sim);
     
-    // Send periodic updates via WebSocket
+    // Send periodic updates via WebSocket and update heat data
     const interval = setInterval(() => {
       const tick = sim.tick();
       
-      // Broadcast to connected clients for this IP
+      // Update the heat data with simulation values
+      const updatedHeatData = {
+        ...mockHeatData,
+        ts: new Date(tick.ts).toISOString().slice(0, 19).replace('T', ' '),
+        chemSteel: {
+          ...mockHeatData.chemSteel,
+          "C": tick.cPct || mockHeatData.chemSteel.C,
+          "S": (tick.oPct || 0.029) / 10, // Convert to reasonable range
+        },
+        // Update stages based on simulation progress
+        stages: mockHeatData.stages.map(stage => {
+          const currentTime = sim.getStatus().time;
+          if (stage.bucket === 1) {
+            // Update current stage status based on simulation
+            if (currentTime > 120 && stage.stage === 15) {
+              return { ...stage, status: 'done' as const, actualTime: '00:24', actualEnergy: 0.38 };
+            }
+            if (currentTime > 900 && stage.stage === 16) {
+              return { ...stage, status: 'current' as const };
+            }
+          }
+          return stage;
+        })
+      };
+      
+      // Broadcast simulation tick for real-time display
+      const tickMessage = JSON.stringify({
+        type: 'simulation_tick',
+        payload: tick
+      });
+      
+      // Broadcast updated heat data
+      const heatMessage = JSON.stringify({
+        type: 'heat_data',
+        payload: updatedHeatData
+      });
+      
+      // Send to connected clients
       if (clientsByHeat.size > 0) {
-        const message = JSON.stringify({
-          type: 'simulation_tick',
-          payload: tick
-        });
-        
         clientsByHeat.forEach((clients) => {
           clients.forEach((ws) => {
             if (ws.readyState === WebSocket.OPEN) {
-              ws.send(message);
+              ws.send(tickMessage);
+              ws.send(heatMessage);
             }
           });
         });

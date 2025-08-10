@@ -138,14 +138,14 @@ export default function SimulatorControls({ className = "" }: SimulatorControlsP
     <div className={`${className} space-y-4`}>
       {/* Real-time Simulation Status - Prominent Display */}
       {simulationData && (
-        <Card className="border-l-4 border-l-cone-red bg-gradient-to-r from-red-50 to-white">
-          <CardHeader className="pb-2">
+        <Card className="border-l-4 border-l-cone-red bg-white shadow-lg">
+          <CardHeader className="pb-2 bg-gray-900 text-white rounded-t-md">
             <CardTitle className="flex items-center justify-between text-lg">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="font-bold text-gray-900">Live EAF Simulation</span>
+                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="font-bold text-white">Live EAF Simulation</span>
               </div>
-              <Badge className="bg-green-500 text-white font-bold">
+              <Badge className="bg-cone-red text-white font-bold text-sm px-3 py-1">
                 {simulationData.stage}
               </Badge>
             </CardTitle>
@@ -153,37 +153,37 @@ export default function SimulatorControls({ className = "" }: SimulatorControlsP
           <CardContent className="space-y-4">
             {/* Key Metrics Row */}
             <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-3 bg-white rounded border">
-                <div className="flex items-center justify-center gap-1 mb-1">
-                  <Thermometer className="w-4 h-4 text-red-500" />
-                  <span className="text-xs font-medium text-gray-600">TEMP</span>
+              <div className="text-center p-4 bg-gray-900 text-white rounded border-2 border-gray-300">
+                <div className="flex items-center justify-center gap-1 mb-2">
+                  <Thermometer className="w-5 h-5 text-red-400" />
+                  <span className="text-sm font-bold text-white">TEMP</span>
                 </div>
-                <div className="text-lg font-bold text-gray-900">{Math.round(simulationData.tempC)}°C</div>
+                <div className="text-2xl font-black text-white">{Math.round(simulationData.tempC)}°C</div>
               </div>
-              <div className="text-center p-3 bg-white rounded border">
-                <div className="flex items-center justify-center gap-1 mb-1">
-                  <Zap className="w-4 h-4 text-yellow-500" />
-                  <span className="text-xs font-medium text-gray-600">ENERGY</span>
+              <div className="text-center p-4 bg-gray-900 text-white rounded border-2 border-gray-300">
+                <div className="flex items-center justify-center gap-1 mb-2">
+                  <Zap className="w-5 h-5 text-yellow-400" />
+                  <span className="text-sm font-bold text-white">ENERGY</span>
                 </div>
-                <div className="text-lg font-bold text-gray-900">{simulationData.kwhPerT.toFixed(1)} kWh/t</div>
+                <div className="text-2xl font-black text-white">{simulationData.kwhPerT.toFixed(1)} kWh/t</div>
               </div>
-              <div className="text-center p-3 bg-white rounded border">
-                <div className="flex items-center justify-center gap-1 mb-1">
-                  <Clock className="w-4 h-4 text-blue-500" />
-                  <span className="text-xs font-medium text-gray-600">TIME</span>
+              <div className="text-center p-4 bg-gray-900 text-white rounded border-2 border-gray-300">
+                <div className="flex items-center justify-center gap-1 mb-2">
+                  <Clock className="w-5 h-5 text-blue-400" />
+                  <span className="text-sm font-bold text-white">TIME</span>
                 </div>
-                <div className="text-lg font-bold text-gray-900">{formatTime(status?.time || 0)}</div>
+                <div className="text-2xl font-black text-white">{formatTime(status?.time || 0)}</div>
               </div>
             </div>
             
             {/* Stage Progress */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="font-medium text-gray-700">Stage: {simulationData.stage}</span>
-                <span className="text-gray-600">{getStageProgress(simulationData.stage, status?.time || 0).toFixed(0)}%</span>
+            <div className="space-y-3 p-4 bg-gray-100 rounded-lg border-2">
+              <div className="flex justify-between text-base">
+                <span className="font-black text-gray-900">Stage: {simulationData.stage}</span>
+                <span className="font-bold text-gray-900">{getStageProgress(simulationData.stage, status?.time || 0).toFixed(0)}%</span>
               </div>
-              <Progress value={getStageProgress(simulationData.stage, status?.time || 0)} className="h-2" />
-              <div className="flex justify-between text-xs text-gray-500">
+              <Progress value={getStageProgress(simulationData.stage, status?.time || 0)} className="h-4 bg-gray-300" />
+              <div className="flex justify-between text-sm font-bold text-gray-800">
                 <span>BOR</span>
                 <span>MELT</span>
                 <span>REFINE</span>
@@ -193,14 +193,14 @@ export default function SimulatorControls({ className = "" }: SimulatorControlsP
 
             {/* Chemistry Updates */}
             {simulationData.cPct !== undefined && (
-              <div className="grid grid-cols-2 gap-3 p-3 bg-gray-50 rounded">
+              <div className="grid grid-cols-2 gap-3 p-4 bg-gray-900 text-white rounded-lg border-2">
                 <div className="text-center">
-                  <div className="text-xs text-gray-600">Carbon %</div>
-                  <div className="font-bold text-gray-900">{(simulationData.cPct * 100).toFixed(3)}%</div>
+                  <div className="text-sm font-bold text-gray-300">Carbon %</div>
+                  <div className="text-xl font-black text-white">{(simulationData.cPct * 100).toFixed(3)}%</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xs text-gray-600">Oxygen ppm</div>
-                  <div className="font-bold text-gray-900">{(simulationData.oPct! * 10000).toFixed(0)} ppm</div>
+                  <div className="text-sm font-bold text-gray-300">Oxygen ppm</div>
+                  <div className="text-xl font-black text-white">{(simulationData.oPct! * 10000).toFixed(0)} ppm</div>
                 </div>
               </div>
             )}
@@ -209,22 +209,22 @@ export default function SimulatorControls({ className = "" }: SimulatorControlsP
       )}
 
       {/* Simulator Controls - Compact */}
-      <Card className="border-2 border-gray-300">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center justify-between text-base">
+      <Card className="border-2 border-gray-400 shadow-md">
+        <CardHeader className="pb-3 bg-gray-50">
+          <CardTitle className="flex items-center justify-between text-lg">
             <div className="flex items-center gap-2">
-              <Settings className="w-5 h-5 text-cone-red" />
-              <span className="font-bold text-gray-900">Simulator Controls</span>
+              <Settings className="w-6 h-6 text-cone-red" />
+              <span className="font-black text-gray-900">Simulator Controls</span>
             </div>
-            <Badge variant={isRunning ? "default" : "outline"} className={isRunning ? "bg-green-500" : ""}>
-              {isRunning ? "Live" : "Ready"}
+            <Badge variant={isRunning ? "default" : "outline"} className={isRunning ? "bg-green-600 text-white font-bold" : "bg-gray-200 text-gray-800 font-bold"}>
+              {isRunning ? "LIVE" : "READY"}
             </Badge>
           </CardTitle>
         </CardHeader>
       <CardContent className="space-y-4">
         {/* Seed Configuration */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
+        <div className="space-y-3">
+          <label className="text-base font-black text-gray-900">
             Simulation Seed (Deterministic)
           </label>
           <div className="flex gap-2">
@@ -233,7 +233,7 @@ export default function SimulatorControls({ className = "" }: SimulatorControlsP
               value={seed}
               onChange={(e) => setSeed(e.target.value)}
               placeholder="42"
-              className="flex-1 text-sm"
+              className="flex-1 text-base font-bold border-2 border-gray-300"
               disabled={isRunning}
             />
             <Button
@@ -241,41 +241,41 @@ export default function SimulatorControls({ className = "" }: SimulatorControlsP
               size="sm"
               onClick={resetSeed}
               disabled={isRunning}
-              className="px-3"
+              className="px-4 border-2 border-gray-400 font-bold"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="w-5 h-5" />
             </Button>
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-sm font-medium text-gray-700">
             Same seed = same heat progression. Use different seeds for variation.
           </p>
         </div>
 
         {/* Control Buttons */}
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <Button
             onClick={startSimulation}
             disabled={isRunning || isLoading}
-            className="flex-1 bg-cone-red hover:bg-cone-red/90 text-white"
+            className="flex-1 bg-cone-red hover:bg-cone-red/90 text-white font-black text-base py-3 border-2 border-cone-red"
           >
-            <Play className="w-4 h-4 mr-2" />
-            Start Physics Sim
+            <Play className="w-5 h-5 mr-2" />
+            START PHYSICS SIM
           </Button>
           <Button
             onClick={stopSimulation}
             disabled={!isRunning || isLoading}
             variant="outline"
-            className="flex-1"
+            className="flex-1 font-black text-base py-3 border-2 border-gray-600 text-gray-900 hover:bg-gray-100"
           >
-            <Square className="w-4 h-4 mr-2" />
-            Stop
+            <Square className="w-5 h-5 mr-2" />
+            STOP
           </Button>
         </div>
 
         {/* Quick Status */}
         {!simulationData && status && (
-          <div className="p-2 bg-gray-50 rounded text-xs text-gray-600">
-            {status.running ? `Running: ${status.stage} stage` : "No simulation active"}
+          <div className="p-3 bg-gray-900 text-white rounded-lg border-2 text-base font-bold">
+            {status.running ? `RUNNING: ${status.stage} STAGE` : "NO SIMULATION ACTIVE"}
           </div>
         )}
       </CardContent>

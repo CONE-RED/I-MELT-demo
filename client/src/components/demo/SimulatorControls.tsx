@@ -208,23 +208,23 @@ export default function SimulatorControls({ className = "" }: SimulatorControlsP
         </Card>
       )}
 
-      {/* Simulator Controls - Compact */}
-      <Card className="border-2 border-gray-400 shadow-md">
-        <CardHeader className="pb-3 bg-gray-50">
+      {/* Simulator Controls - High Contrast */}
+      <Card className="border-2 border-gray-400 shadow-md bg-gray-900">
+        <CardHeader className="pb-3 bg-gray-800">
           <CardTitle className="flex items-center justify-between text-lg">
             <div className="flex items-center gap-2">
               <Settings className="w-6 h-6 text-cone-red" />
-              <span className="font-black text-gray-900">Simulator Controls</span>
+              <span className="font-black text-white">Simulator Controls</span>
             </div>
             <Badge variant={isRunning ? "default" : "outline"} className={isRunning ? "bg-green-600 text-white font-bold" : "bg-gray-200 text-gray-800 font-bold"}>
               {isRunning ? "LIVE" : "READY"}
             </Badge>
           </CardTitle>
         </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 bg-gray-900">
         {/* Seed Configuration */}
         <div className="space-y-3">
-          <label className="text-base font-black text-gray-900">
+          <label className="text-base font-black text-white">
             Simulation Seed (Deterministic)
           </label>
           <div className="flex gap-2">
@@ -246,7 +246,7 @@ export default function SimulatorControls({ className = "" }: SimulatorControlsP
               <RotateCcw className="w-5 h-5" />
             </Button>
           </div>
-          <p className="text-sm font-medium text-gray-700">
+          <p className="text-sm font-bold text-white">
             Same seed = same heat progression. Use different seeds for variation.
           </p>
         </div>

@@ -166,6 +166,11 @@ export default function Dashboard() {
             />
           </ErrorBoundary>
         </div>
+        
+        {/* Physics Simulator - Top Position Next to Heat Header */}
+        <div className={cn(isMobile ? "col-span-1" : "col-span-3 row-span-2")}>
+          <SimulatorControls />
+        </div>
       
       {/* [B] Charge Buckets Matrix (6×4) */}
       <div className={cn(isMobile ? "col-span-1" : "col-span-6 row-span-4")}>
@@ -201,10 +206,7 @@ export default function Dashboard() {
         <PerformanceMetrics metrics={performanceMetrics} />
       </div>
       
-      {/* Physics Simulator - Prominent Position */}
-      <div className={cn(isMobile ? "col-span-1" : "col-span-6")}>
-        <SimulatorControls />
-      </div>
+
       
       {/* AI Chat Widget - Now Floating */}
       <AIChatWidget heatData={heat} />

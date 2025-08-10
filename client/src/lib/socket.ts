@@ -45,6 +45,12 @@ export function setupWebSocket(heatId?: number): WebSocket {
         case 'model_update':
           store.dispatch({ type: 'UPDATE_MODEL_STATUS', payload: message.payload });
           break;
+        
+        case 'simulation_tick':
+          console.log('Simulation tick received:', message.payload);
+          // Handle real-time physics simulation data
+          store.dispatch({ type: 'UPDATE_SIMULATION_DATA', payload: message.payload });
+          break;
         case 'available_heats':
           // Handle available heats list - could be used for heat selector
           console.log('Available heats:', message.payload);

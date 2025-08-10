@@ -57,9 +57,25 @@ export interface Insight {
   actionable: boolean;
 }
 
+// Simulation data types
+export interface SimulationTick {
+  ts: number;
+  stage: "BOR" | "MELT" | "REFINE" | "TAP";
+  tempC: number;
+  kwhTotal: number;
+  kwhPerT: number;
+  pf: number;
+  tap: number;
+  thd: number;
+  foamIdx: number;
+  cPct?: number;
+  oPct?: number;
+  note?: string;
+}
+
 // WebSocket message types
 export interface WebSocketMessage {
-  type: 'heat_data' | 'insight' | 'model_update' | 'available_heats' | 'error';
+  type: 'heat_data' | 'insight' | 'model_update' | 'available_heats' | 'error' | 'simulation_tick';
   payload: any;
 }
 
@@ -73,6 +89,7 @@ export interface AppState {
   wsConnected: boolean;
   selectedTab: 'insights' | 'explain' | 'chat';
   chemViewMode: 'absolute' | 'delta';
+  simulationData: SimulationTick | null;
   chemActiveView: 'steel' | 'slag';
 }
 

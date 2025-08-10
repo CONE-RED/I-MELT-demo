@@ -126,7 +126,8 @@ const initialState: AppState = {
   wsConnected: false,
   selectedTab: 'insights',
   chemViewMode: 'absolute',
-  chemActiveView: 'steel'
+  chemActiveView: 'steel',
+  simulationData: null
 };
 
 // Reducer
@@ -225,6 +226,12 @@ function reducer(state: AppState = initialState, action: AppAction): AppState {
         },
         selectedTab: 'insights' as const,
         error: null
+      };
+      
+    case 'UPDATE_SIMULATION_DATA':
+      return {
+        ...state,
+        simulationData: action.payload
       };
       
     default:

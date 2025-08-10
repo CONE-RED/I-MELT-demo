@@ -133,12 +133,111 @@ const mockHeatData = {
   ]
 };
 
-// Create different heat data variants
+// Create completely different heat data variants
 const heatVariants = new Map([
   [93378, mockHeatData],
-  [93379, { ...mockHeatData, heat: 93379, grade: "10G2B4", master: "Kozlov", operator: "Sidorov", confidence: 92 }],
-  [93380, { ...mockHeatData, heat: 93380, grade: "S235JR", master: "Volkov", operator: "Morozov", confidence: 78 }],
-  [93381, { ...mockHeatData, heat: 93381, grade: "42CrMo4", master: "Petrov", operator: "Ivanov", confidence: 96 }]
+  [93379, {
+    ...mockHeatData,
+    heat: 93379,
+    ts: "2019-01-13 05:30:22",
+    grade: "10G2B4", 
+    master: "Kozlov", 
+    operator: "Sidorov", 
+    confidence: 92,
+    buckets: [
+      {
+        id: 1,
+        materials: [
+          { name: "Scrap Heavy", weight: 78.2, percentage: 76.5 },
+          { name: "DRI Pellets", weight: 18.4, percentage: 18.0 },
+          { name: "Cast Iron", weight: 5.6, percentage: 5.5 }
+        ],
+        totalWeight: 102.2
+      }
+    ],
+    chemSteel: {
+      "C": 0.105,
+      "Mn": 0.380,
+      "Si": 0.025,
+      "P": 0.008,
+      "S": 0.015,
+      "Cr": 0.080,
+      "Cu": 0.145,
+      "Ni": 0.095,
+      "V": 0.0,
+      "Mo": 0.018,
+      "N2": 0.0,
+      "Sn": 0.0
+    }
+  }],
+  [93380, {
+    ...mockHeatData,
+    heat: 93380,
+    ts: "2019-01-13 08:15:45",
+    grade: "S235JR",
+    master: "Volkov",
+    operator: "Morozov", 
+    confidence: 78,
+    buckets: [
+      {
+        id: 1,
+        materials: [
+          { name: "Scrap Mix", weight: 85.6, percentage: 84.2 },
+          { name: "Hot Metal", weight: 12.8, percentage: 12.6 },
+          { name: "Coke", weight: 3.2, percentage: 3.2 }
+        ],
+        totalWeight: 101.6
+      }
+    ],
+    chemSteel: {
+      "C": 0.067,
+      "Mn": 0.185,
+      "Si": 0.012,
+      "P": 0.012,
+      "S": 0.032,
+      "Cr": 0.045,
+      "Cu": 0.205,
+      "Ni": 0.078,
+      "V": 0.0,
+      "Mo": 0.008,
+      "N2": 0.0,
+      "Sn": 0.0
+    }
+  }],
+  [93381, {
+    ...mockHeatData,
+    heat: 93381,
+    ts: "2019-01-13 11:42:18",
+    grade: "42CrMo4",
+    master: "Petrov",
+    operator: "Ivanov",
+    confidence: 96,
+    buckets: [
+      {
+        id: 1,
+        materials: [
+          { name: "Scrap Premium", weight: 45.2, percentage: 44.8 },
+          { name: "Pig Iron Low P", weight: 48.7, percentage: 48.3 },
+          { name: "FeCr LC", weight: 4.9, percentage: 4.9 },
+          { name: "FeMo", weight: 2.0, percentage: 2.0 }
+        ],
+        totalWeight: 100.8
+      }
+    ],
+    chemSteel: {
+      "C": 0.420,
+      "Mn": 0.750,
+      "Si": 0.285,
+      "P": 0.006,
+      "S": 0.008,
+      "Cr": 1.150,
+      "Mo": 0.245,
+      "Ni": 0.089,
+      "V": 0.0,
+      "N2": 0.0,
+      "Sn": 0.0
+    }
+  }]
 ]);
 
 // Get heat data by number

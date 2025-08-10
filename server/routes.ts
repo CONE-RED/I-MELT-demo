@@ -15,7 +15,7 @@ const mockHeatData = {
   grade: "13KhFA/9",
   master: "Ivanov",
   operator: "Petrov",
-  modelStatus: "idle",
+  modelStatus: "idle" as const,
   confidence: 85,
   buckets: [
     {
@@ -73,10 +73,10 @@ const mockHeatData = {
     "Cr": 0.100,
     "Cu": 0.190,
     "Ni": 0.120,
-    "V": null,
+    "V": 0.0,
     "Mo": 0.027,
-    "N2": null,
-    "Sn": null
+    "N2": 0.0,
+    "Sn": 0.0
   },
   chemSlag: {
     "CaO": 0.090,
@@ -87,15 +87,15 @@ const mockHeatData = {
     "MnO": 0.100,
     "MgO": 0.190,
     "Al2O3": 0.120,
-    "S": null,
+    "S": 0.0,
     "Mo": 0.027,
-    "N2": null,
-    "Basicity": null
+    "N2": 0.0,
+    "Basicity": 2.4
   },
   insights: [
     {
       id: "ins-01",
-      type: "critical",
+      type: "critical" as const,
       title: "Critical Action Required",
       message: "Increase carbon addition by 0.42t in next 5 minutes to avoid composition drift. Current trajectory shows 0.19% below target.",
       timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
@@ -104,7 +104,7 @@ const mockHeatData = {
     },
     {
       id: "ins-02",
-      type: "optimization",
+      type: "optimization" as const,
       title: "Stage 15 Optimization",
       message: "Reducing power during phase 15 by 8% would save 4.2kWh without affecting quality based on current composition trajectory.",
       timestamp: new Date(Date.now() - 12 * 60000).toISOString(),
@@ -113,7 +113,7 @@ const mockHeatData = {
     },
     {
       id: "ins-03",
-      type: "trend",
+      type: "trend" as const,
       title: "Trend Analysis",
       message: "Slag basicity approaching optimal range. Current CaO/SiO₂ ratio is trending toward 2.4 which matches target grade requirements.",
       timestamp: new Date(Date.now() - 19 * 60000).toISOString(),
@@ -122,7 +122,7 @@ const mockHeatData = {
     },
     {
       id: "ins-04",
-      type: "historical",
+      type: "historical" as const,
       title: "Historical Pattern",
       message: "Your last 3 heats of 13KhFA/9 grade have shown consistent S values (0.028-0.030%). Current trajectory is within optimal parameters.",
       timestamp: new Date(Date.now() - 25 * 60000).toISOString(),

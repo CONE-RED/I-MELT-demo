@@ -31,10 +31,9 @@ export default function TopBar() {
     // Fetch new heat data when switching heats
     try {
       const response = await fetch(`/api/heat/${heat}`);
-      const result = await response.json();
-      if (result.ok) {
-        dispatch({ type: 'SET_HEAT_DATA', payload: result.data });
-      }
+      const heatData = await response.json();
+      dispatch({ type: 'SET_HEAT_DATA', payload: heatData });
+      console.log(`Switched to heat ${heat}: ${heatData.grade} (${heatData.master}/${heatData.operator})`);
     } catch (error) {
       console.error('Failed to fetch heat data:', error);
     }

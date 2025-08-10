@@ -133,116 +133,86 @@ const mockHeatData = {
   ]
 };
 
-// Create completely different heat data variants
+// Create completely different heat datasets including realistic historical data
+function createHeatData(heat: number, grade: string, master: string, operator: string, 
+                       confidence: number, timestamp: string, isPastHeat: boolean = false) {
+  
+  // Base materials vary by steel grade
+  const materialsByGrade = {
+    "13KhFA/9": [
+      { name: "Scrap 3AZhD", weight: 9.7, percentage: 9.6 },
+      { name: "Scrap 25A", weight: 5.8, percentage: 5.7 },
+      { name: "Scrap 3AN", weight: 76.1, percentage: 75.1 },
+      { name: "Turnings 15A", weight: 4.2, percentage: 4.1 },
+      { name: "Anthracite", weight: 0.8, percentage: 0.8 },
+      { name: "HBI (briquetted DRI)", weight: 4.7, percentage: 4.6 }
+    ],
+    "10G2B4": [
+      { name: "Scrap Heavy", weight: 78.2, percentage: 76.5 },
+      { name: "DRI Pellets", weight: 18.4, percentage: 18.0 },
+      { name: "Cast Iron", weight: 5.6, percentage: 5.5 }
+    ],
+    "S235JR": [
+      { name: "Scrap Mix", weight: 85.6, percentage: 84.2 },
+      { name: "Hot Metal", weight: 12.8, percentage: 12.6 },
+      { name: "Coke", weight: 3.2, percentage: 3.2 }
+    ],
+    "42CrMo4": [
+      { name: "Scrap Premium", weight: 45.2, percentage: 44.8 },
+      { name: "Pig Iron Low P", weight: 48.7, percentage: 48.3 },
+      { name: "FeCr LC", weight: 4.9, percentage: 4.9 },
+      { name: "FeMo", weight: 2.0, percentage: 2.0 }
+    ]
+  };
+
+  // Chemistry by grade
+  const chemistryByGrade = {
+    "13KhFA/9": { "C": 0.090, "Mn": 0.140, "Si": 0.000, "P": 0.004, "S": 0.029, "Cr": 0.100, "Cu": 0.190, "Ni": 0.120, "V": 0.0, "Mo": 0.027, "N2": 0.0, "Sn": 0.0 },
+    "10G2B4": { "C": 0.105, "Mn": 0.380, "Si": 0.025, "P": 0.008, "S": 0.015, "Cr": 0.080, "Cu": 0.145, "Ni": 0.095, "V": 0.0, "Mo": 0.018, "N2": 0.0, "Sn": 0.0 },
+    "S235JR": { "C": 0.067, "Mn": 0.185, "Si": 0.012, "P": 0.012, "S": 0.032, "Cr": 0.045, "Cu": 0.205, "Ni": 0.078, "V": 0.0, "Mo": 0.008, "N2": 0.0, "Sn": 0.0 },
+    "42CrMo4": { "C": 0.420, "Mn": 0.750, "Si": 0.285, "P": 0.006, "S": 0.008, "Cr": 1.150, "Mo": 0.245, "Ni": 0.089, "V": 0.0, "N2": 0.0, "Sn": 0.0 }
+  };
+
+  // Stage progression for past vs current heats
+  const stageStatus = isPastHeat ? 
+    mockHeatData.stages.map(stage => ({ ...stage, status: 'done' as const, actualTime: stage.plannedTime, actualEnergy: stage.plannedEnergy })) :
+    mockHeatData.stages;
+
+  const materials = materialsByGrade[grade as keyof typeof materialsByGrade] || materialsByGrade["13KhFA/9"];
+  const chemistry = chemistryByGrade[grade as keyof typeof chemistryByGrade] || chemistryByGrade["13KhFA/9"];
+
+  return {
+    ...mockHeatData,
+    heat,
+    ts: timestamp,
+    grade,
+    master,
+    operator,
+    confidence,
+    modelStatus: isPastHeat ? 'idle' as const : mockHeatData.modelStatus,
+    buckets: [{
+      id: 1,
+      materials,
+      totalWeight: materials.reduce((sum, m) => sum + m.weight, 0)
+    }],
+    stages: stageStatus,
+    chemSteel: chemistry
+  };
+}
+
+// Create heat variants with realistic industrial data
 const heatVariants = new Map([
-  [93378, mockHeatData],
-  [93379, {
-    ...mockHeatData,
-    heat: 93379,
-    ts: "2019-01-13 05:30:22",
-    grade: "10G2B4", 
-    master: "Kozlov", 
-    operator: "Sidorov", 
-    confidence: 92,
-    buckets: [
-      {
-        id: 1,
-        materials: [
-          { name: "Scrap Heavy", weight: 78.2, percentage: 76.5 },
-          { name: "DRI Pellets", weight: 18.4, percentage: 18.0 },
-          { name: "Cast Iron", weight: 5.6, percentage: 5.5 }
-        ],
-        totalWeight: 102.2
-      }
-    ],
-    chemSteel: {
-      "C": 0.105,
-      "Mn": 0.380,
-      "Si": 0.025,
-      "P": 0.008,
-      "S": 0.015,
-      "Cr": 0.080,
-      "Cu": 0.145,
-      "Ni": 0.095,
-      "V": 0.0,
-      "Mo": 0.018,
-      "N2": 0.0,
-      "Sn": 0.0
-    }
-  }],
-  [93380, {
-    ...mockHeatData,
-    heat: 93380,
-    ts: "2019-01-13 08:15:45",
-    grade: "S235JR",
-    master: "Volkov",
-    operator: "Morozov", 
-    confidence: 78,
-    buckets: [
-      {
-        id: 1,
-        materials: [
-          { name: "Scrap Mix", weight: 85.6, percentage: 84.2 },
-          { name: "Hot Metal", weight: 12.8, percentage: 12.6 },
-          { name: "Coke", weight: 3.2, percentage: 3.2 }
-        ],
-        totalWeight: 101.6
-      }
-    ],
-    chemSteel: {
-      "C": 0.067,
-      "Mn": 0.185,
-      "Si": 0.012,
-      "P": 0.012,
-      "S": 0.032,
-      "Cr": 0.045,
-      "Cu": 0.205,
-      "Ni": 0.078,
-      "V": 0.0,
-      "Mo": 0.008,
-      "N2": 0.0,
-      "Sn": 0.0
-    }
-  }],
-  [93381, {
-    ...mockHeatData,
-    heat: 93381,
-    ts: "2019-01-13 11:42:18",
-    grade: "42CrMo4",
-    master: "Petrov",
-    operator: "Ivanov",
-    confidence: 96,
-    buckets: [
-      {
-        id: 1,
-        materials: [
-          { name: "Scrap Premium", weight: 45.2, percentage: 44.8 },
-          { name: "Pig Iron Low P", weight: 48.7, percentage: 48.3 },
-          { name: "FeCr LC", weight: 4.9, percentage: 4.9 },
-          { name: "FeMo", weight: 2.0, percentage: 2.0 }
-        ],
-        totalWeight: 100.8
-      }
-    ],
-    chemSteel: {
-      "C": 0.420,
-      "Mn": 0.750,
-      "Si": 0.285,
-      "P": 0.006,
-      "S": 0.008,
-      "Cr": 1.150,
-      "Mo": 0.245,
-      "Ni": 0.089,
-      "V": 0.0,
-      "N2": 0.0,
-      "Sn": 0.0
-    }
-  }]
+  [93378, mockHeatData], // Current heat (live)
+  [93379, createHeatData(93379, "10G2B4", "Kozlov", "Sidorov", 92, "2019-01-13 05:30:22", false)], // Current heat (different grade)
+  [93380, createHeatData(93380, "S235JR", "Volkov", "Morozov", 78, "2019-01-13 08:15:45", true)], // Past completed heat
+  [93381, createHeatData(93381, "42CrMo4", "Petrov", "Ivanov", 96, "2019-01-13 11:42:18", true)] // Past completed heat
 ]);
 
 // Get heat data by number
 const getHeatData = (heatNumber: number) => {
-  return heatVariants.get(heatNumber) || mockHeatData;
+  const data = heatVariants.get(heatNumber);
+  console.log(`Heat ${heatNumber} requested - Found: ${!!data}, Grade: ${data?.grade}, Master: ${data?.master}`);
+  return data || mockHeatData;
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -431,13 +401,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Fix: Add both singular and plural endpoints for compatibility
   app.get('/api/heat/:id', async (req, res) => {
     const heatId = parseInt(req.params.id);
-    res.json({ ...mockHeatData, heat: heatId });
+    const heatData = getHeatData(heatId);
+    res.json(heatData); // Direct response format for compatibility
   });
   
-  app.get('/api/heats/:id', async (req, res) => {
-    const heatId = parseInt(req.params.id);
-    res.json({ ...mockHeatData, heat: heatId });
-  });
+  // Removed duplicate endpoint - using /api/heat/:id instead
 
   // AI Chat API endpoint  
   app.post('/api/ai/chat', async (req, res) => {
@@ -538,6 +506,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Deterministic Heat Simulator endpoints for physics-based demo
   app.get('/api/demo/start', (req, res) => {
     const seed = Number(req.query.seed ?? 42);
+    const heatId = Number(req.query.heatId ?? 93378); // Allow simulator to target specific heat
     const clientId = req.ip || 'default';
     
     // Stop existing simulation if any
@@ -555,7 +524,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tick = sim.tick();
       
       // Get current heat data and update with simulation values  
-      const currentHeatData = getHeatData(heatId) || mockHeatData;
+      const currentHeatData = getHeatData(heatId);
       const updatedHeatData = {
         ...currentHeatData,
         ts: new Date(tick.ts).toISOString().slice(0, 19).replace('T', ' '),

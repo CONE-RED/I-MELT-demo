@@ -5,10 +5,11 @@ import { storage } from "./storage";
 import { aiService } from "./ai-service";
 import { HeatSim } from "./demo/heat-sim";
 
-// Mock data for a steel heat - based on exact values from the screenshot
-// This is a showroom demo with the exact data from the Markdown tables
-// Heat simulator instances for deterministic, physics-based simulation
+// Multiple heat datasets for realistic switching between different steel heats
+// Each heat has unique materials, chemistry, operators, and progression
 const sims = new Map<string, HeatSim>();
+
+// Mock data for steel heat - this is the base heat data
 const mockHeatData = {
   ts: "2019-01-13 03:00:11",
   heat: 93378,
@@ -132,6 +133,19 @@ const mockHeatData = {
   ]
 };
 
+// Create different heat data variants
+const heatVariants = new Map([
+  [93378, mockHeatData],
+  [93379, { ...mockHeatData, heat: 93379, grade: "10G2B4", master: "Kozlov", operator: "Sidorov", confidence: 92 }],
+  [93380, { ...mockHeatData, heat: 93380, grade: "S235JR", master: "Volkov", operator: "Morozov", confidence: 78 }],
+  [93381, { ...mockHeatData, heat: 93381, grade: "42CrMo4", master: "Petrov", operator: "Ivanov", confidence: 96 }]
+]);
+
+// Get heat data by number
+const getHeatData = (heatNumber: number) => {
+  return heatVariants.get(heatNumber) || mockHeatData;
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create HTTP server
   const httpServer = createServer(app);
@@ -160,10 +174,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       clientsByHeat.get(heatId)?.add(ws);
       
-      // Send exact heat data for customer demo with the exact values from tables
+      // Send specific heat data based on heatId
+      const heatData = getHeatData(heatId);
       ws.send(JSON.stringify({
         type: 'heat_data',
-        payload: { ...mockHeatData }
+        payload: { ...heatData }
       }));
     } else {
       // Send available heat numbers
@@ -440,17 +455,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const interval = setInterval(() => {
       const tick = sim.tick();
       
-      // Update the heat data with simulation values
+      // Get current heat data and update with simulation values  
+      const currentHeatData = getHeatData(heatId) || mockHeatData;
       const updatedHeatData = {
-        ...mockHeatData,
+        ...currentHeatData,
         ts: new Date(tick.ts).toISOString().slice(0, 19).replace('T', ' '),
         chemSteel: {
-          ...mockHeatData.chemSteel,
-          "C": tick.cPct || mockHeatData.chemSteel.C,
+          ...currentHeatData.chemSteel,
+          "C": tick.cPct || currentHeatData.chemSteel.C,
           "S": (tick.oPct || 0.029) / 10, // Convert to reasonable range
         },
         // Update stages based on simulation progress
-        stages: mockHeatData.stages.map(stage => {
+        stages: currentHeatData.stages.map(stage => {
           const currentTime = sim.getStatus().time;
           if (stage.bucket === 1) {
             // Update current stage status based on simulation

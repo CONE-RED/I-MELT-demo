@@ -24,9 +24,20 @@ export default function TopBar() {
     dispatch({ type: 'SET_LANGUAGE', payload: language === 'en' ? 'ru' : 'en' });
   };
   
-  const selectHeat = (heat: number) => {
+  const selectHeat = async (heat: number) => {
     dispatch({ type: 'SET_HEAT_NUMBER', payload: heat });
     setOpenHeatSelector(false);
+    
+    // Fetch new heat data when switching heats
+    try {
+      const response = await fetch(`/api/heat/${heat}`);
+      const result = await response.json();
+      if (result.ok) {
+        dispatch({ type: 'SET_HEAT_DATA', payload: result.data });
+      }
+    } catch (error) {
+      console.error('Failed to fetch heat data:', error);
+    }
   };
   
   // Mock heat numbers - in a real app this would come from an API

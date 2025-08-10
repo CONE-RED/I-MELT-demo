@@ -27,10 +27,10 @@ export default function Home() {
 
   // Watch for heat number changes to subscribe to specific heat data
   useEffect(() => {
-    if (heatNumber && wsConnected) {
+    if (heatNumber) {
       setupWebSocket(heatNumber);
     }
-  }, [heatNumber, wsConnected]);
+  }, [heatNumber]);
   
   // Show toast for errors
   useEffect(() => {

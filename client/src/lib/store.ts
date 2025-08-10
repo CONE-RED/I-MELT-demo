@@ -143,6 +143,12 @@ function reducer(state: AppState = initialState, action: AppAction): AppState {
         ...state,
         heatNumber: action.payload
       };
+    case 'SET_HEAT_DATA':
+      return {
+        ...state,
+        heat: action.payload,
+        heatNumber: action.payload.heat
+      };
     case 'SET_LOADING':
       return {
         ...state,

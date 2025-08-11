@@ -1,38 +1,26 @@
 import { describe, test, expect } from '@jest/globals';
+import { HeatSim } from '../../server/demo/heat-sim';
 
-// Test the HeatSim deterministic physics simulation
-describe('HeatSim Physics Simulation', () => {
-  test('should produce deterministic results with seed', () => {
-    // Mock the HeatSim class for testing
-    const mockHeatSim = {
-      tick: () => ({
-        ts: Date.now(),
-        stage: 'MELT',
-        tempC: 1670,
-        kwhTotal: 8.5,
-        kwhPerT: 0.1,
-        pf: 0.85,
-        tap: 9,
-        thd: 6.2,
-        foamIdx: 0.95,
-        cPct: 0.12,
-        oPct: 0.025
-      }),
-      getStatus: () => ({ time: 120, running: true })
-    };
-
-    const tick1 = mockHeatSim.tick();
-    const tick2 = mockHeatSim.tick();
-    
-    expect(tick1.stage).toBe('MELT');
-    expect(tick1.tempC).toBe(1670);
-    expect(tick2.stage).toBe('MELT');
-    expect(typeof tick1.kwhTotal).toBe('number');
+describe('HeatSim determinism & scenarios', () => {
+  test('same seed yields same sequence', () => {
+    const s1 = new HeatSim(42), s2 = new HeatSim(42);
+    const seq1 = Array.from({length: 10}, () => s1.tick().tempC);
+    const seq2 = Array.from({length: 10}, () => s2.tick().tempC);
+    expect(seq1).toEqual(seq2);
   });
 
-  test('should handle simulation state transitions', () => {
-    const mockStatus = { time: 120, running: true };
-    expect(mockStatus.running).toBe(true);
-    expect(mockStatus.time).toBeGreaterThan(0);
+  test('scenario injection & recovery', () => {
+    const sim = new HeatSim(42);
+    for (let i=0;i<420;i++) sim.tick(); // advance to ~7min
+    sim.injectScenario({
+      id: 'energy-spike',
+      injectAtSec: 0,
+      delta: { pf: -0.08, thd: +1.5, foamIdx: -0.2, note: 'Injected' }
+    });
+    const before = sim.tick();
+    expect(before.pf).toBeLessThan(0.82);
+    sim.applyRecovery();
+    const after = sim.tick();
+    expect(after.pf).toBeGreaterThan(before.pf); // back toward nominal
   });
 });

@@ -4,6 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { aiService } from "./ai-service";
 import { HeatSim, ScenarioInjection } from "./demo/heat-sim";
+import { insightFor } from "./ai/insight-static";
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -405,6 +406,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const heatId = parseInt(req.params.id);
     const heatData = getHeatData(heatId);
     res.json(heatData); // Direct response format for compatibility
+  });
+  
+  // AI Insights endpoint - deterministic by default
+  app.get('/api/insights/:heatId', (req, res) => {
+    try {
+      const { heatId } = req.params;
+      const clientId = req.ip || 'default';
+      const sim = sims.get(clientId);
+      
+      if (!sim) {
+        return res.status(400).json({ error: 'No active simulation for insights.' });
+      }
+      
+      // Get current simulation state
+      const currentTick = sim.getCurrentState();
+      
+      if (!currentTick) {
+        return res.status(404).json({ error: 'No simulation data available.' });
+      }
+      
+      // Generate deterministic insight
+      const insight = insightFor(currentTick);
+      
+      res.json({
+        heatId: parseInt(heatId),
+        timestamp: Date.now(),
+        mode: 'deterministic',
+        insight,
+        simulationState: {
+          stage: currentTick.stage,
+          tempC: Math.round(currentTick.tempC),
+          kwhPerT: (currentTick.kwhPerT * 1000).toFixed(1),
+          pf: currentTick.pf.toFixed(2),
+          foamIdx: (currentTick.foamIdx * 100).toFixed(0)
+        }
+      });
+      
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: `Failed to generate insights: ${error.message}` 
+      });
+    }
   });
   
   // Removed duplicate endpoint - using /api/heat/:id instead

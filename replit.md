@@ -40,6 +40,7 @@ Preferred communication style: Simple, everyday language.
 - **Type Safety**: Shared TypeScript interfaces between client and server
 - **Data Flow**: Redux actions triggered by WebSocket events
 - **AI Integration**: OpenRouter API with fallback responses for steel production insights and recommendations
+- **Deterministic Insights**: Physics simulation state mapped to instant AI insights (LLM-off by default)
 
 ### Development Workflow
 - **Build Process**: Separate client and server builds with shared type definitions

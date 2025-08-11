@@ -139,6 +139,13 @@ export class HeatSim extends EventEmitter {
       totalKwh: this.kwh
     };
   }
+
+  getCurrentState(): HeatTick | null {
+    if (this.t === 0) return null;
+    
+    // Return the last generated tick state
+    return this.tick();
+  }
   
   reset() {
     this.t = 0;

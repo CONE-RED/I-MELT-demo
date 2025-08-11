@@ -1,0 +1,28 @@
+# I-MELT ROI Analysis Report
+**Generated:** 8/11/2025
+
+## Executive Summary
+**Monthly Savings:** €1,038,240
+**Per Heat Savings:** €2884.00
+**Annual Projection:** €12,458,880
+
+## Performance Improvements
+| Metric | Baseline | Optimized | Improvement |
+|--------|----------|-----------|-------------|
+| Energy Consumption | 475 kWh/t | 445 kWh/t | 30.0 kWh/t |
+| Heat Duration | 65 min | 61 min | 4.0 min |
+| Electrode Consumption | 4.2 kg/heat | 3.7 kg/heat | 0.5 kg/heat |
+
+## Savings Breakdown (Per Month)
+- **Energy Savings:** €100,980
+- **Time Savings:** €936,000
+- **Electrode Savings:** €1,260
+
+## Assumptions
+- Production Rate: 12 heats/day
+- Heat Size: 85 tonnes
+- Energy Price: €0.11/kWh
+- Electrode Price: €7/kg
+- Production Value: €650/min
+
+*Analysis based on I-MELT system performance vs. conventional EAF operation*

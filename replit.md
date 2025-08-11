@@ -44,6 +44,8 @@ Preferred communication style: Simple, everyday language.
 - **ROI Calculator**: Live savings calculation with CFO-focused €/month projections and PDF report generation
 - **Auto-start Simulator**: Dashboard automatically starts physics simulation to avoid dead panels during demos
 - **Clean Demo Experience**: Removed random insight push, all insights now deterministic based on simulation state
+- **Real PDF Generation**: ROI reports now generate actual PDF files using PDFKit with professional layouts and European formatting
+- **Enhanced UI Styling**: DeterministicInsights component features cone red brand colors (header bg-[#cf1f1fa6], content bg-[#fff2f2])
 
 ### Development Workflow
 - **Build Process**: Separate client and server builds with shared type definitions

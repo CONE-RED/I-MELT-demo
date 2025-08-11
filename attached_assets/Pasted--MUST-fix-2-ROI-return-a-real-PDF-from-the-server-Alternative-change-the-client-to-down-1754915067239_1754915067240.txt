@@ -1,0 +1,82 @@
+
+# MUST-fix #2 — ROI: return a **real PDF** from the server
+
+(Alternative: change the client to download `.md`. I recommend **PDF**.)
+
+### Install dependency
+
+```bash
+npm i pdfkit
+```
+
+### Replace `/api/roi/report` handler in `server/routes.ts` with **this full block**:
+
+```ts
+import PDFDocument from 'pdfkit';
+// ...keep other imports
+
+app.post('/api/roi/report', (req, res) => {
+  try {
+    const { current, prices }: { current: Current; prices?: Prices } = req.body;
+    if (!current) return res.status(400).json({ error: 'Current performance data is required' });
+
+    const finalPrices = { ...DEFAULT_PRICES, ...prices };
+    const roi = computeROI(DEFAULT_BASELINE, current, finalPrices);
+
+    const doc = new PDFDocument({ size: 'A4', margin: 50 });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="I-MELT_ROI_Report.pdf"');
+    doc.pipe(res);
+
+    // Header
+    doc.fontSize(18).text('I-MELT ROI Analysis Report', { underline: true });
+    doc.moveDown(0.5).fontSize(10).text(`Generated: ${new Date().toLocaleString('en-EU')}`);
+    doc.moveDown();
+
+    // Executive summary
+    doc.fontSize(12).text(`Monthly Savings: €${roi.perMonth.toLocaleString('en-EU', { maximumFractionDigits: 0 })}`);
+    doc.text(`Per Heat Savings: €${roi.perHeat.toFixed(2)}`);
+    doc.text(`Annual Projection: €${(roi.perMonth * 12).toLocaleString('en-EU', { maximumFractionDigits: 0 })}`);
+    doc.moveDown();
+
+    // Table: improvements
+    const rows = [
+      ['Metric', 'Baseline', 'Optimized', 'Improvement'],
+      ['Energy (kWh/t)', `${DEFAULT_BASELINE.kwhPerT}`, `${current.kwhPerT}`, `${roi.details.energyDelta.toFixed(1)} kWh/t`],
+      ['Time (min/heat)', `${DEFAULT_BASELINE.minPerHeat}`, `${current.minPerHeat}`, `${roi.details.timeDelta.toFixed(1)} min/heat`],
+      ['Electrodes (kg/heat)', `${DEFAULT_BASELINE.electrodeKgPerHeat}`, `${current.electrodeKgPerHeat}`, `${roi.details.electrodeDelta.toFixed(2)} kg/heat`],
+    ];
+    doc.fontSize(11);
+    rows.forEach((r, i) => {
+      if (i === 0) doc.font('Helvetica-Bold');
+      doc.text(r[0], { continued: true, width: 160 });
+      doc.text(r[1], { continued: true, width: 120 });
+      doc.text(r[2], { continued: true, width: 120 });
+      doc.text(r[3]);
+      if (i === 0) doc.font('Helvetica');
+    });
+    doc.moveDown();
+
+    // Breakdown
+    doc.text('Breakdown (per heat):');
+    doc.text(`• Energy: €${roi.breakdown.energySaving.toFixed(2)}`);
+    doc.text(`• Time: €${roi.breakdown.timeSaving.toFixed(2)}`);
+    doc.text(`• Electrodes: €${roi.breakdown.electrodeSaving.toFixed(2)}`);
+    doc.moveDown();
+
+    // Assumptions
+    doc.text('Assumptions:');
+    doc.text(`• Heats/day: ${DEFAULT_BASELINE.heatsPerDay}`);
+    doc.text(`• Heat size: ${DEFAULT_BASELINE.massT} t`);
+    doc.text(`• Energy price: €${finalPrices.kwh}/kWh`);
+    doc.text(`• Electrode price: €${finalPrices.electrode}/kg`);
+    doc.text(`• Production value: €${finalPrices.prodValuePerMin}/min`);
+
+    doc.end();
+  } catch (error: any) {
+    res.status(500).json({ error: `Failed to generate ROI report: ${error.message}` });
+  }
+});
+```
+
+_(If you prefer Markdown: in `ROICalculator.tsx` change `download` name to `.md` and accept `text/markdown`.)_

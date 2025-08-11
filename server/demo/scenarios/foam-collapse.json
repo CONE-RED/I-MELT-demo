@@ -1,0 +1,23 @@
+{
+  "id": "foam-collapse",
+  "name": "Foam Collapse Event",
+  "description": "Slag foam suddenly collapses, exposing electrodes to radiation",
+  "injectAtSec": 180,
+  "delta": { 
+    "foamIdx": -0.6, 
+    "tempC": -45, 
+    "thd": 0.8,
+    "pf": 0.03,
+    "note": "Foam collapse - electrode exposure imminent"
+  },
+  "recommendation": {
+    "text": "Immediate lime injection 800kg, reduce power 15%, adjust tap to 5.",
+    "expectedImpact": { 
+      "foamRecovery": 0.4, 
+      "timeMin": -0.5,
+      "electrodeLife": "+12 hours"
+    },
+    "urgency": "critical",
+    "timeToApply": "30 seconds"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "temp-risk",
+  "name": "Temperature Risk to Caster",
+  "description": "Steel temperature approaching caster limits - quality risk",
+  "injectAtSec": 600,
+  "delta": { 
+    "tempC": 85, 
+    "cPct": 0.02,
+    "foamIdx": 0.15,
+    "note": "Temperature exceeding caster specifications - quality at risk"
+  },
+  "recommendation": {
+    "text": "Reduce power 12%, extend holding time 3min, add 200kg DRI cooling.",
+    "expectedImpact": { 
+      "tempReduction": -35,
+      "qualityImprovement": "+2 grades",
+      "yieldIncrease": "0.8%"
+    },
+    "urgency": "medium",
+    "timeToApply": "90 seconds"
+  }
+}

@@ -19,6 +19,8 @@ import { OneClickReport } from '@/components/industrial/export-reporting';
 import NotificationCenter, { Notification } from '@/components/ui/notification-center';
 import AIChatWidget from '@/components/chat/AIChatWidget';
 import SimulatorControls from '@/components/demo/SimulatorControls';
+import CheatSheetOverlay from '@/components/ui/cheat-sheet-overlay';
+import { useHotkeys, DEMO_HOTKEYS } from '@/hooks/useHotkeys';
 import useMobile from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
@@ -31,6 +33,7 @@ export default function Dashboard() {
   const [showContextualActions, setShowContextualActions] = useState(true);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [useLazyFlowTimeline, setUseLazyFlowTimeline] = useState(true);
+  const [showCheatSheet, setShowCheatSheet] = useState(false);
 
   // Determine system status based on heat data
   const getSystemStatus = () => {
@@ -49,6 +52,51 @@ export default function Dashboard() {
     { key: 'Ctrl+A', description: 'Acknowledge All Alerts', action: () => console.log('Acknowledge alerts') },
     { key: 'Ctrl+E', description: 'Export Report', action: () => console.log('Export report') },
   ];
+
+  // Demo scenario hotkey handlers
+  const triggerScenario = async (scenarioId: string) => {
+    try {
+      console.log(`Triggering scenario: ${scenarioId}`);
+      const response = await fetch(`/api/demo/scenario/${scenarioId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const result = await response.json();
+      if (result.ok) {
+        console.log(`✓ Scenario "${scenarioId}" activated:`, result.scenario.name);
+      } else {
+        console.error(`✗ Scenario failed:`, result.error);
+      }
+    } catch (error) {
+      console.error(`Failed to trigger scenario ${scenarioId}:`, error);
+    }
+  };
+
+  const applyRecovery = async () => {
+    try {
+      console.log('Applying recovery actions...');
+      const response = await fetch('/api/demo/recovery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const result = await response.json();
+      if (result.ok) {
+        console.log('✓ Recovery applied successfully');
+      }
+    } catch (error) {
+      console.error('Failed to apply recovery:', error);
+    }
+  };
+
+  // Configure hotkeys for Win Moments
+  useHotkeys({
+    '1': () => triggerScenario('energy-spike'),
+    '2': () => triggerScenario('foam-collapse'), 
+    '3': () => triggerScenario('temp-risk'),
+    'r': applyRecovery,
+    'R': applyRecovery,
+    '?': () => setShowCheatSheet(!showCheatSheet)
+  });
 
   // Performance metrics for operator feedback
   const performanceMetrics = {
@@ -212,6 +260,12 @@ export default function Dashboard() {
       <AIChatWidget heatData={heat} />
         </div>
       </ErrorBoundary>
+      
+      {/* Demo Control Overlay - Hotkey Help */}
+      <CheatSheetOverlay 
+        isVisible={showCheatSheet}
+        onClose={() => setShowCheatSheet(false)}
+      />
     </IndustrialLayout>
   );
 }

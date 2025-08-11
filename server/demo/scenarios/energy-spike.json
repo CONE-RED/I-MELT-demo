@@ -1,0 +1,23 @@
+{
+  "id": "energy-spike",
+  "name": "Energy Spike Crisis",
+  "description": "Power factor drops suddenly, THD increases, foam collapses",
+  "injectAtSec": 420,
+  "delta": { 
+    "pf": -0.08, 
+    "thd": 1.5, 
+    "foamIdx": -0.2,
+    "tempC": 25,
+    "note": "Electrical instability detected - electrode position critical"
+  },
+  "recommendation": {
+    "text": "Switch to Tap 7, raise PF to 0.86, inject 6kg C in 2 pulses.",
+    "expectedImpact": { 
+      "kwhPerT": -7.5, 
+      "timeMin": -1.8,
+      "costSaving": 850
+    },
+    "urgency": "high",
+    "timeToApply": "2 minutes"
+  }
+}

@@ -3,7 +3,9 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { aiService } from "./ai-service";
-import { HeatSim } from "./demo/heat-sim";
+import { HeatSim, ScenarioInjection } from "./demo/heat-sim";
+import * as fs from 'fs';
+import * as path from 'path';
 
 // Multiple heat datasets for realistic switching between different steel heats
 // Each heat has unique materials, chemistry, operators, and progression
@@ -500,6 +502,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         error: `Failed to download report: ${error.message}` 
       });
+    }
+  });
+
+  // Scenario injection endpoints for "Win Moments" demo
+  app.post('/api/demo/scenario/:scenarioId', async (req, res) => {
+    try {
+      const { scenarioId } = req.params;
+      const clientId = req.ip || 'default';
+      const sim = sims.get(clientId);
+      
+      if (!sim) {
+        return res.status(400).json({ error: 'No active simulation. Start simulation first.' });
+      }
+      
+      // Load scenario from file
+      const scenarioPath = path.join(process.cwd(), 'server/demo/scenarios', `${scenarioId}.json`);
+      if (!fs.existsSync(scenarioPath)) {
+        return res.status(404).json({ error: `Scenario "${scenarioId}" not found` });
+      }
+      
+      const scenarioData = JSON.parse(fs.readFileSync(scenarioPath, 'utf8')) as ScenarioInjection;
+      sim.injectScenario(scenarioData);
+      
+      res.json({
+        ok: true,
+        scenario: scenarioData,
+        message: `Scenario "${scenarioId}" injected successfully`
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: `Failed to inject scenario: ${error.message}` });
+    }
+  });
+
+  app.post('/api/demo/recovery', (req, res) => {
+    try {
+      const clientId = req.ip || 'default';
+      const sim = sims.get(clientId);
+      
+      if (!sim) {
+        return res.status(400).json({ error: 'No active simulation. Start simulation first.' });
+      }
+      
+      sim.applyRecovery();
+      res.json({
+        ok: true,
+        message: 'Recovery actions applied successfully'
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: `Failed to apply recovery: ${error.message}` });
+    }
+  });
+
+  app.get('/api/demo/scenarios', (req, res) => {
+    try {
+      const scenariosDir = path.join(process.cwd(), 'server/demo/scenarios');
+      const files = fs.readdirSync(scenariosDir);
+      const scenarios = files
+        .filter(file => file.endsWith('.json'))
+        .map(file => {
+          const content = fs.readFileSync(path.join(scenariosDir, file), 'utf8');
+          return JSON.parse(content);
+        });
+      
+      res.json({ scenarios });
+    } catch (error: any) {
+      res.status(500).json({ error: `Failed to load scenarios: ${error.message}` });
     }
   });
 

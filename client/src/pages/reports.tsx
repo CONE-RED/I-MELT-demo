@@ -231,7 +231,7 @@ export default function ReportsPage() {
       <div className="flex flex-1 overflow-hidden">
         <SideNav />
         
-        <main className="flex-1 overflow-y-auto p-4 bg-white">
+        <main className="flex-1 overflow-y-auto p-4 bg-gradient-to-br from-gray-50 via-white to-gray-100">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -250,7 +250,7 @@ export default function ReportsPage() {
             </div>
 
             {/* Report Configuration */}
-            <Card className="mb-6">
+            <Card className="mb-6 dashboard-card-enhanced">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Settings className="w-5 h-5" />
@@ -303,7 +303,7 @@ export default function ReportsPage() {
             {/* Report Types */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {reportTypes.map((report) => (
-                <Card key={report.id} className="relative overflow-hidden">
+                <Card key={report.id} className="relative overflow-hidden dashboard-card-enhanced">
                   <div className={`absolute top-0 left-0 w-1 h-full ${report.color}`} />
                   
                   <CardHeader>
@@ -372,7 +372,7 @@ export default function ReportsPage() {
             </div>
 
             {/* Quick Stats */}
-            <Card className="mt-6">
+            <Card className="mt-6 dashboard-card-enhanced">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileSpreadsheet className="w-5 h-5" />

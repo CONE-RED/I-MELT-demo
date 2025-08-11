@@ -65,7 +65,7 @@ export default function HeatHeaderCard({
   };
 
   return (
-    <div className="dashboard-card h-full">
+    <div className="dashboard-card-enhanced h-full">
       {/* Primary Information - Heat Number & Status */}
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-xl font-bold triangle text-gray-900">

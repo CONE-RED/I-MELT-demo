@@ -50,7 +50,7 @@ export default function AdditivesLedger({ additives }: AdditivesLedgerProps) {
   };
   
   return (
-    <div className="dashboard-card h-full overflow-hidden">
+    <div className="dashboard-card-enhanced h-full overflow-hidden">
       <h2 className="text-lg font-semibold triangle mb-3">
         {labels[lang].title}
       </h2>

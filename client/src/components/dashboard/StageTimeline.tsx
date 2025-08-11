@@ -57,7 +57,7 @@ export default function StageTimeline({ stages }: StageTimelineProps) {
     : 22; // Default position if no current stage
   
   return (
-    <div className="dashboard-card overflow-hidden">
+    <div className="dashboard-card-enhanced overflow-hidden">
       <h2 className="text-lg font-semibold triangle mb-3">
         {labels[lang].title}
       </h2>

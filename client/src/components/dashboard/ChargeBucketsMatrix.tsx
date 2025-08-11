@@ -71,7 +71,7 @@ export default function ChargeBucketsMatrix({ buckets }: ChargeBucketsMatrixProp
   const secondaryMaterials = allMaterialNames.filter(name => !criticalMaterials.includes(name));
 
   return (
-    <div className="dashboard-card h-full overflow-hidden">
+    <div className="dashboard-card-enhanced h-full overflow-hidden">
       <h2 className="text-lg font-semibold triangle mb-4">
         {labels[lang].title}
       </h2>

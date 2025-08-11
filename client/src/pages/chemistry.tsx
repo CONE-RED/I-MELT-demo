@@ -168,7 +168,7 @@ export default function Chemistry() {
   
   const getPredictiveInsights = () => {
     const insights = [];
-    const currentStage = 'melting'; // Default stage for demo
+    const currentStage: 'melting' | 'refining' | 'tapping' = 'melting'; // Default stage for demo
     const timeInStage = 25; // Demo time in stage
 
     // Stage-aware chemistry predictions
@@ -436,7 +436,7 @@ Execute all fixes now?`);
       <div className="flex flex-1 overflow-hidden">
         <SideNav />
         
-        <main className="flex-1 overflow-y-auto p-4 bg-white">
+        <main className="flex-1 overflow-y-auto p-4 bg-gradient-to-br from-gray-50 via-white to-gray-100">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
@@ -484,7 +484,7 @@ Execute all fixes now?`);
 
             {/* Predictive Intelligence Section - Phase 3 */}
             {predictiveInsights.length > 0 && (
-              <Card className="mb-6 border-purple-200 bg-purple-50">
+              <Card className="mb-6 border-purple-200 bg-purple-50 dashboard-card-enhanced">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-purple-800">
                     <TrendingUp className="w-5 h-5" />
@@ -542,7 +542,7 @@ Execute all fixes now?`);
 
             {/* Critical Issues Alert - LazyFlow Phase 1 */}
             {criticalIssues.length > 0 && (
-              <Card className="mb-6 border-red-200 bg-red-50">
+              <Card className="mb-6 border-red-200 bg-red-50 dashboard-card-enhanced">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-red-800">
                     <Target className="w-5 h-5" />
@@ -623,7 +623,7 @@ Execute all fixes now?`);
             )}
 
             {/* Chemistry Status Summary - LazyFlow */}
-            <Card className="mb-6 border-green-200 bg-green-50">
+            <Card className="mb-6 border-green-200 bg-green-50 dashboard-card-enhanced">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-green-800">
                   <FlaskRound className="w-5 h-5" />
@@ -720,7 +720,7 @@ Execute all fixes now?`);
             </Card>
             
             {/* Detailed Steel Composition - Collapsed by default */}
-            <Card className="mb-6">
+            <Card className="mb-6 dashboard-card-enhanced">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="w-5 h-5" />
@@ -792,7 +792,7 @@ Execute all fixes now?`);
             </Card>
             
             {/* Slag Composition */}
-            <Card>
+            <Card className="dashboard-card-enhanced">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FlaskRound className="w-5 h-5" />

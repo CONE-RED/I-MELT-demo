@@ -131,7 +131,7 @@ const ROICalculator: React.FC<ROICalculatorProps> = ({ heatId, isVisible = true 
   }
 
   return (
-    <Card className="rounded-lg border shadow-sm w-full bg-[#e5c5c536] text-[#000000]">
+    <Card className="roi-card w-full">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">

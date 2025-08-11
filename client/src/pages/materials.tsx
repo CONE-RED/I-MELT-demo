@@ -103,7 +103,7 @@ export default function Materials() {
       <div className="flex flex-1 overflow-hidden">
         <SideNav />
         
-        <main className="flex-1 overflow-y-auto p-4 bg-white">
+        <main className="flex-1 overflow-y-auto p-4 bg-gradient-to-br from-gray-50 via-white to-gray-100">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
@@ -122,7 +122,7 @@ export default function Materials() {
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
               {/* Current Inventory */}
-              <Card className="lg:col-span-2">
+              <Card className="lg:col-span-2 dashboard-card-enhanced">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Package className="w-5 h-5" />
@@ -162,7 +162,7 @@ export default function Materials() {
               </Card>
               
               {/* Material Requests */}
-              <Card>
+              <Card className="dashboard-card-enhanced">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Truck className="w-5 h-5" />
@@ -198,7 +198,7 @@ export default function Materials() {
             </div>
             
             {/* Charge Buckets from Heat Data */}
-            <Card>
+            <Card className="dashboard-card-enhanced">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Package className="w-5 h-5" />

@@ -100,11 +100,11 @@ const DeterministicInsights: React.FC<DeterministicInsightsProps> = ({
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-3 bg-[#cf1f1fa6]">
+    <Card className="insight-card w-full">
+      <CardHeader className="pb-3 bg-gradient-to-r from-[#cf1f1f]/80 to-[#cf1f1f]/60 text-white rounded-t-xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Zap className="w-5 h-5 text-blue-600" />
+            <Zap className="w-5 h-5 text-white" />
             <CardTitle className="text-lg">AI Insights</CardTitle>
             <Badge variant="secondary" className="text-xs">
               {insights.mode === 'deterministic' ? 'Instant' : 'AI-Powered'}

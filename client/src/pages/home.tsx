@@ -4,7 +4,7 @@ import { RootState } from '@/lib/store';
 import { setupWebSocket, closeWebSocket } from '@/lib/socket';
 import TopBar from '@/components/layout/TopBar';
 import SideNav from '@/components/layout/SideNav';
-import Dashboard from '@/components/dashboard/Dashboard';
+import MissionControl from '@/components/dashboard/MissionControl';
 import { useToast } from '@/hooks/use-toast';
 import useMobile from '@/hooks/use-mobile';
 
@@ -52,8 +52,8 @@ export default function Home() {
       <div className="flex flex-1 overflow-hidden">
         <SideNav />
         
-        <main className="flex-1 overflow-y-auto p-4">
-          <Dashboard />
+        <main className="flex-1 overflow-y-auto">
+          <MissionControl />
         </main>
       </div>
     </div>

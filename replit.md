@@ -47,6 +47,7 @@ Preferred communication style: Simple, everyday language.
 - **Real PDF Generation**: ROI reports now generate actual PDF files using PDFKit with professional layouts and European formatting
 - **Enhanced UI Styling**: DeterministicInsights component features cone red brand colors (header bg-[#cf1f1fa6], content bg-[#fff2f2])
 - **DEMO_RANDOM Environment Control**: Random insight broadcasts now opt-in via DEMO_RANDOM=true (deterministic by default for reliable demos)
+- **Jest Testing Framework**: Complete testing setup with ts-jest, unit/e2e test structure, ES module support, and module path mapping
 
 ### Development Workflow
 - **Build Process**: Separate client and server builds with shared type definitions

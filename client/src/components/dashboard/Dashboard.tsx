@@ -20,6 +20,7 @@ import NotificationCenter, { Notification } from '@/components/ui/notification-c
 import AIChatWidget from '@/components/chat/AIChatWidget';
 import SimulatorControls from '@/components/demo/SimulatorControls';
 import DeterministicInsights from '@/components/dashboard/DeterministicInsights';
+import ROICalculator from '@/components/dashboard/ROICalculator';
 import CheatSheetOverlay from '@/components/ui/cheat-sheet-overlay';
 import { useHotkeys, DEMO_HOTKEYS } from '@/hooks/useHotkeys';
 import useMobile from '@/hooks/use-mobile';
@@ -226,7 +227,7 @@ export default function Dashboard() {
         <ChargeBucketsMatrix buckets={heat.buckets} />
       </div>
       
-      {/* [F] AI Insight Pane (3×4) */}
+      {/* [F] AI Insight Pane (3×2) */}
       <div className={cn(isMobile ? "col-span-1" : "col-span-3 row-span-2")}>
         <AIInsightPane insights={heat.insights} />
       </div>
@@ -234,6 +235,11 @@ export default function Dashboard() {
       {/* Deterministic AI Insights (3×2) - LLM-off by default */}
       <div className={cn(isMobile ? "col-span-1" : "col-span-3 row-span-2")}>
         <DeterministicInsights heatId={heat.heat || 93378} />
+      </div>
+      
+      {/* ROI Calculator (6×2) - CFO-focused savings */}
+      <div className={cn(isMobile ? "col-span-1" : "col-span-6 row-span-2")}>
+        <ROICalculator heatId={heat.heat || 93378} />
       </div>
       
       {/* [C] Stage Timeline (12×2) - LazyFlow Enhanced */}

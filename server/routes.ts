@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { aiService } from "./ai-service";
 import { HeatSim, ScenarioInjection } from "./demo/heat-sim";
 import { insightFor } from "./ai/insight-static";
+import { computeROI, generateROIReport, DEFAULT_BASELINE, DEFAULT_PRICES, type Current, type Prices } from "./roi";
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -450,7 +451,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Removed duplicate endpoint - using /api/heat/:id instead
+  // ROI Calculation API endpoints
+  app.post('/api/roi/calculate', (req, res) => {
+    try {
+      const { current, prices }: { current: Current; prices?: Prices } = req.body;
+      
+      if (!current) {
+        return res.status(400).json({ error: 'Current performance data is required' });
+      }
+      
+      const finalPrices = { ...DEFAULT_PRICES, ...prices };
+      const roi = computeROI(DEFAULT_BASELINE, current, finalPrices);
+      
+      res.json(roi);
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: `Failed to calculate ROI: ${error.message}` 
+      });
+    }
+  });
+
+  app.post('/api/roi/report', (req, res) => {
+    try {
+      const { current, prices }: { current: Current; prices?: Prices } = req.body;
+      
+      if (!current) {
+        return res.status(400).json({ error: 'Current performance data is required' });
+      }
+      
+      const finalPrices = { ...DEFAULT_PRICES, ...prices };
+      const reportMarkdown = generateROIReport(DEFAULT_BASELINE, current, finalPrices);
+      
+      // For now, return markdown. In production, this would generate a PDF
+      res.setHeader('Content-Type', 'text/markdown');
+      res.setHeader('Content-Disposition', 'attachment; filename="I-MELT_ROI_Report.md"');
+      res.send(reportMarkdown);
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: `Failed to generate ROI report: ${error.message}` 
+      });
+    }
+  });
 
   // AI Chat API endpoint  
   app.post('/api/ai/chat', async (req, res) => {

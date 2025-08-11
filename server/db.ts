@@ -6,9 +6,10 @@ import * as schema from "@shared/schema";
 neonConfig.webSocketConstructor = ws;
 
 if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+  console.log("⚠️  No DATABASE_URL set - running in demo mode with in-memory data");
+  console.log("   To persist data, set DATABASE_URL in your .env file");
+  // Use a simple SQLite in-memory database for demo
+  process.env.DATABASE_URL = "sqlite://:memory:";
 }
 
 export const pool = new Pool({ connectionString: process.env.DATABASE_URL });

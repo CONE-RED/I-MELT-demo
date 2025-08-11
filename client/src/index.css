@@ -4,63 +4,59 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
-    --muted: 0 0% 48%;
-    --muted-foreground: 0 0% 48%;
-    --popover: 0 0% 0%;
-    --popover-foreground: 0 0% 100%;
-    --card: 0 0% 0%;
-    --card-foreground: 0 0% 100%;
-    --border: 0 0% 48%;
-    --input: 0 0% 48%;
-    --primary: 358 98% 45%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 48%;
-    --secondary-foreground: 0 0% 100%;
-    --accent: 9 100% 62%;
-    --accent-foreground: 0 0% 0%;
-    --destructive: 358 98% 45%;
-    --destructive-foreground: 0 0% 100%;
-    --ring: 358 98% 45%;
+    /* Light mode - High contrast and visibility */
+    --background: 0 0% 100%;           /* Pure white background */
+    --foreground: 0 0% 9%;             /* Nearly black text for maximum contrast */
+    --muted: 0 0% 96%;                 /* Very light gray for muted backgrounds */
+    --muted-foreground: 0 0% 45%;      /* Medium gray for secondary text */
+    --popover: 0 0% 100%;              /* White popover background */
+    --popover-foreground: 0 0% 9%;     /* Dark text on white popover */
+    --card: 0 0% 100%;                 /* White card background */
+    --card-foreground: 0 0% 9%;        /* Dark text on white cards */
+    --border: 0 0% 90%;                /* Light gray borders */
+    --input: 0 0% 100%;                /* White input backgrounds */
+    --primary: 358 98% 45%;            /* I-MELT red */
+    --primary-foreground: 0 0% 100%;   /* White text on red */
+    --secondary: 0 0% 96%;             /* Light gray secondary */
+    --secondary-foreground: 0 0% 9%;   /* Dark text on light secondary */
+    --accent: 9 100% 62%;              /* Orange accent */
+    --accent-foreground: 0 0% 100%;    /* White text on orange */
+    --destructive: 0 84% 60%;          /* Red for destructive actions */
+    --destructive-foreground: 0 0% 98%;/* White text on red */
+    --ring: 358 98% 45%;               /* I-MELT red focus rings */
     --radius: 0.625rem;
     --tri-size: 1.125rem;
     
     /* Brand Colors - Light Theme */
-    --cone-red: 358 98% 45%;
-    --cone-black: 0 0% 95%;     /* Light background */
-    --cone-gray: 0 0% 40%;      /* Dark text on light bg */
-    --cone-white: 0 0% 20%;     /* Dark text */
-    --cone-accent: 9 100% 62%;
+    --cone-red: 358 98% 45%;           /* I-MELT signature red */
+    --cone-black: 0 0% 9%;             /* Nearly black for text */
+    --cone-gray: 0 0% 45%;             /* Medium gray for secondary text */
+    --cone-white: 0 0% 100%;           /* Pure white for backgrounds */
+    --cone-accent: 9 100% 62%;         /* Orange accent color */
     
-    /* Chart Colors */
-    --chart-1: 358 98% 45%;
-    --chart-2: 9 100% 62%;
-    --chart-3: 0 0% 48%;
-    --chart-4: 0 0% 20%;
-    --chart-5: 0 0% 70%;
+    /* Chart Colors - High contrast for light backgrounds */
+    --chart-1: 358 98% 45%;            /* I-MELT red */
+    --chart-2: 9 100% 62%;             /* Orange */
+    --chart-3: 217 91% 60%;            /* Blue */
+    --chart-4: 142 71% 45%;            /* Green */
+    --chart-5: 262 83% 58%;            /* Purple */
   }
   
+  /* Force light mode only - no dark theme */
   .dark {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
-    --muted: 0 0% 48%;
-    --muted-foreground: 0 0% 70%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 100%;
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 100%;
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --primary: 358 98% 45%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 25%;
-    --secondary-foreground: 0 0% 100%;
-    --accent: 9 100% 62%;
-    --accent-foreground: 0 0% 0%;
-    --destructive: 358 98% 45%;
-    --destructive-foreground: 0 0% 100%;
-    --ring: 358 98% 45%;
+    /* Override any dark mode attempts with light mode values */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --border: 0 0% 90%;
+    --input: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
   }
 
   * {
@@ -68,14 +64,51 @@
   }
 
   body {
-    @apply bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-900 font-sans antialiased;
+    @apply bg-white text-gray-900 font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
     font-size: 14px;
     line-height: 1.35;
+    /* Force light mode background */
+    background-color: white !important;
+    color: #111827 !important;
   }
 }
 
 @layer components {
+  /* Force high contrast light mode for all components */
+  .card, [data-radix-collection-item], .bg-card {
+    background-color: white !important;
+    color: #111827 !important;
+    border-color: #e5e7eb !important;
+  }
+  
+  .bg-background {
+    background-color: white !important;
+  }
+  
+  .text-foreground, .text-card-foreground {
+    color: #111827 !important;
+  }
+  
+  .text-muted-foreground {
+    color: #6b7280 !important;
+  }
+  
+  .border {
+    border-color: #e5e7eb !important;
+  }
+  
+  /* Ensure buttons have proper contrast */
+  .btn-secondary, .bg-secondary {
+    background-color: #f3f4f6 !important;
+    color: #111827 !important;
+    border-color: #d1d5db !important;
+  }
+  
+  .btn-secondary:hover, .bg-secondary:hover {
+    background-color: #e5e7eb !important;
+  }
+
   .triangle {
     @apply relative pl-6;
   }

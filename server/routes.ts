@@ -384,6 +384,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // All insights are deterministic by default (DEMO_RANDOM=false)
   
   // API routes
+  // Health check endpoint for API smoke tests
+  app.get('/healthz', (req, res) => {
+    res.json({ ok: true, timestamp: Date.now(), service: 'I-MELT API' });
+  });
+
   app.get('/api/heats', async (req, res) => {
     res.json([93378, 93379, 93380, 93381]);
   });

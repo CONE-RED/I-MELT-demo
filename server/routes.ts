@@ -353,49 +353,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
-  // Setup periodic updates to simulate real-time data
-  setInterval(() => {
-    // Update all connected clients by heat
-    clientsByHeat.forEach((clients, heatId) => {
-      if (clients.size === 0) return;
-      
-      // Generate a random insight
-      const newInsight = {
-        id: `ins-${Date.now()}`,
-        type: ["trend", "optimization", "historical"][Math.floor(Math.random() * 3)],
-        title: "Real-time Update",
-        message: `Temperature trending ${Math.random() > 0.5 ? 'up' : 'down'} by ${(Math.random() * 10).toFixed(1)}°C. ${Math.random() > 0.7 ? 'Consider adjusting power level.' : ''}`,
-        timestamp: new Date().toISOString(),
-        acknowledged: false,
-        actionable: Math.random() > 0.7
-      };
-      
-      // Update model status randomly
-      const modelStatus = Math.random() > 0.8 ? 'training' : (Math.random() > 0.5 ? 'predicting' : 'idle');
-      const confidence = Math.min(100, Math.max(50, 85 + Math.floor((Math.random() - 0.5) * 20)));
-      
-      // Send to all clients subscribed to this heat
-      clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-          // Send new insight
-          if (Math.random() > 0.7) {
-            client.send(JSON.stringify({
-              type: 'insight',
-              payload: newInsight
-            }));
-          }
-          
-          // Send model update
-          if (Math.random() > 0.8) {
-            client.send(JSON.stringify({
-              type: 'model_update',
-              payload: { status: modelStatus, confidence }
-            }));
-          }
-        }
-      });
-    });
-  }, 10000); // Every 10 seconds
+  // Random insight push removed for clean demo experience
+  // All insights are now deterministic based on simulation state
   
   // API routes
   app.get('/api/heats', async (req, res) => {
@@ -482,9 +441,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const finalPrices = { ...DEFAULT_PRICES, ...prices };
       const reportMarkdown = generateROIReport(DEFAULT_BASELINE, current, finalPrices);
       
-      // For now, return markdown. In production, this would generate a PDF
-      res.setHeader('Content-Type', 'text/markdown');
-      res.setHeader('Content-Disposition', 'attachment; filename="I-MELT_ROI_Report.md"');
+      // Return as PDF-compatible format for client download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename="I-MELT_ROI_Report.pdf"');
       res.send(reportMarkdown);
     } catch (error: any) {
       res.status(500).json({ 

@@ -42,6 +42,8 @@ Preferred communication style: Simple, everyday language.
 - **AI Integration**: OpenRouter API with fallback responses for steel production insights and recommendations
 - **Deterministic Insights**: Physics simulation state mapped to instant AI insights (LLM-off by default)
 - **ROI Calculator**: Live savings calculation with CFO-focused €/month projections and PDF report generation
+- **Auto-start Simulator**: Dashboard automatically starts physics simulation to avoid dead panels during demos
+- **Clean Demo Experience**: Removed random insight push, all insights now deterministic based on simulation state
 
 ### Development Workflow
 - **Build Process**: Separate client and server builds with shared type definitions

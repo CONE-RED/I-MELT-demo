@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/lib/store';
 import HeatHeaderCard from './HeatHeaderCard';
@@ -99,6 +99,19 @@ export default function Dashboard() {
     'R': applyRecovery,
     '?': () => setShowCheatSheet(!showCheatSheet)
   });
+
+  // CRITICAL: Auto-start simulator to avoid dead panels / confused CFOs
+  useEffect(() => {
+    (async () => {
+      try {
+        // Start deterministic sim with known seed for consistent demos
+        await fetch(`/api/demo/start?seed=42&heatId=93378`);
+        console.log('✓ Simulator auto-started with seed 42 for heat 93378');
+      } catch (e) {
+        console.error('✗ Failed to auto-start simulator:', e);
+      }
+    })();
+  }, []);
 
   // Performance metrics for operator feedback
   const performanceMetrics = {

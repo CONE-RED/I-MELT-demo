@@ -101,7 +101,7 @@ const DeterministicInsights: React.FC<DeterministicInsightsProps> = ({
 
   return (
     <Card className="w-full">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3 bg-[#cf1f1fa6]">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Zap className="w-5 h-5 text-blue-600" />
@@ -127,7 +127,7 @@ const DeterministicInsights: React.FC<DeterministicInsightsProps> = ({
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 bg-[#fff2f2] text-[#000000]">
         {/* Main insight */}
         <div className="flex items-start space-x-3">
           {getSeverityIcon(insights.insight.severity)}

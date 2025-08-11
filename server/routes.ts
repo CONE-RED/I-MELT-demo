@@ -354,8 +354,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
-  // Random insight push removed for clean demo experience
-  // All insights are now deterministic based on simulation state
+  // DEMO_RANDOM environment variable controls random insight broadcasts
+  const demoRandom = process.env.DEMO_RANDOM === 'true';
+  
+  // Random insight push (opt-in only via DEMO_RANDOM=true)
+  if (demoRandom) {
+    setInterval(() => {
+      // Send random insights to all connected clients
+      const randomInsights = [
+        { type: 'insight', text: 'Electrode consumption appears optimized', priority: 'medium' },
+        { type: 'model_update', status: 'Thermal model recalibrated', confidence: 94 },
+        { type: 'insight', text: 'Power factor efficiency detected', priority: 'high' }
+      ];
+      
+      const randomInsight = randomInsights[Math.floor(Math.random() * randomInsights.length)];
+      
+      // Broadcast to all connected clients
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({
+            type: randomInsight.type,
+            payload: randomInsight
+          }));
+        }
+      });
+    }, 10000); // Every 10 seconds
+  }
+  
+  // All insights are deterministic by default (DEMO_RANDOM=false)
   
   // API routes
   app.get('/api/heats', async (req, res) => {

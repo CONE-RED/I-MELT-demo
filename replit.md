@@ -46,6 +46,7 @@ Preferred communication style: Simple, everyday language.
 - **Clean Demo Experience**: Removed random insight push, all insights now deterministic based on simulation state
 - **Real PDF Generation**: ROI reports now generate actual PDF files using PDFKit with professional layouts and European formatting
 - **Enhanced UI Styling**: DeterministicInsights component features cone red brand colors (header bg-[#cf1f1fa6], content bg-[#fff2f2])
+- **DEMO_RANDOM Environment Control**: Random insight broadcasts now opt-in via DEMO_RANDOM=true (deterministic by default for reliable demos)
 
 ### Development Workflow
 - **Build Process**: Separate client and server builds with shared type definitions

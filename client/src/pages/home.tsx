@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/lib/store';
-import { setupWebSocket, closeWebSocket } from '@/lib/socket';
+// TEMPORARILY COMMENTED OUT WebSocket to prevent crashes
+// import { setupWebSocket, closeWebSocket } from '@/lib/buffered-socket';
 import TopBar from '@/components/layout/TopBar';
 import SideNav from '@/components/layout/SideNav';
 import MissionControl from '@/components/dashboard/MissionControl';
@@ -17,18 +18,20 @@ export default function Home() {
 
   // Initialize WebSocket connection
   useEffect(() => {
+    // TEMPORARILY DISABLED FOR DEBUGGING
     // Set up WebSocket connection
-    setupWebSocket();
+    // setupWebSocket();
     
     return () => {
-      closeWebSocket();
+      // closeWebSocket();
     };
   }, []);
 
   // Watch for heat number changes to subscribe to specific heat data
   useEffect(() => {
     if (heatNumber) {
-      setupWebSocket(heatNumber);
+      // TEMPORARILY DISABLED FOR DEBUGGING
+      // setupWebSocket(heatNumber);
     }
   }, [heatNumber]);
   

@@ -8,8 +8,8 @@ export interface HeatData {
   buckets: Bucket[];
   stages: Stage[];
   additives: Additive[];
-  chemSteel: Record<string, number>;
-  chemSlag: Record<string, number>;
+  chemSteel: Record<string, number | null>;
+  chemSlag: Record<string, number | null>;
   insights: Insight[];
   modelStatus: 'idle' | 'training' | 'predicting';
   confidence: number;
@@ -75,8 +75,17 @@ export interface SimulationTick {
 
 // WebSocket message types
 export interface WebSocketMessage {
-  type: 'heat_data' | 'insight' | 'model_update' | 'available_heats' | 'error' | 'simulation_tick';
+  type: 'heat_data' | 'insight' | 'model_update' | 'available_heats' | 'error' | 'simulation_tick' | 'ping' | 'pong';
   payload: any;
+}
+
+// Connection metrics for Phase 5 reliability
+export interface ConnectionMetrics {
+  latency: number;
+  isBuffering: boolean;
+  bufferSize: number;
+  reconnectAttempts: number;
+  lastServerTick: number;
 }
 
 // App state types
@@ -87,6 +96,7 @@ export interface AppState {
   loading: boolean;
   error: string | null;
   wsConnected: boolean;
+  connectionMetrics: ConnectionMetrics;
   selectedTab: 'insights' | 'explain' | 'chat';
   chemViewMode: 'absolute' | 'delta';
   simulationData: SimulationTick | null;

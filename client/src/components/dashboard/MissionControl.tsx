@@ -18,6 +18,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import useMobile from '@/hooks/use-mobile';
+import { autoStartService, AutoStartConfig } from '@/lib/AutoStartService';
+import ResetControls from '@/components/demo/ResetControls';
+import SyncGuardBanner from '@/components/industrial/SyncGuardBanner';
+import PersonaSwitch, { usePersona, PersonaConditional, PERSONA_COPY, type PersonaType } from '@/components/ui/PersonaSwitch';
 
 // Keep essential demo hotkeys from original Dashboard
 import { useHotkeys } from '@/hooks/useHotkeys';
@@ -34,6 +38,10 @@ export default function MissionControl() {
   const [predictiveActions, setPredictiveActions] = useState<PredictiveAction[]>([]);
   const [showCheatSheet, setShowCheatSheet] = useState(false);
   const [executingAction, setExecutingAction] = useState<string | null>(null);
+  const [isAutoStarting, setIsAutoStarting] = useState(false);
+  
+  // Phase 4: Persona management
+  const { currentPersona, changePersona, personaConfig, shouldShow } = usePersona('operator');
 
   // LazyFlow: Calculate hero insight and actions when heat data changes
   useEffect(() => {
@@ -50,6 +58,15 @@ export default function MissionControl() {
   const triggerScenario = async (scenarioId: string) => {
     try {
       console.log(`🎬 Triggering LazyFlow demo scenario: ${scenarioId}`);
+      
+      // Ensure simulation is running before triggering scenarios
+      if (!autoStartService.isRunning()) {
+        console.log('⚠️ No active simulation, starting one first...');
+        await autoStartService.autoStart({ seed: 42, heatId: 93378 });
+        // Give the simulation a moment to initialize
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
       const response = await fetch(`/api/demo/scenario/${scenarioId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
@@ -61,6 +78,13 @@ export default function MissionControl() {
           description: `${result.scenario.name} - Watch the magic happen!`,
         });
         console.log(`✓ Scenario "${scenarioId}" activated:`, result.scenario.name);
+      } else {
+        console.warn(`⚠️ Scenario failed:`, result.error);
+        toast({
+          title: "Scenario Issue",
+          description: "Please wait for simulation to fully initialize.",
+          variant: "default",
+        });
       }
     } catch (error) {
       console.error(`Failed to trigger scenario ${scenarioId}:`, error);
@@ -70,10 +94,34 @@ export default function MissionControl() {
   const applyRecovery = async () => {
     try {
       console.log('🚀 Applying AI recovery actions...');
+      
+      // Ensure simulation is running before applying recovery
+      if (!autoStartService.isRunning()) {
+        console.log('⚠️ No active simulation, starting one first...');
+        await autoStartService.autoStart({ seed: 42, heatId: 93378 });
+        // Give the simulation a moment to initialize
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
       const response = await fetch('/api/demo/recovery', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (errorData.error?.includes('No active simulation')) {
+          toast({
+            title: "Starting Simulation",
+            description: "Please wait for simulation to initialize, then try recovery again.",
+            variant: "default",
+          });
+        } else {
+          throw new Error(errorData.error || 'Recovery failed');
+        }
+        return;
+      }
+      
       const result = await response.json();
       if (result.ok) {
         toast({
@@ -85,30 +133,145 @@ export default function MissionControl() {
       }
     } catch (error) {
       console.error('Failed to apply recovery:', error);
+      toast({
+        title: "Recovery Failed",
+        description: "Could not apply recovery actions. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
-  // Configure hotkeys for demo win moments
+  // Reset to baseline with deterministic seed
+  const resetToBaseline = async () => {
+    try {
+      const status = await autoStartService.reset(42);
+      toast({
+        title: "Baseline Restored",
+        description: `Reset complete with seed=${status.seed}`,
+      });
+      console.log('✅ G2 Reset Success:', status);
+    } catch (error) {
+      console.error('❌ G2 Reset Failed:', error);
+      toast({
+        title: "Reset Failed",
+        description: "Could not reset to baseline",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Phase 3: Trigger caster delay scenario for Sync Guard demonstration
+  const triggerCasterDelay = async () => {
+    try {
+      console.log('🎬 Triggering caster delay scenario for Sync Guard demo');
+      
+      // For demo purposes, we'll just show a toast and trigger the sync guard banner visibility
+      toast({
+        title: "Caster Delay Detected",
+        description: "LF2→CC1 route delayed by 4 minutes - Sync Guard activated",
+        variant: "destructive",
+      });
+      
+      // In a real implementation, this would trigger the actual caster delay scenario
+      // For now, the SyncGuardBanner component already shows the delay scenario
+      
+      console.log('✓ Caster delay scenario activated - Sync Guard should now be visible');
+    } catch (error) {
+      console.error('Failed to trigger caster delay scenario:', error);
+    }
+  };
+
+  // Configure hotkeys for demo win moments + G2 reset + Phase 3 caster delay
   useHotkeys({
     '1': () => triggerScenario('energy-spike'),
     '2': () => triggerScenario('foam-collapse'), 
     '3': () => triggerScenario('temp-risk'),
+    '4': () => triggerCasterDelay(), // Phase 3: Trigger caster delay scenario
     'r': applyRecovery,
     'R': applyRecovery,
+    '0': resetToBaseline, // G2 requirement: One-key reset
     '?': () => setShowCheatSheet(!showCheatSheet)
   });
 
-  // Auto-start simulator for smooth demos
+  // Phase 1: Deterministic Auto-Start from URL Parameters (No clicks required)
+  // TEMPORARILY DISABLED TO FIX INFINITE LOOP
   useEffect(() => {
-    (async () => {
+    console.log('⚠️ AutoStart temporarily disabled to prevent infinite API calls');
+    return; // EARLY RETURN TO DISABLE
+    
+    const initializeDeterministicStart = async () => {
+      if (isAutoStarting) return; // Prevent multiple initializations
+      
+      setIsAutoStarting(true);
+      console.log('🎯 Phase 1: Initializing deterministic auto-start...');
+      
       try {
-        await fetch(`/api/demo/start?seed=42&heatId=93378`);
-        console.log('✓ LazyFlow simulator auto-started for seamless demos');
-      } catch (e) {
-        console.error('✗ Failed to auto-start simulator:', e);
+        // Parse URL parameters for deterministic demo
+        const urlParams = new URLSearchParams(window.location.search);
+        const seed = parseInt(urlParams.get('seed') || '42');
+        const heatId = parseInt(urlParams.get('heatId') || '93378');
+        const scenario = urlParams.get('scenario') || '';
+        
+        console.log(`🔄 Deterministic start: seed=${seed}, heatId=${heatId}, scenario=${scenario}`);
+        
+        // Use the new deterministic reset endpoint for consistent behavior
+        const resetParams = new URLSearchParams({
+          seed: seed.toString(),
+          heatId: heatId.toString()
+        });
+        
+        if (scenario) {
+          resetParams.set('scenario', scenario);
+          // Add injection timing based on scenario
+          const injectAtSec = getScenarioInjectTime(scenario);
+          if (injectAtSec) {
+            resetParams.set('injectAtSec', injectAtSec.toString());
+          }
+        }
+        
+        const response = await fetch(`/api/demo/reset?${resetParams.toString()}`);
+        const result = await response.json();
+        
+        if (result.ok) {
+          console.log('✅ Deterministic auto-start successful:', result);
+          
+          toast({
+            title: "Factory Demo Ready",
+            description: scenario 
+              ? `Heat ${result.heatId} with ${scenario} scenario loaded (seed=${result.seed})`
+              : `Heat ${result.heatId} baseline loaded (seed=${result.seed})`,
+            variant: "default",
+          });
+        } else {
+          throw new Error(result.error || 'Deterministic start failed');
+        }
+        
+      } catch (error) {
+        console.error('❌ Deterministic auto-start failed:', error);
+        
+        toast({
+          title: "Auto-Start Issue",
+          description: "Falling back to manual controls",
+          variant: "destructive",
+        });
+      } finally {
+        setIsAutoStarting(false);
       }
-    })();
-  }, []);
+    };
+
+    initializeDeterministicStart();
+  }, [toast]);
+
+  // Helper function to get scenario injection times
+  const getScenarioInjectTime = (scenarioId: string): number | null => {
+    const scenarioTimes: { [key: string]: number } = {
+      'energy-spike': 120,
+      'foam-collapse': 180,
+      'temp-risk': 240,
+      'power-factor': 300
+    };
+    return scenarioTimes[scenarioId] || null;
+  };
 
   // Execute predictive action
   const executeAction = async (action: PredictiveAction) => {
@@ -174,6 +337,29 @@ export default function MissionControl() {
       "space-y-6 p-6",
       isMobile && "p-4 space-y-4"
     )}>
+      
+      {/* Phase 4: Persona Switch - Transform view for different stakeholders */}
+      <PersonaSwitch 
+        currentPersona={currentPersona}
+        onPersonaChange={changePersona}
+        compact={isMobile}
+        className="mb-4"
+      />
+      
+      {/* Phase 3: Sync Guard Banner - Shows ΔT decay and € impact */}
+      <PersonaConditional persona={['manager', 'cfo']} currentPersona={currentPersona}>
+        <SyncGuardBanner 
+          heatId={heat?.heat || 93378}
+          onMitigationChosen={(mitigation) => {
+            toast({
+              title: "Mitigation Applied",
+              description: `${mitigation.name} - Monitoring for temperature improvements`,
+              variant: "default",
+            });
+            console.log('🎯 Sync Guard mitigation chosen:', mitigation);
+          }}
+        />
+      </PersonaConditional>
       
       {/* Hero Insight Section - The ONE thing that matters */}
       <Card className="border-l-4 border-l-blue-500 shadow-lg">
@@ -242,90 +428,208 @@ export default function MissionControl() {
         </CardHeader>
 
         <CardContent>
-          {/* One-click action button for hero insight */}
+          {/* Primary action button (main hero insight action) */}
           {heroInsight.actionable && heroInsight.actionLabel && (
-            <Button 
-              variant={HeroInsightCalculator.getActionButtonVariant(heroInsight)}
-              size="lg"
-              className="w-full sm:w-auto"
-              onClick={() => {
-                if (heroInsight.actionType === 'fix') {
-                  applyRecovery();
-                } else {
-                  toast({
-                    title: heroInsight.actionLabel,
-                    description: "Action initiated - monitoring progress",
-                  });
-                }
-              }}
-            >
-              {heroInsight.actionLabel}
-            </Button>
+            <div className="mb-4">
+              <Button 
+                variant={HeroInsightCalculator.getActionButtonVariant(heroInsight)}
+                size="lg"
+                className="w-full"
+                onClick={() => {
+                  if (heroInsight.actionType === 'fix') {
+                    applyRecovery();
+                  } else {
+                    toast({
+                      title: heroInsight.actionLabel,
+                      description: "Action initiated - monitoring progress",
+                    });
+                  }
+                }}
+              >
+                {heroInsight.actionLabel}
+              </Button>
+            </div>
           )}
           
+          {/* Secondary control buttons - separated for better layout */}
+          <PersonaConditional exclude={['cfo']} currentPersona={currentPersona}>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {/* Manual start button (requested by user) */}
+              <Button 
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    setIsAutoStarting(true);
+                    const status = await autoStartService.manualStart();
+                    toast({
+                      title: "Manual Start",
+                      description: `Heat ${status.heatId} started manually`,
+                    });
+                  } catch (error) {
+                    toast({
+                      title: "Start Failed",
+                      description: "Could not start simulation",
+                      variant: "destructive",
+                    });
+                  } finally {
+                    setIsAutoStarting(false);
+                  }
+                }}
+                disabled={isAutoStarting}
+                className="text-xs"
+              >
+                {isAutoStarting ? "Starting..." : "🚀 Manual Start"}
+              </Button>
+              
+              {/* Reset button for G2 */}
+              <Button 
+                variant="secondary"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const status = await autoStartService.reset(42);
+                    toast({
+                      title: "Reset Complete",
+                      description: `Baseline restored with seed=${status.seed}`,
+                    });
+                  } catch (error) {
+                    toast({
+                      title: "Reset Failed",
+                      description: "Could not reset to baseline",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                className="text-xs"
+              >
+                🔄 Reset & Seed
+              </Button>
+            </div>
+          </PersonaConditional>
+          
+          {/* Phase 4: CFO-specific ROI PDF download */}
+          <PersonaConditional persona={['manager', 'cfo']} currentPersona={currentPersona}>
+            <div className="mb-4">
+              <Button 
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const response = await fetch(`/api/roi/pdf?heatId=${heat?.heat || 93378}`);
+                    if (!response.ok) throw new Error('PDF generation failed');
+                    
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `I-MELT-ROI-Report-Heat-${heat?.heat || 93378}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    
+                    toast({
+                      title: "ROI Report Generated",
+                      description: "Professional PDF report downloaded successfully",
+                    });
+                  } catch (error) {
+                    toast({
+                      title: "PDF Generation Failed",
+                      description: "Could not generate ROI report",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                className="text-xs w-full"
+              >
+                📊 Download ROI PDF Report
+              </Button>
+            </div>
+          </PersonaConditional>
+          
           {/* Context explanation */}
-          <p className="text-sm text-gray-600 mt-3">
+          <p className="text-sm text-gray-600">
             💡 {heroInsight.context}
           </p>
         </CardContent>
       </Card>
 
       {/* Predictive Actions Section - Smart suggestions */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {predictiveActions.map((action, index) => (
-          <Card key={action.id} className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">{action.icon}</span>
-                  <CardTitle className="text-lg">{action.title}</CardTitle>
-                </div>
-                <Badge 
-                  className={cn(
-                    "text-xs",
-                    PredictiveActionEngine.getPriorityBadgeColor(action.priority)
-                  )}
-                >
-                  {action.priority}
-                </Badge>
-              </div>
-              <CardDescription>{action.description}</CardDescription>
-            </CardHeader>
-
-            <CardContent className="space-y-3">
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>⏱ {action.estimatedTime}</span>
-                <span>📈 {action.expectedBenefit}</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">
-                  {action.confidence}% confidence
-                </span>
-                
-                {action.oneClickAvailable ? (
-                  <Button
-                    variant={PredictiveActionEngine.getActionButtonVariant(action)}
-                    size="sm"
-                    onClick={() => executeAction(action)}
-                    disabled={executingAction === action.id}
+      <PersonaConditional exclude={['cfo']} currentPersona={currentPersona}>
+        <div className="grid gap-4 md:grid-cols-3">
+          {predictiveActions.map((action, index) => (
+            <Card key={action.id} className="hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{action.icon}</span>
+                    <CardTitle className="text-lg">{action.title}</CardTitle>
+                  </div>
+                  <Badge 
+                    className={cn(
+                      "text-xs",
+                      PredictiveActionEngine.getPriorityBadgeColor(action.priority)
+                    )}
                   >
-                    {executingAction === action.id ? 'Executing...' : 'Execute'}
-                  </Button>
-                ) : (
-                  <Button variant="outline" size="sm">
-                    Manual
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                    {action.priority}
+                  </Badge>
+                </div>
+                <CardDescription>{action.description}</CardDescription>
+              </CardHeader>
+
+              <CardContent className="space-y-3">
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>⏱ {action.estimatedTime}</span>
+                  <span>📈 {action.expectedBenefit}</span>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500">
+                    {action.confidence}% confidence
+                  </span>
+                  
+                  {action.oneClickAvailable ? (
+                    <Button
+                      variant={PredictiveActionEngine.getActionButtonVariant(action)}
+                      size="sm"
+                      onClick={() => executeAction(action)}
+                      disabled={executingAction === action.id}
+                    >
+                      {executingAction === action.id ? 'Executing...' : 'Execute'}
+                    </Button>
+                  ) : (
+                    <Button variant="outline" size="sm">
+                      Manual
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </PersonaConditional>
+
+      {/* Phase 1: Deterministic Reset Controls for Factory Demos */}
+      <PersonaConditional exclude={['cfo']} currentPersona={currentPersona}>
+        <ResetControls 
+          className="mb-6"
+          onReset={(params) => {
+            console.log('🔄 Reset executed with params:', params);
+            // The component handles URL updates and API calls
+            // This callback can be used for additional state updates if needed
+          }}
+        />
+      </PersonaConditional>
 
       {/* Ambient Details - Background context */}
       <div className="bg-gray-50 rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">System Overview</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          {currentPersona === 'cfo' ? 'Financial Overview' : 
+           currentPersona === 'manager' ? 'KPI Dashboard' : 
+           currentPersona === 'metallurgist' ? 'Process Parameters' : 
+           'System Overview'}
+        </h2>
         <AmbientDetailsGrid heatData={heat} />
       </div>
 

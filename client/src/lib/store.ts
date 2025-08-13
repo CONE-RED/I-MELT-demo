@@ -1,5 +1,5 @@
 import { createStore } from 'redux';
-import { AppState, AppAction, HeatData, Insight } from '@/types';
+import { AppState, AppAction, HeatData, Insight, ConnectionMetrics } from '@/types';
 
 // Default heat data from the Markdown tables
 const defaultHeatData = {
@@ -35,20 +35,20 @@ const defaultHeatData = {
     }
   ],
   stages: [
-    { bucket: 1, stage: 10, plannedEnergy: 0.38, actualEnergy: 0.38, plannedTime: "00:24", actualTime: "00:23", profile: 3, temp: null, status: "done" },
-    { bucket: 1, stage: 12, plannedEnergy: 0.19, actualEnergy: 0.20, plannedTime: "00:09", actualTime: "00:10", profile: 3, temp: null, status: "done" },
-    { bucket: 1, stage: 14, plannedEnergy: 0.20, actualEnergy: 0.20, plannedTime: "00:09", actualTime: "00:10", profile: 3, temp: null, status: "done" },
-    { bucket: 1, stage: 15, plannedEnergy: 0.18, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 5, temp: null, status: "current" },
-    { bucket: 1, stage: 16, plannedEnergy: 0.20, actualEnergy: null, plannedTime: "00:08", actualTime: null, profile: 5, temp: null, status: "planned" },
-    { bucket: 1, stage: 18, plannedEnergy: 20.02, actualEnergy: null, plannedTime: "15:31", actualTime: null, profile: 5, temp: null, status: "planned" },
-    { bucket: 2, stage: 10, plannedEnergy: 0.389, actualEnergy: null, plannedTime: "00:24", actualTime: null, profile: 4, temp: null, status: "planned" },
-    { bucket: 2, stage: 12, plannedEnergy: 0.21, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 4, temp: null, status: "planned" },
-    { bucket: 2, stage: 14, plannedEnergy: 0.20, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 4, temp: null, status: "planned" },
-    { bucket: 2, stage: 15, plannedEnergy: 0.18, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 4, temp: null, status: "planned" },
-    { bucket: 2, stage: 16, plannedEnergy: 0.20, actualEnergy: null, plannedTime: "00:08", actualTime: null, profile: 5, temp: null, status: "planned" },
-    { bucket: 2, stage: 18, plannedEnergy: 9.05, actualEnergy: null, plannedTime: "00:08", actualTime: null, profile: 5, temp: null, status: "planned" },
-    { bucket: 2, stage: 18, plannedEnergy: 0.37, actualEnergy: null, plannedTime: "00:06", actualTime: null, profile: 5, temp: null, status: "planned" },
-    { bucket: 2, stage: 17, plannedEnergy: 23.4, actualEnergy: null, plannedTime: "00:16:42", actualTime: null, profile: 3, temp: 1590, status: "planned" }
+    { bucket: 1, stage: 10, plannedEnergy: 0.38, actualEnergy: 0.38, plannedTime: "00:24", actualTime: "00:23", profile: 3, temp: null, status: "done" as const },
+    { bucket: 1, stage: 12, plannedEnergy: 0.19, actualEnergy: 0.20, plannedTime: "00:09", actualTime: "00:10", profile: 3, temp: null, status: "done" as const },
+    { bucket: 1, stage: 14, plannedEnergy: 0.20, actualEnergy: 0.20, plannedTime: "00:09", actualTime: "00:10", profile: 3, temp: null, status: "done" as const },
+    { bucket: 1, stage: 15, plannedEnergy: 0.18, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 5, temp: null, status: "current" as const },
+    { bucket: 1, stage: 16, plannedEnergy: 0.20, actualEnergy: null, plannedTime: "00:08", actualTime: null, profile: 5, temp: null, status: "planned" as const },
+    { bucket: 1, stage: 18, plannedEnergy: 20.02, actualEnergy: null, plannedTime: "15:31", actualTime: null, profile: 5, temp: null, status: "planned" as const },
+    { bucket: 2, stage: 10, plannedEnergy: 0.389, actualEnergy: null, plannedTime: "00:24", actualTime: null, profile: 4, temp: null, status: "planned" as const },
+    { bucket: 2, stage: 12, plannedEnergy: 0.21, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 4, temp: null, status: "planned" as const },
+    { bucket: 2, stage: 14, plannedEnergy: 0.20, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 4, temp: null, status: "planned" as const },
+    { bucket: 2, stage: 15, plannedEnergy: 0.18, actualEnergy: null, plannedTime: "00:09", actualTime: null, profile: 4, temp: null, status: "planned" as const },
+    { bucket: 2, stage: 16, plannedEnergy: 0.20, actualEnergy: null, plannedTime: "00:08", actualTime: null, profile: 5, temp: null, status: "planned" as const },
+    { bucket: 2, stage: 18, plannedEnergy: 9.05, actualEnergy: null, plannedTime: "00:08", actualTime: null, profile: 5, temp: null, status: "planned" as const },
+    { bucket: 2, stage: 18, plannedEnergy: 0.37, actualEnergy: null, plannedTime: "00:06", actualTime: null, profile: 5, temp: null, status: "planned" as const },
+    { bucket: 2, stage: 17, plannedEnergy: 23.4, actualEnergy: null, plannedTime: "00:16:42", actualTime: null, profile: 3, temp: 1590, status: "planned" as const }
   ],
   additives: [
     { bucket: 1, stage: 18, name: "Lime 3-80 mm", weight: 3002, energy: 16.8 },
@@ -70,7 +70,7 @@ const defaultHeatData = {
     "Mo": 0.027,
     "N2": null,
     "Sn": null
-  },
+  } as Record<string, number | null>,
   chemSlag: {
     "CaO": 0.090,
     "SiO2": 0.140,
@@ -84,11 +84,11 @@ const defaultHeatData = {
     "Mo": 0.027,
     "N2": null,
     "Basicity": null
-  },
+  } as Record<string, number | null>,
   insights: [
     {
       id: "ins-01",
-      type: "critical",
+      type: "critical" as const,
       title: "Critical Action Required",
       message: "Increase carbon addition by 0.42t in next 5 minutes to avoid composition drift. Current trajectory shows 0.19% below target.",
       timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
@@ -97,7 +97,7 @@ const defaultHeatData = {
     },
     {
       id: "ins-02",
-      type: "optimization",
+      type: "optimization" as const,
       title: "Energy Optimization",
       message: "Switch to profile 4 during stages 15-16 to reduce energy consumption by 8.7% based on historical data pattern.",
       timestamp: new Date(Date.now() - 15 * 60000).toISOString(),
@@ -106,7 +106,7 @@ const defaultHeatData = {
     },
     {
       id: "ins-03",
-      type: "trend",
+      type: "trend" as const,
       title: "Manganese Trend Detected",
       message: "Mn levels trending 0.02% higher than previous 5 heats of same grade. Consider adjusting FeMn addition in bucket 2.",
       timestamp: new Date(Date.now() - 30 * 60000).toISOString(),
@@ -124,6 +124,13 @@ const initialState: AppState = {
   loading: false,
   error: null,
   wsConnected: false,
+  connectionMetrics: {
+    latency: 0,
+    isBuffering: false,
+    bufferSize: 0,
+    reconnectAttempts: 0,
+    lastServerTick: 0
+  },
   selectedTab: 'insights',
   chemViewMode: 'absolute',
   chemActiveView: 'steel',
@@ -157,6 +164,11 @@ function reducer(state: AppState = initialState, action: AppAction): AppState {
       return {
         ...state,
         wsConnected: action.payload
+      };
+    case 'SET_CONNECTION_METRICS':
+      return {
+        ...state,
+        connectionMetrics: action.payload
       };
     case 'SET_HEAT_DATA':
       return {

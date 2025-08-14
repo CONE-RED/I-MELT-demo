@@ -98,12 +98,12 @@ export default function HeatHeaderCard({
       
       {/* Progressive Details - Personnel Info */}
       <ProgressiveDetails
-        summary={
+        primary={
           <div className="text-xs text-cone-gray">
             {formattedDate}
           </div>
         }
-        details={
+        secondary={
           <div className="grid grid-cols-1 gap-2 text-xs">
             <div className="flex justify-between">
               <span className="text-cone-gray">{labels[lang].master}</span>
@@ -115,8 +115,6 @@ export default function HeatHeaderCard({
             </div>
           </div>
         }
-        expandText="Show personnel"
-        collapseText="Hide personnel"
       />
     </div>
   );

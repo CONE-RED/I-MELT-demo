@@ -45,10 +45,10 @@ function NavItem({ icon, label, labelRu, active, onClick }: NavItemProps) {
   const isMobile = useMobile();
   
   return (
-    <a 
-      href="#" 
+    <button 
+      type="button"
       className={cn(
-        "flex items-center gap-2 py-2 px-3 rounded-md transition",
+        "w-full flex items-center gap-2 py-2 px-3 rounded-md transition text-left",
         isMobile && "flex-col items-center px-1",
         active 
           ? "text-cone-red bg-red-50 border-l-2 border-cone-red" 
@@ -56,14 +56,24 @@ function NavItem({ icon, label, labelRu, active, onClick }: NavItemProps) {
       )}
       onClick={(e) => {
         e.preventDefault();
-        onClick?.();
+        console.log(`🔗 Navigation: Clicking ${label}`, onClick ? 'with handler' : 'no handler');
+        try {
+          if (onClick) {
+            onClick();
+            console.log(`✅ Navigation: Successfully executed ${label} handler`);
+          } else {
+            console.error(`❌ Navigation: No handler for ${label}`);
+          }
+        } catch (error) {
+          console.error(`❌ Navigation: Error executing ${label} handler:`, error);
+        }
       }}
     >
       {icon}
       <span className={cn(isMobile && "text-xs")}>
         {language === 'en' ? label : labelRu}
       </span>
-    </a>
+    </button>
   );
 }
 

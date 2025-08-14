@@ -12,6 +12,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ChevronDown } from 'lucide-react';
 import NotificationCenter, { Notification } from '@/components/ui/notification-center';
+import { CompactLatencyBadge } from '@/components/ui/LatencyBadge';
+import SecurityIntegrationDrawer from '@/components/security/SecurityIntegrationDrawer';
+import PersonaSwitch from '@/components/ui/PersonaSwitch';
+import { useGlobalPersona } from '@/context/PersonaContext';
 
 export default function TopBar() {
   const dispatch = useDispatch();
@@ -19,6 +23,9 @@ export default function TopBar() {
   
   const [openHeatSelector, setOpenHeatSelector] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  
+  // Global persona state for entire application
+  const { currentPersona, setPersona } = useGlobalPersona();
   
   const toggleLanguage = () => {
     dispatch({ type: 'SET_LANGUAGE', payload: language === 'en' ? 'ru' : 'en' });
@@ -110,8 +117,8 @@ export default function TopBar() {
         </div>
       </div>
       
-      {/* Heat Selector */}
-      <div className="flex items-center gap-4">
+      {/* Heat Selector & Persona Switch */}
+      <div className="flex items-center gap-6">
         <div className="flex items-center gap-2">
           <span>{language === 'en' ? 'Heat' : 'Плавка'}</span>
           <DropdownMenu open={openHeatSelector} onOpenChange={setOpenHeatSelector}>
@@ -130,6 +137,14 @@ export default function TopBar() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        
+        {/* Global Persona Switch */}
+        <PersonaSwitch 
+          currentPersona={currentPersona}
+          onPersonaChange={setPersona}
+          compact={true}
+        />
+        
         <div className="text-gray-600">
           {heat?.ts ? new Date(heat.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
         </div>
@@ -137,6 +152,12 @@ export default function TopBar() {
       
       {/* Notification Center & Language Toggle */}
       <div className="flex items-center gap-4">
+        {/* Phase 5: Security & Integration drawer for ops trust */}
+        <SecurityIntegrationDrawer />
+        
+        {/* Phase 5: Latency badge for ops reliability */}
+        <CompactLatencyBadge />
+        
         <NotificationCenter
           notifications={notifications}
           onAcknowledge={handleAcknowledge}

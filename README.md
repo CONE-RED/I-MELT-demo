@@ -115,6 +115,18 @@ A: If your potato can run Chrome, you're golden.
 **Q: Is this production ready?**  
 A: For demos? Absolutely. For actual steel production? Please consult actual metallurgists and probably several lawyers.
 
+## Documentation 📚
+
+For developers and Claude agents working on this project:
+
+🧭 **[Technical Documentation](./docs/README.md)** - Intelligent navigation guide with:
+- Architecture and UX enhancement plans
+- Testing strategies and ATDD specifications  
+- Strategic roadmaps and implementation priorities
+- Git workflow and demo preparation guides
+
+The documentation is organized for quick agent navigation with decision frameworks and success metrics.
+
 ## Contributing 🤝
 
 Found a bug? Want to add more realistic steel chemistry? Think our AI insights could be funnier? 
@@ -123,6 +135,7 @@ We welcome contributions! Just remember:
 - Keep it professional (we're selling to executives)
 - Keep it accurate (engineers will check)
 - Keep it impressive (investors have short attention spans)
+- Check the [docs/](./docs/README.md) for implementation guidance
 
 ## License 📄
 

@@ -6,8 +6,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/lib/store';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, store } from '@/lib/store';
 import { HeroInsightCalculator, HeroInsight } from '@/lib/HeroInsightCalculator';
 import { PredictiveActionEngine, PredictiveAction } from '@/lib/PredictiveActionEngine';
 import { HeroConfidenceRing } from '@/components/ui/ConfidenceRingIndicator';
@@ -19,9 +19,9 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import useMobile from '@/hooks/use-mobile';
 import { autoStartService, AutoStartConfig } from '@/lib/AutoStartService';
-import ResetControls from '@/components/demo/ResetControls';
 import SyncGuardBanner from '@/components/industrial/SyncGuardBanner';
-import PersonaSwitch, { usePersona, PersonaConditional, PERSONA_COPY, type PersonaType } from '@/components/ui/PersonaSwitch';
+import { PersonaConditional, PERSONA_COPY, type PersonaType } from '@/components/ui/PersonaSwitch';
+import { useGlobalPersona } from '@/context/PersonaContext';
 
 // Keep essential demo hotkeys from original Dashboard
 import { useHotkeys } from '@/hooks/useHotkeys';
@@ -31,6 +31,7 @@ import AIChatWidget from '@/components/chat/AIChatWidget';
 export default function MissionControl() {
   const heat = useSelector((state: RootState) => state.heat);
   const loading = useSelector((state: RootState) => state.loading);
+  const dispatch = useDispatch();
   const isMobile = useMobile();
   const { toast } = useToast();
   
@@ -39,20 +40,106 @@ export default function MissionControl() {
   const [showCheatSheet, setShowCheatSheet] = useState(false);
   const [executingAction, setExecutingAction] = useState<string | null>(null);
   const [isAutoStarting, setIsAutoStarting] = useState(false);
+  const [lastUpdateInfo, setLastUpdateInfo] = useState<{seed: number | null, heatId: number | null, timestamp: string} | null>(null);
+  const [showUpdateIndicator, setShowUpdateIndicator] = useState(false);
+  const [resolvedIssues, setResolvedIssues] = useState<Set<string>>(new Set());
+  const [isResolvingCrisis, setIsResolvingCrisis] = useState(false);
+  const [recentlyExecutedActions, setRecentlyExecutedActions] = useState<Set<string>>(new Set());
   
-  // Phase 4: Persona management
-  const { currentPersona, changePersona, personaConfig, shouldShow } = usePersona('operator');
+  // Phase 4: Persona management - now global via context
+  const { currentPersona } = useGlobalPersona();
+
+  // Helper function to update Redux store with dynamic simulation data
+  const updateHeatDataFromSimulation = async (heatId: number | null, seed: number | null) => {
+    try {
+      if (!heatId) heatId = 93378; // default fallback
+      console.log(`🔄 Updating heat data from simulation: heatId=${heatId}, seed=${seed}`);
+      
+      // TEMPORARY FIX: Generate dynamic heat data from simulation API data
+      // Get fresh simulation state
+      const simResponse = await fetch(`/api/demo/reset?seed=${seed}&heatId=${heatId}`);
+      if (!simResponse.ok) throw new Error('Failed to fetch simulation data');
+      const simData = await simResponse.json();
+      
+      // Get base heat structure from static API
+      const baseResponse = await fetch(`/api/heat/${heatId}`);
+      if (!baseResponse.ok) throw new Error('Failed to fetch base heat data');
+      const baseHeatData = await baseResponse.json();
+      
+      // Merge simulation data into heat structure for realistic dynamic behavior
+      const updatedHeatData = {
+        ...baseHeatData,
+        confidence: simData.confidence || baseHeatData.confidence,
+        // Update insights with seed-specific variations
+        insights: baseHeatData.insights.map((insight: any, idx: number) => ({
+          ...insight,
+          // Add seed-based variation to insight messages
+          message: seed && seed !== 42 ? 
+            insight.message.replace(/0\.\d+/g, (match: string) => {
+              const val = parseFloat(match);
+              const variation = ((seed % 100) / 100 - 0.5) * 0.1; // ±5% variation
+              return (val + variation).toFixed(3);
+            }) : insight.message,
+          timestamp: new Date(Date.now() - (idx * 5 * 60000) - ((seed || 42) % 10) * 1000).toISOString()
+        })),
+        // Update chemistry with seed-based variations for visible differences
+        chemSteel: Object.fromEntries(
+          Object.entries(baseHeatData.chemSteel).map(([key, value]) => [
+            key, 
+            value !== null && seed ? 
+              Math.round((value + ((seed % 13) / 100 - 0.065) * value) * 1000) / 1000 :
+              value
+          ])
+        ),
+        // Update some stage data to show seed effects
+        stages: baseHeatData.stages.map((stage: any) => ({
+          ...stage,
+          actualEnergy: stage.actualEnergy !== null && seed ? 
+            Math.round((stage.actualEnergy + ((seed % 7) / 100 - 0.035) * stage.actualEnergy) * 100) / 100 :
+            stage.actualEnergy
+        })),
+        // Add simulation metadata
+        _simulationSeed: seed,
+        _lastUpdate: new Date().toISOString()
+      };
+      
+      // Update Redux store with the new dynamic data
+      dispatch({ 
+        type: 'SET_HEAT_DATA', 
+        payload: updatedHeatData 
+      });
+      
+      console.log(`✅ Heat data updated with seed ${seed} variations:`, {
+        seed: updatedHeatData._simulationSeed,
+        confidence: updatedHeatData.confidence,
+        firstInsightMessage: updatedHeatData.insights[0]?.message?.substring(0, 50) + '...'
+      });
+
+      // Update visual feedback state
+      setLastUpdateInfo({
+        seed: seed,
+        heatId: heatId,
+        timestamp: new Date().toLocaleTimeString()
+      });
+      
+      // Show update indicator briefly
+      setShowUpdateIndicator(true);
+      setTimeout(() => setShowUpdateIndicator(false), 3000);
+    } catch (error) {
+      console.error('❌ Failed to update heat data from simulation:', error);
+    }
+  };
 
   // LazyFlow: Calculate hero insight and actions when heat data changes
   useEffect(() => {
     if (heat) {
-      const insight = HeroInsightCalculator.calculateHeroInsight(heat);
+      const insight = HeroInsightCalculator.calculateHeroInsight(heat, currentPersona);
       const actions = PredictiveActionEngine.generateNextActions(heat);
       
       setHeroInsight(insight);
       setPredictiveActions(actions);
     }
-  }, [heat]);
+  }, [heat, currentPersona]);
 
   // Demo scenario hotkey handlers (preserve from original Dashboard)
   const triggerScenario = async (scenarioId: string) => {
@@ -145,6 +232,10 @@ export default function MissionControl() {
   const resetToBaseline = async () => {
     try {
       const status = await autoStartService.reset(42);
+      
+      // Fetch updated heat data and update Redux store
+      await updateHeatDataFromSimulation(status.heatId, status.seed);
+      
       toast({
         title: "Baseline Restored",
         description: `Reset complete with seed=${status.seed}`,
@@ -287,20 +378,102 @@ export default function MissionControl() {
     setExecutingAction(action.id);
     
     try {
-      const result = await PredictiveActionEngine.executeAction(action);
+      // Make API call to execute action
+      const response = await fetch(action.apiEndpoint!, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(action.parameters || {})
+      });
+
+      const result = await response.json();
       
-      if (result.success) {
+      if (response.ok && result.ok) {
+        // Update the heat data in Redux with the action results
+        if (heat && result.result) {
+          const updatedHeat = { ...heat };
+          
+          // Update chemistry values based on action type
+          if (action.id === 'adjust-carbon-content' && result.result.newCarbonLevel) {
+            updatedHeat.chemSteel = {
+              ...updatedHeat.chemSteel,
+              C: result.result.newCarbonLevel
+            };
+          }
+          
+          if (action.id === 'reduce-sulfur-content' && result.result.newSulfurLevel) {
+            updatedHeat.chemSteel = {
+              ...updatedHeat.chemSteel,
+              S: result.result.newSulfurLevel
+            };
+          }
+          
+          if (action.id === 'adjust-silicon-content' && result.result.newSiliconLevel) {
+            updatedHeat.chemSteel = {
+              ...updatedHeat.chemSteel,
+              Si: result.result.newSiliconLevel
+            };
+          }
+
+          // Update confidence if provided
+          if (result.result.confidence) {
+            updatedHeat.confidence = result.result.confidence;
+          }
+
+          // Add action execution to insights
+          const actionInsight = {
+            id: `action-${action.id}-${Date.now()}`,
+            title: action.title,
+            message: result.result.message || `${action.title} completed successfully`,
+            type: 'info' as const,
+            severity: 'info' as const,
+            timestamp: new Date().toISOString(),
+            confidence: result.result.confidence || 95,
+            acknowledged: false,
+            category: action.category,
+            actionExecuted: true
+          };
+
+          updatedHeat.insights = [actionInsight, ...(updatedHeat.insights || [])];
+          updatedHeat._lastActionExecuted = {
+            actionId: action.id,
+            timestamp: new Date().toISOString(),
+            result: result.result
+          };
+
+          // Update Redux store
+          dispatch({ type: 'SET_HEAT_DATA', payload: updatedHeat });
+
+          console.log(`✅ Action executed and heat data updated:`, {
+            action: action.id,
+            chemistry: updatedHeat.chemSteel,
+            confidence: updatedHeat.confidence
+          });
+        }
+
+        // Mark action as recently executed for visual feedback
+        setRecentlyExecutedActions(prev => new Set([...prev, action.id]));
+        
+        // Clear the visual indicator after 5 seconds
+        setTimeout(() => {
+          setRecentlyExecutedActions(prev => {
+            const next = new Set(prev);
+            next.delete(action.id);
+            return next;
+          });
+        }, 5000);
+
         toast({
           title: "Action Completed",
-          description: result.message,
+          description: result.result?.message || `${action.title} executed successfully`,
           variant: "default",
         });
         
         // Refresh insights after action
         setTimeout(() => {
           if (heat) {
-            const newInsight = HeroInsightCalculator.calculateHeroInsight(heat);
-            const newActions = PredictiveActionEngine.generateNextActions(heat);
+            const updatedHeatData = heat;
+            const newInsight = HeroInsightCalculator.calculateHeroInsight(updatedHeatData, currentPersona);
+            const newActions = PredictiveActionEngine.generateNextActions(updatedHeatData);
             setHeroInsight(newInsight);
             setPredictiveActions(newActions);
           }
@@ -338,13 +511,21 @@ export default function MissionControl() {
       isMobile && "p-4 space-y-4"
     )}>
       
-      {/* Phase 4: Persona Switch - Transform view for different stakeholders */}
-      <PersonaSwitch 
-        currentPersona={currentPersona}
-        onPersonaChange={changePersona}
-        compact={isMobile}
-        className="mb-4"
-      />
+
+      {/* Day 3: Visual Feedback for Parameter Changes */}
+      {showUpdateIndicator && lastUpdateInfo && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 animate-pulse">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
+            <span className="text-sm font-medium text-blue-800">
+              Data Updated Successfully
+            </span>
+            <span className="text-xs text-blue-600">
+              Seed {lastUpdateInfo.seed} • Heat {lastUpdateInfo.heatId} • {lastUpdateInfo.timestamp}
+            </span>
+          </div>
+        </div>
+      )}
       
       {/* Phase 3: Sync Guard Banner - Shows ΔT decay and € impact */}
       <PersonaConditional persona={['manager', 'cfo']} currentPersona={currentPersona}>
@@ -380,19 +561,29 @@ export default function MissionControl() {
             </div>
             
             {/* Hero confidence indicator */}
-            <div className={cn("flex-shrink-0", isMobile && "hidden")}>
+            <div className={cn(
+              "flex-shrink-0 relative transition-all duration-500",
+              isMobile && "hidden",
+              showUpdateIndicator && "ring-2 ring-blue-200 ring-opacity-50 rounded-full"
+            )}>
               <HeroConfidenceRing 
                 confidence={heroInsight.confidence}
                 title="AI Confidence"
                 className="ml-6"
               />
+              {showUpdateIndicator && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-ping"></div>
+              )}
             </div>
           </div>
           
           {/* Key metrics row */}
           <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100">
             {heroInsight.value && (
-              <div className="flex items-baseline gap-2">
+              <div className={cn(
+                "flex items-baseline gap-2 transition-all duration-500",
+                showUpdateIndicator && "bg-yellow-50 px-2 py-1 rounded border border-yellow-200"
+              )}>
                 <span className="text-3xl font-bold text-gray-900">
                   {heroInsight.value}
                 </span>
@@ -435,18 +626,77 @@ export default function MissionControl() {
                 variant={HeroInsightCalculator.getActionButtonVariant(heroInsight)}
                 size="lg"
                 className="w-full"
-                onClick={() => {
+                disabled={isResolvingCrisis}
+                onClick={async () => {
                   if (heroInsight.actionType === 'fix') {
-                    applyRecovery();
+                    setIsResolvingCrisis(true);
+                    
+                    // Mark this critical issue as resolved
+                    const newResolvedIssues = new Set(resolvedIssues);
+                    newResolvedIssues.add(heroInsight.id);
+                    setResolvedIssues(newResolvedIssues);
+                    
+                    try {
+                      await applyRecovery();
+                      
+                      // Show immediate success feedback
+                      toast({
+                        title: "Crisis Resolved! ✅",
+                        description: "AI recovery actions successful - system stabilized",
+                        variant: "default",
+                      });
+                      
+                      // Immediately update to show resolution
+                      setTimeout(() => {
+                        if (heat) {
+                          // Create modified heat data that doesn't have critical insights
+                          const modifiedHeat = {
+                            ...heat,
+                            insights: heat.insights?.map(insight => 
+                              newResolvedIssues.has(`critical-${insight.id}`) 
+                                ? { ...insight, acknowledged: true }
+                                : insight
+                            ) || [],
+                            confidence: Math.min(95, (heat.confidence || 85) + 10) // Boost confidence after fix
+                          };
+                          
+                          const newInsight = HeroInsightCalculator.calculateHeroInsight(modifiedHeat, currentPersona);
+                          const newActions = PredictiveActionEngine.generateNextActions(modifiedHeat);
+                          setHeroInsight(newInsight);
+                          setPredictiveActions(newActions);
+                        }
+                      }, 1000); // Quick update to show success
+                      
+                    } finally {
+                      setIsResolvingCrisis(false);
+                    }
+                    
                   } else {
                     toast({
                       title: heroInsight.actionLabel,
                       description: "Action initiated - monitoring progress",
                     });
+                    
+                    // For non-critical actions, also refresh insights  
+                    setTimeout(() => {
+                      if (heat) {
+                        const newInsight = HeroInsightCalculator.calculateHeroInsight(heat, currentPersona);
+                        const newActions = PredictiveActionEngine.generateNextActions(heat);
+                        setHeroInsight(newInsight);
+                        setPredictiveActions(newActions);
+                      }
+                    }, 1500);
                   }
                 }}
               >
-                {heroInsight.actionLabel}
+                {isResolvingCrisis ? (
+                  <>
+                    <span className="animate-spin mr-2">⚙️</span>
+                    Resolving Crisis...
+                  </>
+                ) : (
+                  heroInsight.actionLabel
+                )}
               </Button>
             </div>
           )}
@@ -462,6 +712,10 @@ export default function MissionControl() {
                   try {
                     setIsAutoStarting(true);
                     const status = await autoStartService.manualStart();
+                    
+                    // Fetch updated heat data and update Redux store
+                    await updateHeatDataFromSimulation(status.heatId, status.seed);
+                    
                     toast({
                       title: "Manual Start",
                       description: `Heat ${status.heatId} started manually`,
@@ -489,6 +743,10 @@ export default function MissionControl() {
                 onClick={async () => {
                   try {
                     const status = await autoStartService.reset(42);
+                    
+                    // Fetch updated heat data and update Redux store
+                    await updateHeatDataFromSimulation(status.heatId, status.seed);
+                    
                     toast({
                       title: "Reset Complete",
                       description: `Baseline restored with seed=${status.seed}`,
@@ -591,12 +849,20 @@ export default function MissionControl() {
                   
                   {action.oneClickAvailable ? (
                     <Button
-                      variant={PredictiveActionEngine.getActionButtonVariant(action)}
+                      variant={
+                        recentlyExecutedActions.has(action.id) 
+                          ? "default" 
+                          : PredictiveActionEngine.getActionButtonVariant(action)
+                      }
                       size="sm"
                       onClick={() => executeAction(action)}
                       disabled={executingAction === action.id}
+                      className={cn(
+                        recentlyExecutedActions.has(action.id) && "bg-green-600 hover:bg-green-700 text-white"
+                      )}
                     >
-                      {executingAction === action.id ? 'Executing...' : 'Execute'}
+                      {executingAction === action.id ? 'Executing...' : 
+                       recentlyExecutedActions.has(action.id) ? '✓ Completed' : 'Execute'}
                     </Button>
                   ) : (
                     <Button variant="outline" size="sm">
@@ -610,17 +876,6 @@ export default function MissionControl() {
         </div>
       </PersonaConditional>
 
-      {/* Phase 1: Deterministic Reset Controls for Factory Demos */}
-      <PersonaConditional exclude={['cfo']} currentPersona={currentPersona}>
-        <ResetControls 
-          className="mb-6"
-          onReset={(params) => {
-            console.log('🔄 Reset executed with params:', params);
-            // The component handles URL updates and API calls
-            // This callback can be used for additional state updates if needed
-          }}
-        />
-      </PersonaConditional>
 
       {/* Ambient Details - Background context */}
       <div className="bg-gray-50 rounded-lg p-6">
@@ -630,7 +885,7 @@ export default function MissionControl() {
            currentPersona === 'metallurgist' ? 'Process Parameters' : 
            'System Overview'}
         </h2>
-        <AmbientDetailsGrid heatData={heat} />
+        <AmbientDetailsGrid heatData={heat} persona={currentPersona} />
       </div>
 
       {/* Floating AI Chat Widget */}

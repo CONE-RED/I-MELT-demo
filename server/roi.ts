@@ -21,6 +21,7 @@ export interface Prices {
 export interface ROIResult {
   perHeat: number;
   perMonth: number;
+  perYear: number;
   breakdown: {
     energySaving: number;
     timeSaving: number;
@@ -30,6 +31,11 @@ export interface ROIResult {
     energyDelta: number; // kWh/t difference
     timeDelta: number; // min/heat difference
     electrodeDelta: number; // kg/heat difference
+  };
+  payback: {
+    months: number;
+    description: string;
+    investmentEstimate: number; // Estimated system cost
   };
 }
 
@@ -61,10 +67,23 @@ export function computeROI(baseline: Baseline, current: Current, prices: Prices)
   
   const perHeat = energySaving + timeSaving + electrodeSaving;
   const perMonth = perHeat * baseline.heatsPerDay * 30;
+  const perYear = perMonth * 12;
+  
+  // Calculate payback period (typical AI system investment estimate)
+  const investmentEstimate = 50000; // €50k for AI optimization system
+  const paybackMonths = perMonth > 0 ? investmentEstimate / perMonth : 36;
+  const paybackDescription = paybackMonths <= 6 
+    ? "Excellent ROI - under 6 months"
+    : paybackMonths <= 12 
+    ? "Good ROI - under 1 year"
+    : paybackMonths <= 24
+    ? "Acceptable ROI - under 2 years"
+    : "Long-term investment";
   
   return {
     perHeat,
     perMonth,
+    perYear,
     breakdown: {
       energySaving,
       timeSaving,
@@ -74,6 +93,11 @@ export function computeROI(baseline: Baseline, current: Current, prices: Prices)
       energyDelta,
       timeDelta,
       electrodeDelta
+    },
+    payback: {
+      months: Math.round(paybackMonths * 10) / 10, // Round to 1 decimal
+      description: paybackDescription,
+      investmentEstimate
     }
   };
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Zap, Droplets, Thermometer, RotateCcw } from 'lucide-react';
+import { X, Zap, Droplets, Thermometer, RotateCcw, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface CheatSheetOverlayProps {
@@ -31,6 +31,13 @@ const CheatSheetOverlay: React.FC<CheatSheetOverlayProps> = ({ isVisible, onClos
       title: 'Temperature Risk to Caster',
       description: 'Steel temperature approaching caster limits',
       impact: '+2 quality grades possible'
+    },
+    {
+      key: '4',
+      icon: <Clock className="w-5 h-5 text-orange-500" />,
+      title: 'Caster Delay - Sync Guard',
+      description: 'LF→CC route delayed causing temperature loss',
+      impact: 'Up to €60/heat savings potential'
     },
     {
       key: 'R',

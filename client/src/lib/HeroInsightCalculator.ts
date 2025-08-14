@@ -41,35 +41,35 @@ export class HeroInsightCalculator {
   /**
    * Core LazyFlow Method: Calculate the ONE thing that matters most right now
    */
-  static calculateHeroInsight(heatData: HeatData): HeroInsight {
+  static calculateHeroInsight(heatData: HeatData, persona?: string): HeroInsight {
     if (!heatData) {
       return this.createDefaultInsight();
     }
 
     // Priority 1: Critical Safety/Quality Issues
-    const criticalIssue = this.checkCriticalIssues(heatData);
+    const criticalIssue = this.checkCriticalIssues(heatData, persona);
     if (criticalIssue) return criticalIssue;
 
     // Priority 2: Urgent Process Deviations  
-    const urgentDeviation = this.checkUrgentDeviations(heatData);
+    const urgentDeviation = this.checkUrgentDeviations(heatData, persona);
     if (urgentDeviation) return urgentDeviation;
 
     // Priority 3: Optimization Opportunities
-    const optimization = this.checkOptimizationOpportunities(heatData);
+    const optimization = this.checkOptimizationOpportunities(heatData, persona);
     if (optimization) return optimization;
 
     // Priority 4: Process Monitoring
-    const processStatus = this.checkProcessStatus(heatData);
+    const processStatus = this.checkProcessStatus(heatData, persona);
     if (processStatus) return processStatus;
 
     // Fallback: General status
-    return this.createStatusInsight(heatData);
+    return this.createStatusInsight(heatData, persona);
   }
 
   /**
    * Critical Issues: Immediate action required (foam collapse, temperature spike, etc.)
    */
-  private static checkCriticalIssues(heatData: HeatData): HeroInsight | null {
+  private static checkCriticalIssues(heatData: HeatData, persona?: string): HeroInsight | null {
     const criticalInsights = heatData.insights?.filter(i => 
       i.type === 'critical' && !i.acknowledged
     ) || [];
@@ -135,7 +135,7 @@ export class HeroInsightCalculator {
   /**
    * Urgent Deviations: Important but not immediately dangerous
    */
-  private static checkUrgentDeviations(heatData: HeatData): HeroInsight | null {
+  private static checkUrgentDeviations(heatData: HeatData, persona?: string): HeroInsight | null {
     // Check chemistry deviations
     if (heatData.chemSteel) {
       const { C, S, Si, Mn } = heatData.chemSteel;
@@ -206,21 +206,54 @@ export class HeroInsightCalculator {
   /**
    * Optimization Opportunities: Ways to improve efficiency/quality
    */
-  private static checkOptimizationOpportunities(heatData: HeatData): HeroInsight | null {
-    // Energy optimization opportunity
+  private static checkOptimizationOpportunities(heatData: HeatData, persona?: string): HeroInsight | null {
+    // Energy optimization opportunity - persona-specific messaging
     if (heatData.confidence && heatData.confidence > 90) {
+      const personaInsights = {
+        cfo: {
+          title: 'Cost Reduction Opportunity',
+          message: 'Stable process enables immediate cost savings',
+          value: '€8,400',
+          unit: '/month potential',
+          context: 'Optimized energy usage can reduce monthly operating costs significantly'
+        },
+        manager: {
+          title: 'Efficiency Improvement',
+          message: 'Process stability allows for KPI optimization',
+          value: '12%',
+          unit: 'efficiency gain',
+          context: 'Current stability enables process improvements without quality risk'
+        },
+        metallurgist: {
+          title: 'Process Optimization',
+          message: 'Stable metallurgy allows for parameter refinement',
+          value: '2.3kWh/t',
+          unit: 'energy reduction',
+          context: 'Chemistry stability enables power reduction while maintaining grade specs'
+        },
+        operator: {
+          title: 'Energy Savings Available',
+          message: 'Process stable - opportunity to reduce power consumption',
+          value: '€847',
+          unit: 'savings this heat',
+          context: 'Stable process allows for energy reduction without quality impact'
+        }
+      };
+      
+      const insight = personaInsights[persona as keyof typeof personaInsights] || personaInsights.operator;
+      
       return {
         id: 'energy-optimization',
         priority: 'important',
-        title: 'Energy Savings Available', 
-        message: 'Process stable - opportunity to reduce power consumption',
-        value: '€847',
-        unit: 'savings this heat',
+        title: insight.title,
+        message: insight.message,
+        value: insight.value,
+        unit: insight.unit,
         confidence: 84,
         actionable: true,
-        actionLabel: 'Optimize Energy',
+        actionLabel: persona === 'cfo' ? 'Implement Savings' : 'Optimize Energy',
         actionType: 'optimize',
-        context: 'Stable process allows for energy reduction without quality impact',
+        context: insight.context,
         source: 'ai'
       };
     }
@@ -250,7 +283,7 @@ export class HeroInsightCalculator {
   /**
    * Process Status: Normal monitoring information
    */
-  private static checkProcessStatus(heatData: HeatData): HeroInsight | null {
+  private static checkProcessStatus(heatData: HeatData, persona?: string): HeroInsight | null {
     // Check current stage from timeline
     if (heatData.stages && heatData.stages.length > 0) {
       const currentStage = heatData.stages.find(s => s.status === 'active') || 
@@ -296,7 +329,7 @@ export class HeroInsightCalculator {
   /**
    * Status Insight: General operational status
    */
-  private static createStatusInsight(heatData: HeatData): HeroInsight {
+  private static createStatusInsight(heatData: HeatData, persona?: string): HeroInsight {
     return {
       id: 'status-normal',
       priority: 'normal', 

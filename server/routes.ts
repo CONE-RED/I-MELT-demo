@@ -9,6 +9,8 @@ import { computeROI, generateROIReport, DEFAULT_BASELINE, DEFAULT_PRICES, type C
 import PDFDocument from 'pdfkit';
 import * as fs from 'fs';
 import * as path from 'path';
+import { syncGuard, syncDecisionLog, type RouteETA, type SyncDecision } from './models/sync';
+import { pdfService } from './pdf-service';
 
 // Multiple heat datasets for realistic switching between different steel heats
 // Each heat has unique materials, chemistry, operators, and progression
@@ -296,6 +298,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Insight ${parsedMessage.payload.insightId} acknowledged`);
         }
         
+        // Phase 5: Handle ping for latency measurement
+        if (parsedMessage.type === 'ping' && parsedMessage.payload?.timestamp) {
+          ws.send(JSON.stringify({
+            type: 'pong',
+            payload: { 
+              timestamp: parsedMessage.payload.timestamp,
+              serverTime: Date.now()
+            }
+          }));
+        }
+        
         // Handle chat message with real AI service
         if (parsedMessage.type === 'chat_message' && parsedMessage.payload?.message) {
           if (aiService.isConfigured()) {
@@ -462,65 +475,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/roi/report', (req, res) => {
+  app.post('/api/roi/report', async (req, res) => {
     try {
-      const { current, prices }: { current: Current; prices?: Prices } = req.body;
-      if (!current) return res.status(400).json({ error: 'Current performance data is required' });
+      const { current, prices, heatId, operator }: { 
+        current: Current; 
+        prices?: Prices; 
+        heatId?: number;
+        operator?: string;
+      } = req.body;
+      
+      if (!current) {
+        return res.status(400).json({ error: 'Current performance data is required' });
+      }
 
       const finalPrices = { ...DEFAULT_PRICES, ...prices };
       const roi = computeROI(DEFAULT_BASELINE, current, finalPrices);
+      
+      // Generate report ID
+      const reportId = `I-MELT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Prepare data for PDF generation
+      const pdfData = {
+        roi,
+        baseline: DEFAULT_BASELINE,
+        current,
+        prices: finalPrices,
+        metadata: {
+          heatId: heatId || 93378,
+          operator: operator || 'Demo User',
+          timestamp: new Date(),
+          reportId
+        }
+      };
 
-      const doc = new PDFDocument({ size: 'A4', margin: 50 });
+      // Generate PDF using professional service
+      const pdfBuffer = await pdfService.generateROIPDF(pdfData);
+      
+      // Set proper PDF headers
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', 'attachment; filename="I-MELT_ROI_Report.pdf"');
-      doc.pipe(res);
-
-      // Header
-      doc.fontSize(18).text('I-MELT ROI Analysis Report', { underline: true });
-      doc.moveDown(0.5).fontSize(10).text(`Generated: ${new Date().toLocaleString('en-EU')}`);
-      doc.moveDown();
-
-      // Executive summary
-      doc.fontSize(12).text(`Monthly Savings: €${roi.perMonth.toLocaleString('en-EU', { maximumFractionDigits: 0 })}`);
-      doc.text(`Per Heat Savings: €${roi.perHeat.toFixed(2)}`);
-      doc.text(`Annual Projection: €${(roi.perMonth * 12).toLocaleString('en-EU', { maximumFractionDigits: 0 })}`);
-      doc.moveDown();
-
-      // Table: improvements
-      const rows = [
-        ['Metric', 'Baseline', 'Optimized', 'Improvement'],
-        ['Energy (kWh/t)', `${DEFAULT_BASELINE.kwhPerT}`, `${current.kwhPerT}`, `${roi.details.energyDelta.toFixed(1)} kWh/t`],
-        ['Time (min/heat)', `${DEFAULT_BASELINE.minPerHeat}`, `${current.minPerHeat}`, `${roi.details.timeDelta.toFixed(1)} min/heat`],
-        ['Electrodes (kg/heat)', `${DEFAULT_BASELINE.electrodeKgPerHeat}`, `${current.electrodeKgPerHeat}`, `${roi.details.electrodeDelta.toFixed(2)} kg/heat`],
-      ];
-      doc.fontSize(11);
-      rows.forEach((r, i) => {
-        if (i === 0) doc.font('Helvetica-Bold');
-        doc.text(r[0], { continued: true, width: 160 });
-        doc.text(r[1], { continued: true, width: 120 });
-        doc.text(r[2], { continued: true, width: 120 });
-        doc.text(r[3]);
-        if (i === 0) doc.font('Helvetica');
-      });
-      doc.moveDown();
-
-      // Breakdown
-      doc.text('Breakdown (per heat):');
-      doc.text(`• Energy: €${roi.breakdown.energySaving.toFixed(2)}`);
-      doc.text(`• Time: €${roi.breakdown.timeSaving.toFixed(2)}`);
-      doc.text(`• Electrodes: €${roi.breakdown.electrodeSaving.toFixed(2)}`);
-      doc.moveDown();
-
-      // Assumptions
-      doc.text('Assumptions:');
-      doc.text(`• Heats/day: ${DEFAULT_BASELINE.heatsPerDay}`);
-      doc.text(`• Heat size: ${DEFAULT_BASELINE.massT} t`);
-      doc.text(`• Energy price: €${finalPrices.kwh}/kWh`);
-      doc.text(`• Electrode price: €${finalPrices.electrode}/kg`);
-      doc.text(`• Production value: €${finalPrices.prodValuePerMin}/min`);
-
-      doc.end();
+      res.setHeader('Content-Length', pdfBuffer.length);
+      
+      // Send PDF
+      res.send(pdfBuffer);
+      
+      console.log(`📄 Generated ROI PDF report: ${reportId} (${pdfBuffer.length} bytes)`);
+      
     } catch (error: any) {
+      console.error('PDF generation error:', error);
       res.status(500).json({ error: `Failed to generate ROI report: ${error.message}` });
     }
   });
@@ -670,6 +672,189 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Phase 2: Apply Plan endpoint for specific insight recommendations
+  app.post('/api/demo/apply-plan', (req, res) => {
+    try {
+      const clientId = req.ip || 'default';
+      const sim = sims.get(clientId);
+      const { insightId, expectedImpact } = req.body;
+      
+      if (!sim) {
+        return res.status(400).json({ error: 'No active simulation. Start simulation first.' });
+      }
+
+      // Get current tick to determine which plan to apply
+      const currentTick = sim.getCurrentTick();
+      if (!currentTick) {
+        return res.status(400).json({ error: 'No simulation data available' });
+      }
+
+      // Apply specific optimization based on current insight
+      const insight = insightFor(currentTick);
+      
+      if (!insight.applyable) {
+        return res.status(400).json({ error: 'Current insight is not applyable automatically' });
+      }
+
+      // Apply the plan by making targeted adjustments to simulation parameters
+      const appliedChanges = sim.applyInsightPlan(insight);
+      
+      res.json({
+        ok: true,
+        message: `Applied: ${insight.title}`,
+        appliedChanges,
+        expectedImpact: insight.expectedImpact,
+        timestamp: Date.now(),
+        // Phase 2 requirement: Show KPI changes within 10-15 seconds
+        visibleIn: '10-15 seconds'
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: `Failed to apply plan: ${error.message}` });
+    }
+  });
+
+  // Phase 3: Sync Guard API endpoints for LF→CC synchronization
+  app.get('/api/sync/analyze/:routeId', (req, res) => {
+    try {
+      const { routeId } = req.params;
+      const heatId = parseInt(req.query.heatId as string) || 93378;
+      
+      // Mock route data for demo - in real implementation would come from plant systems
+      const mockRoute: RouteETA = {
+        eta_LF: 2,        // Ladle ready in 2 minutes
+        eta_CC: 8,        // Caster available in 8 minutes  
+        eta_target: 4,    // Target was 4 minutes
+        route_id: routeId
+      };
+
+      const analysis = syncGuard.analyzeRoute(mockRoute);
+      
+      res.json({
+        ok: true,
+        heatId,
+        analysis,
+        timestamp: Date.now()
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: `Failed to analyze route: ${error.message}` });
+    }
+  });
+
+  app.post('/api/sync/apply-mitigation', (req, res) => {
+    try {
+      const { routeId, mitigationId, heatId, operator } = req.body;
+      
+      if (!routeId || !mitigationId) {
+        return res.status(400).json({ error: 'routeId and mitigationId are required' });
+      }
+
+      // Get fresh analysis for the route
+      const mockRoute: RouteETA = {
+        eta_LF: 2,
+        eta_CC: 8,
+        eta_target: 4,
+        route_id: routeId
+      };
+
+      const analysis = syncGuard.analyzeRoute(mockRoute);
+      const chosen_mitigation = analysis.mitigation_options.find(m => m.id === mitigationId);
+      
+      if (!chosen_mitigation) {
+        return res.status(400).json({ error: 'Invalid mitigation option' });
+      }
+
+      // Calculate final impact after mitigation
+      const final_impact = syncGuard.applyMitigation(
+        analysis.route,
+        analysis.baseline_impact,
+        chosen_mitigation
+      );
+
+      // Log the decision
+      const decision: SyncDecision = {
+        timestamp: Date.now(),
+        route_id: routeId,
+        original_impact: analysis.baseline_impact,
+        chosen_mitigation,
+        final_impact,
+        operator: operator || 'Demo User'
+      };
+
+      syncDecisionLog.logDecision(decision);
+
+      res.json({
+        ok: true,
+        message: `Mitigation "${chosen_mitigation.name}" applied successfully`,
+        decision,
+        savings: {
+          per_heat: decision.original_impact.cost_per_heat - decision.final_impact.cost_per_heat,
+          per_day: decision.original_impact.cost_per_day - decision.final_impact.cost_per_day,
+          per_year: decision.original_impact.cost_per_year - decision.final_impact.cost_per_year
+        },
+        timestamp: Date.now()
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: `Failed to apply mitigation: ${error.message}` });
+    }
+  });
+
+  app.get('/api/sync/decisions', (req, res) => {
+    try {
+      const routeId = req.query.routeId as string;
+      const count = parseInt(req.query.count as string) || 10;
+      
+      const decisions = routeId 
+        ? syncDecisionLog.getDecisions(routeId)
+        : syncDecisionLog.getRecentDecisions(count);
+      
+      const totalSavings = syncDecisionLog.getTotalSavings();
+      
+      res.json({
+        ok: true,
+        decisions,
+        totalSavings,
+        count: decisions.length,
+        timestamp: Date.now()
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: `Failed to get decisions: ${error.message}` });
+    }
+  });
+
+  app.get('/api/sync/config', (req, res) => {
+    try {
+      const config = syncGuard.getConfig();
+      res.json({
+        ok: true,
+        config,
+        timestamp: Date.now()
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: `Failed to get config: ${error.message}` });
+    }
+  });
+
+  app.post('/api/sync/config', (req, res) => {
+    try {
+      const { config } = req.body;
+      
+      if (!config) {
+        return res.status(400).json({ error: 'Config object is required' });
+      }
+
+      syncGuard.updateConfig(config);
+      
+      res.json({
+        ok: true,
+        message: 'Sync Guard configuration updated',
+        config: syncGuard.getConfig(),
+        timestamp: Date.now()
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: `Failed to update config: ${error.message}` });
+    }
+  });
+
   app.get('/api/demo/scenarios', (req, res) => {
     try {
       const scenariosDir = path.join(process.cwd(), 'server/demo/scenarios');
@@ -780,6 +965,185 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Phase 1: Deterministic Reset with Scenario Support
+  app.get('/api/demo/reset', (req, res) => {
+    try {
+      const seed = Number(req.query.seed ?? 42);
+      const heatId = Number(req.query.heatId ?? 93378);
+      const scenario = req.query.scenario as string || '';
+      const injectAtSec = Number(req.query.injectAtSec ?? 0);
+      const clientId = req.ip || 'default';
+      
+      console.log(`🔄 Deterministic reset: seed=${seed}, heatId=${heatId}, scenario=${scenario}, injectAt=${injectAtSec}`);
+      
+      // Stop existing simulation if any
+      const existingSim = sims.get(clientId);
+      if (existingSim) {
+        existingSim.removeAllListeners();
+        sims.delete(clientId);
+      }
+      
+      // Create new simulation with deterministic seed
+      const newSim = new HeatSim(seed);
+      
+      // Fast-forward simulation to injection time if specified
+      if (injectAtSec > 0) {
+        console.log(`⏩ Fast-forwarding simulation to ${injectAtSec} seconds`);
+        // Fast-forward by ticking the simulation
+        for (let i = 0; i < injectAtSec; i++) {
+          newSim.tick();
+        }
+      }
+      
+      // Apply scenario if specified
+      if (scenario) {
+        console.log(`🎬 Applying scenario: ${scenario}`);
+        try {
+          newSim.injectScenario(scenario as any);
+        } catch (scenarioError) {
+          console.warn(`⚠️ Failed to inject scenario ${scenario}:`, scenarioError);
+        }
+      }
+      
+      sims.set(clientId, newSim);
+      
+      // Get current simulation state
+      const currentTick = newSim.tick();
+      
+      console.log(`✅ Deterministic reset complete: ${newSim.getStatus().stage} stage at ${newSim.getStatus().time}s`);
+      
+      res.json({ 
+        ok: true, 
+        status: 'reset',
+        seed: seed,
+        heatId: heatId,
+        scenario: scenario || null,
+        seconds: newSim.getStatus().time,
+        stage: currentTick.stage,
+        confidence: 85,
+        temperature: currentTick.tempC,
+        energy: currentTick.kwhPerT
+      });
+    } catch (error: any) {
+      console.error('Deterministic reset failed:', error);
+      res.status(500).json({ error: `Failed to reset simulation: ${error.message}` });
+    }
+  });
+
+  // Legacy POST endpoint for backwards compatibility
+  app.post('/api/demo/reset', (req, res) => {
+    try {
+      const { seed = 42 } = req.body;
+      const clientId = req.ip || 'default';
+      
+      // Stop existing simulation if any
+      const existingSim = sims.get(clientId);
+      if (existingSim) {
+        existingSim.removeAllListeners();
+        sims.delete(clientId);
+      }
+      
+      // Create new simulation with specified seed (default 42)
+      const newSim = new HeatSim(seed);
+      sims.set(clientId, newSim);
+      
+      console.log(`🔄 Legacy reset simulation with seed=${seed} for client ${clientId}`);
+      
+      res.json({ 
+        ok: true, 
+        status: 'reset', 
+        seed: seed,
+        heatId: 93378,
+        confidence: 85,
+        stage: 'MELT'
+      });
+    } catch (error: any) {
+      console.error('Reset failed:', error);
+      res.status(500).json({ error: `Failed to reset simulation: ${error.message}` });
+    }
+  });
+
+  // Phase 1: Current simulation state endpoint
+  app.get('/api/demo/state', (req, res) => {
+    const clientId = req.ip || 'default';
+    const sim = sims.get(clientId);
+    
+    if (sim) {
+      const currentTick = sim.tick();
+      res.json({
+        ok: true,
+        seed: sim.seed || 42,
+        heatId: 93378, // TODO: Make this configurable
+        seconds: currentTick.time,
+        stage: currentTick.stage,
+        scenarioActive: sim.activeScenario || null,
+        running: true,
+        temperature: currentTick.tempC,
+        energy: currentTick.kwhPerT,
+        powerFactor: currentTick.pf
+      });
+    } else {
+      res.json({
+        ok: false,
+        seed: null,
+        heatId: null,
+        seconds: 0,
+        stage: null,
+        scenarioActive: null,
+        running: false,
+        error: 'No active simulation'
+      });
+    }
+  });
+
+  // Phase 1: Available scenarios endpoint
+  app.get('/api/demo/scenarios', (req, res) => {
+    try {
+      const scenarios = [
+        {
+          id: 'energy-spike',
+          name: 'Energy Consumption Spike',
+          description: 'Power consumption increases due to electrode issues',
+          injectAtSec: 120,
+          expectedImpact: '+15% energy consumption',
+          category: 'energy'
+        },
+        {
+          id: 'foam-collapse', 
+          name: 'Foam Index Collapse',
+          description: 'Slag foaming collapses, exposing electrodes',
+          injectAtSec: 180,
+          expectedImpact: '+25% electrode consumption',
+          category: 'process'
+        },
+        {
+          id: 'temp-risk',
+          name: 'Temperature Deviation Risk',
+          description: 'Temperature trending outside target range',
+          injectAtSec: 240,
+          expectedImpact: 'Quality risk, timing delays',
+          category: 'quality'
+        },
+        {
+          id: 'power-factor',
+          name: 'Poor Power Factor',
+          description: 'Power factor drops below optimal range',
+          injectAtSec: 300,
+          expectedImpact: '+8% energy costs',
+          category: 'energy'
+        }
+      ];
+      
+      res.json({
+        ok: true,
+        scenarios: scenarios,
+        count: scenarios.length
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: `Failed to load scenarios: ${error.message}` });
+    }
+  });
+
   app.get('/api/demo/status', (req, res) => {
     const clientId = req.ip || 'default';
     const sim = sims.get(clientId);
@@ -796,6 +1160,369 @@ export async function registerRoutes(app: Express): Promise<Server> {
         running: false 
       });
     }
+  });
+
+  // ROI PDF endpoint with proper error handling
+  app.get('/api/roi/pdf', async (req, res) => {
+    try {
+      const heatId = parseInt(req.query.heatId as string) || 93378;
+      
+      // Mock current performance data for demo
+      const mockCurrent = {
+        kwhPerTon: 420,
+        electrodeConsumption: 2.1,
+        qualityScore: 96,
+        downtime: 8,
+        heatsPerMonth: 850
+      };
+
+      // Generate PDF using the service
+      const pdfData = {
+        roi: computeROI(DEFAULT_BASELINE, mockCurrent, DEFAULT_PRICES),
+        baseline: DEFAULT_BASELINE,
+        current: mockCurrent,
+        prices: DEFAULT_PRICES,
+        metadata: {
+          heatId,
+          operator: 'Demo User',
+          timestamp: new Date(),
+          reportId: `I-MELT-${Date.now()}`
+        }
+      };
+
+      const pdfBuffer = await pdfService.generateROIPDF(pdfData);
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename="I-MELT_ROI_Report.pdf"');
+      res.setHeader('Content-Length', pdfBuffer.length);
+      res.send(pdfBuffer);
+      
+    } catch (error: any) {
+      console.error('PDF generation error:', error);
+      res.status(500).json({ 
+        error: 'Failed to generate ROI PDF report',
+        message: error.message 
+      });
+    }
+  });
+
+  // Predictive Action Execution Endpoints
+  // These endpoints simulate realistic steel production actions for demo
+  
+  app.post('/api/actions/adjust-carbon', async (req, res) => {
+    try {
+      const { heatId, targetC, addAmount } = req.body;
+      
+      // Simulate realistic carbon adjustment process
+      const adjustmentTime = Math.floor(Math.random() * 300) + 480; // 8-13 minutes
+      const confidence = Math.floor(Math.random() * 15) + 85; // 85-100% confidence
+      
+      setTimeout(() => {
+        console.log(`✅ Carbon adjustment complete for Heat ${heatId}: +${addAmount}t carbon added`);
+      }, 2000); // Simulate processing delay
+      
+      res.json({
+        ok: true,
+        action: 'adjust-carbon',
+        heatId: heatId,
+        parameters: {
+          carbonAdded: addAmount,
+          targetCarbon: targetC,
+          estimatedTime: adjustmentTime,
+          actualTime: adjustmentTime - Math.floor(Math.random() * 60)
+        },
+        result: {
+          success: true,
+          message: `Successfully added ${addAmount}t carbon to Heat ${heatId}`,
+          newCarbonLevel: targetC,
+          confidence: confidence,
+          qualityImprovement: '+12% grade compliance',
+          costImpact: `€${Math.floor(Math.random() * 200) + 150} material cost`,
+          nextAction: 'Monitor chemistry for 15 minutes, then verify with lab analysis'
+        },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: 'Failed to execute carbon adjustment',
+        message: error.message 
+      });
+    }
+  });
+
+  app.post('/api/actions/desulfurize', async (req, res) => {
+    try {
+      const { heatId, targetS } = req.body;
+      
+      const treatmentTime = Math.floor(Math.random() * 300) + 600; // 10-15 minutes
+      const confidence = Math.floor(Math.random() * 10) + 87; // 87-97% confidence
+      
+      res.json({
+        ok: true,
+        action: 'desulfurize',
+        heatId: heatId,
+        result: {
+          success: true,
+          message: `Desulfurization initiated for Heat ${heatId}`,
+          newSulfurLevel: targetS,
+          targetSulfur: targetS,
+          estimatedTime: `${Math.floor(treatmentTime / 60)} minutes`,
+          confidence: confidence,
+          qualityImprovement: '+18% ductility improvement expected',
+          agentsUsed: 'CaO + Al',
+          costImpact: `€${Math.floor(Math.random() * 150) + 80} treatment cost`
+        },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: 'Failed to execute desulfurization',
+        message: error.message 
+      });
+    }
+  });
+
+  app.post('/api/actions/adjust-silicon', async (req, res) => {
+    try {
+      const { heatId } = req.body;
+      
+      res.json({
+        ok: true,
+        action: 'adjust-silicon',
+        heatId: heatId,
+        result: {
+          success: true,
+          message: `Silicon adjustment initiated for Heat ${heatId}`,
+          newSiliconLevel: 0.18, // Target silicon level
+          estimatedTime: '6-8 minutes',
+          confidence: 82,
+          materialAdded: 'FeSi75',
+          expectedBenefit: 'Improved deoxidation and steel cleanliness',
+          costImpact: '€95 ferrosilicon cost'
+        },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: 'Failed to execute silicon adjustment',
+        message: error.message 
+      });
+    }
+  });
+
+  app.post('/api/actions/optimize-energy', async (req, res) => {
+    try {
+      const { heatId, powerReduction } = req.body;
+      
+      const savings = Math.floor(Math.random() * 200) + 750; // €750-950 savings
+      
+      res.json({
+        ok: true,
+        action: 'optimize-energy',
+        heatId: heatId,
+        result: {
+          success: true,
+          message: `Energy optimization applied to Heat ${heatId}`,
+          powerReduction: `${(powerReduction * 100).toFixed(1)}%`,
+          estimatedSavings: `€${savings}`,
+          confidence: 84,
+          method: 'Arc power curve optimization + electrode positioning',
+          qualityImpact: 'No quality compromise expected',
+          timeToEffect: '3-5 minutes'
+        },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: 'Failed to execute energy optimization',
+        message: error.message 
+      });
+    }
+  });
+
+  app.post('/api/actions/prevent-foam-collapse', async (req, res) => {
+    try {
+      const { heatId, urgency } = req.body;
+      
+      res.json({
+        ok: true,
+        action: 'prevent-foam-collapse',
+        heatId: heatId,
+        result: {
+          success: true,
+          message: 'Emergency foam stabilization executed',
+          actions: [
+            'Anti-foaming agent injection: 15kg',
+            'Gas flow reduction: -20%',
+            'Arc power adjustment: -10%'
+          ],
+          estimatedTime: '2-3 minutes',
+          confidence: 94,
+          criticalityLevel: urgency,
+          expectedOutcome: 'Foam stability restored, electrode protection maintained'
+        },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: 'Failed to execute foam collapse prevention',
+        message: error.message 
+      });
+    }
+  });
+
+  app.post('/api/actions/stabilize-temperature', async (req, res) => {
+    try {
+      const { heatId, targetTemp } = req.body;
+      
+      res.json({
+        ok: true,
+        action: 'stabilize-temperature',
+        heatId: heatId,
+        result: {
+          success: true,
+          message: 'Temperature stabilization initiated',
+          targetTemperature: `${targetTemp}°C`,
+          actions: [
+            'Arc power reduction: -15%',
+            'Cooling lance activation',
+            'Electrode positioning optimization'
+          ],
+          estimatedTime: '4-5 minutes',
+          confidence: 91,
+          safetyImpact: 'Overheating risk eliminated'
+        },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: 'Failed to execute temperature stabilization',
+        message: error.message 
+      });
+    }
+  });
+
+  app.post('/api/actions/manage-energy-spike', async (req, res) => {
+    try {
+      const { heatId } = req.body;
+      
+      res.json({
+        ok: true,
+        action: 'manage-energy-spike',
+        heatId: heatId,
+        result: {
+          success: true,
+          message: 'Energy spike management applied',
+          actions: [
+            'Arc power limiting: -20%',
+            'Electrode height adjustment: +50mm',
+            'Reactive power compensation'
+          ],
+          estimatedTime: '3-4 minutes',
+          confidence: 88,
+          equipmentProtection: 'Transformer and electrode damage prevention'
+        },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: 'Failed to execute energy spike management',
+        message: error.message 
+      });
+    }
+  });
+
+  app.post('/api/actions/schedule-chemistry-check', async (req, res) => {
+    try {
+      const { heatId } = req.body;
+      
+      res.json({
+        ok: true,
+        action: 'schedule-chemistry-check',
+        heatId: heatId || 93378,
+        result: {
+          success: true,
+          message: 'Chemistry analysis scheduled',
+          scheduledTime: new Date(Date.now() + 15 * 60000).toISOString(), // 15 minutes from now
+          analysisType: 'Full chemistry + inclusion analysis',
+          estimatedTime: '15-20 minutes',
+          confidence: 85,
+          labTechnician: 'Auto-assigned',
+          priority: 'Standard'
+        },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: 'Failed to schedule chemistry check',
+        message: error.message 
+      });
+    }
+  });
+
+  app.post('/api/system/health-check', async (req, res) => {
+    try {
+      res.json({
+        ok: true,
+        action: 'health-check',
+        result: {
+          success: true,
+          message: 'System health check completed',
+          systems: {
+            aiMonitoring: 'Operational',
+            dataCollection: 'Operational', 
+            networkConnectivity: 'Optimal',
+            sensorStatus: '98.5% online',
+            lastUpdate: new Date().toISOString()
+          },
+          confidence: 95,
+          issues: 'None detected',
+          nextCheck: '1 hour'
+        },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: 'Failed to execute health check',
+        message: error.message 
+      });
+    }
+  });
+
+  // API Error Handler - Must be after all API routes
+  app.use('/api/*', (req, res) => {
+    res.status(404).json({
+      error: 'API endpoint not found',
+      endpoint: req.path,
+      method: req.method,
+      availableEndpoints: [
+        'GET /api/heats',
+        'GET /api/heat/:id', 
+        'GET /api/insights/:heatId',
+        'GET /api/roi/pdf',
+        'POST /api/roi/calculate',
+        'POST /api/roi/report',
+        'POST /api/ai/chat',
+        'POST /api/ai/generate-insight',
+        'GET /api/demo/scenarios',
+        'GET /api/demo/start',
+        'GET /api/demo/stop',
+        'GET /api/demo/reset',
+        'POST /api/demo/scenario/:scenarioId',
+        'POST /api/demo/recovery',
+        'GET /api/sync/analyze/:routeId',
+        'POST /api/sync/apply-mitigation',
+        'POST /api/actions/adjust-carbon',
+        'POST /api/actions/desulfurize',
+        'POST /api/actions/adjust-silicon',
+        'POST /api/actions/optimize-energy',
+        'POST /api/actions/prevent-foam-collapse',
+        'POST /api/actions/stabilize-temperature',
+        'POST /api/actions/manage-energy-spike',
+        'POST /api/actions/schedule-chemistry-check',
+        'POST /api/system/health-check'
+      ]
+    });
   });
 
   return httpServer;

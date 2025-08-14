@@ -1,0 +1,29 @@
+{
+  "id": "caster-delay",
+  "name": "Caster Delay - Sync Guard",
+  "description": "LF→CC route delayed causing temperature loss and financial impact",
+  "category": "sync",
+  "expectedImpact": "€60/heat savings potential",
+  "injectAtSec": 300,
+  "delta": {
+    "note": "Caster delay detected - temperature loss risk",
+    "tempC": -2,
+    "foamIdx": -0.05,
+    "thd": 0.3
+  },
+  "recommendation": {
+    "text": "Apply Sync Guard mitigation to minimize temperature loss",
+    "expectedImpact": {
+      "kwhPerT": "varies by mitigation",
+      "timeMin": "varies by mitigation", 
+      "cost": "up to €60 savings per heat"
+    },
+    "urgency": "high",
+    "timeToApply": "immediate"
+  },
+  "metadata": {
+    "phase": 3,
+    "cfoPriority": true,
+    "financialImpact": "high"
+  }
+}

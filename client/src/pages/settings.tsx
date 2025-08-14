@@ -3,7 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/lib/store';
 import TopBar from '@/components/layout/TopBar';
 import SideNav from '@/components/layout/SideNav';
-import { Settings, Globe, Palette, Bell, Monitor, Save } from 'lucide-react';
+import ResetControls from '@/components/demo/ResetControls';
+import { Settings, Globe, Palette, Bell, Monitor, Save, RotateCcw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -39,6 +40,8 @@ export default function SettingsPage() {
       enableNotifications: 'Enable Notifications',
       criticalAlerts: 'Critical Alerts',
       soundAlerts: 'Sound Alerts',
+      demoControls: 'Demo Controls',
+      demoControlsDesc: 'Simulation and demonstration settings',
       system: 'System Settings',
       dataRetention: 'Data Retention',
       exportFormat: 'Export Format',
@@ -62,6 +65,8 @@ export default function SettingsPage() {
       enableNotifications: 'Включить уведомления',
       criticalAlerts: 'Критические оповещения',
       soundAlerts: 'Звуковые оповещения',
+      demoControls: 'Управление демонстрацией',
+      demoControlsDesc: 'Настройки симуляции и демонстрации',
       system: 'Системные настройки',
       dataRetention: 'Хранение данных',
       exportFormat: 'Формат экспорта',
@@ -285,6 +290,22 @@ export default function SettingsPage() {
                       <Switch defaultChecked />
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+              
+              {/* Demo Controls */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <RotateCcw className="w-5 h-5" />
+                    {labels[lang].demoControls}
+                  </CardTitle>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {labels[lang].demoControlsDesc}
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <ResetControls className="border-0 bg-transparent p-0" />
                 </CardContent>
               </Card>
               

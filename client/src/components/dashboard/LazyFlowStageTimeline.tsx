@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Clock, AlertTriangle, CheckCircle, TrendingUp, Zap, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 import { Stage as ImportedStage } from '@/types';
 
@@ -49,7 +50,7 @@ export default function LazyFlowStageTimeline({ stages }: LazyFlowStageTimelineP
       bucket: stage.bucket,
       stage: `Stage ${stage.stage}`,
       plannedTime: stage.plannedTime,
-      actualTime: stage.actualTime,
+      actualTime: stage.actualTime ?? undefined,
       plannedEnergy: stage.plannedEnergy,
       actualEnergy: stage.actualEnergy,
       profile: stage.profile,
@@ -115,15 +116,96 @@ export default function LazyFlowStageTimeline({ stages }: LazyFlowStageTimelineP
 
   const criticalInsights = getCriticalInsights();
 
-  // LazyFlow Phase 2: One-Tap Actions
-  const executeTimelineAction = (action: string) => {
-    const actions = {
-      'Accelerate bucket charging': 'AI calculating optimal charging sequence...\n\n⚡ Recommendations:\n• Reduce bucket 4 dwell time by 3 min\n• Increase power to 85MW for next 8 minutes\n• Pre-position bucket 5 for immediate drop\n\nExecute optimizations?',
-      'Pre-heat electrode adjustment': 'Electrode pre-heating sequence initiated...\n\n🔥 Actions:\n• Electrode gap: 180mm → 160mm\n• Power ramp: Current → 78MW over 2 minutes\n• Expected time savings: 6-8 minutes\n\nConfirm electrode adjustment?',
-      'Review charging sequence': 'Charging sequence analysis complete...\n\n📊 Optimization plan:\n• Resequence remaining buckets for efficiency\n• Estimated time recovery: 4-7 minutes\n• Maintain chemistry targets\n\nApply sequence changes?'
-    };
+  // LazyFlow Phase 2: Realistic Furnace Actions
+  const [executingAction, setExecutingAction] = useState<string | null>(null);
+  const [acknowledgedAlerts, setAcknowledgedAlerts] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
+
+  const executeTimelineAction = async (action: string, insightId?: string) => {
+    setExecutingAction(action);
     
-    alert(actions[action as keyof typeof actions] || `Executing: ${action}`);
+    try {
+      // Realistic furnace action simulation
+      const actionDetails = {
+        'Accelerate bucket charging': {
+          title: 'Bucket Charging Optimized',
+          description: 'Power increased to 85MW, bucket sequence adjusted',
+          duration: 2000,
+          furnaceChanges: {
+            power: '85MW',
+            temperature: '+45°C',
+            efficiency: '+12%',
+            estimatedSavings: '6-8 minutes'
+          }
+        },
+        'Pre-heat electrode adjustment': {
+          title: 'Electrode Position Adjusted', 
+          description: 'Gap reduced to 160mm, power ramping initiated',
+          duration: 3000,
+          furnaceChanges: {
+            electrodeGap: '160mm',
+            powerRamp: '78MW',
+            heatRate: '+15%',
+            estimatedSavings: '4-6 minutes'
+          }
+        },
+        'Review charging sequence': {
+          title: 'Charging Sequence Optimized',
+          description: 'Bucket order resequenced for maximum efficiency',
+          duration: 1500,
+          furnaceChanges: {
+            sequence: 'Optimized',
+            efficiency: '+8%',
+            qualityImpact: 'Neutral',
+            estimatedSavings: '4-7 minutes'
+          }
+        }
+      };
+
+      const actionData = actionDetails[action as keyof typeof actionDetails];
+      
+      if (actionData) {
+        // Show realistic loading state
+        toast({
+          title: "Executing Action...",
+          description: `Applying ${action.toLowerCase()}`,
+        });
+        
+        // Simulate realistic furnace response time
+        await new Promise(resolve => setTimeout(resolve, actionData.duration));
+        
+        // Show success with furnace data changes
+        toast({
+          title: actionData.title,
+          description: actionData.description,
+          duration: 5000,
+        });
+
+        // Acknowledge the alert if insightId provided
+        if (insightId) {
+          setAcknowledgedAlerts(prev => new Set([...prev, insightId]));
+        }
+
+        // TODO: Update Redux state with realistic furnace changes
+        // This should trigger actual dashboard updates
+        console.log('🔥 Furnace Changes Applied:', actionData.furnaceChanges);
+        
+      } else {
+        toast({
+          title: "Action Executed",
+          description: `${action} completed successfully`,
+        });
+      }
+      
+    } catch (error) {
+      toast({
+        title: "Action Failed", 
+        description: "Unable to execute furnace action",
+        variant: "destructive",
+      });
+    } finally {
+      setExecutingAction(null);
+    }
   };
 
   // LazyFlow Phase 3: Ambient Timeline Intelligence
@@ -197,7 +279,7 @@ export default function LazyFlowStageTimeline({ stages }: LazyFlowStageTimelineP
   return (
     <div className="space-y-4">
       {/* LazyFlow Phase 1: Critical Insights Alert */}
-      {criticalInsights.length > 0 && (
+      {criticalInsights.length > 0 && criticalInsights.some((_, index) => !acknowledgedAlerts.has(`insight-${index}`)) && (
         <Card className="border-red-200 bg-red-50">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-red-800">
@@ -206,35 +288,43 @@ export default function LazyFlowStageTimeline({ stages }: LazyFlowStageTimelineP
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {criticalInsights.map((insight, index) => (
-              <div key={index} className="p-3 bg-white rounded-lg border border-red-200">
-                <div className="flex items-center justify-between mb-2">
-                  <Badge className={cn(
-                    "text-white text-xs",
-                    insight.type === 'critical' ? "bg-red-600" :
-                    insight.type === 'prediction' ? "bg-orange-600" : "bg-yellow-600"
-                  )}>
-                    {insight.urgency.toUpperCase()}
-                  </Badge>
-                  <span className="text-xs text-gray-600">{insight.urgency}</span>
-                </div>
+            {criticalInsights
+              .filter((_, index) => !acknowledgedAlerts.has(`insight-${index}`))
+              .map((insight, index) => {
+                const insightId = `insight-${index}`;
+                const isExecuting = executingAction === insight.action;
                 
-                <div className="font-medium text-gray-900 mb-1">{insight.title}</div>
-                <div className="text-sm text-gray-600 mb-2">💥 Impact: {insight.impact}</div>
-                
-                <Button
-                  className={cn(
-                    "w-full text-white font-medium",
-                    insight.type === 'critical' ? "bg-red-600 hover:bg-red-700" :
-                    insight.type === 'prediction' ? "bg-orange-600 hover:bg-orange-700" :
-                    "bg-yellow-600 hover:bg-yellow-700"
-                  )}
-                  onClick={() => executeTimelineAction(insight.action)}
-                >
-                  ⚡ {insight.action}
-                </Button>
-              </div>
-            ))}
+                return (
+                  <div key={index} className="p-3 bg-white rounded-lg border border-red-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge className={cn(
+                        "text-white text-xs",
+                        insight.type === 'critical' ? "bg-red-600" :
+                        insight.type === 'prediction' ? "bg-orange-600" : "bg-yellow-600"
+                      )}>
+                        {insight.urgency.toUpperCase()}
+                      </Badge>
+                      <span className="text-xs text-gray-600">{insight.urgency}</span>
+                    </div>
+                    
+                    <div className="font-medium text-gray-900 mb-1">{insight.title}</div>
+                    <div className="text-sm text-gray-600 mb-2">💥 Impact: {insight.impact}</div>
+                    
+                    <Button
+                      className={cn(
+                        "w-full text-white font-medium",
+                        insight.type === 'critical' ? "bg-red-600 hover:bg-red-700" :
+                        insight.type === 'prediction' ? "bg-orange-600 hover:bg-orange-700" :
+                        "bg-yellow-600 hover:bg-yellow-700"
+                      )}
+                      onClick={() => executeTimelineAction(insight.action, insightId)}
+                      disabled={isExecuting}
+                    >
+                      {isExecuting ? "⚙️ Executing..." : "⚡ " + insight.action}
+                    </Button>
+                  </div>
+                );
+              })}
             
             <div className="mt-3 p-2 bg-red-100 rounded text-center">
               <div className="text-xs text-red-700">
@@ -349,6 +439,37 @@ export default function LazyFlowStageTimeline({ stages }: LazyFlowStageTimelineP
           )}
         </CardContent>
       </Card>
+
+      {/* Show success state when all critical alerts are acknowledged */}
+      {criticalInsights.length > 0 && criticalInsights.every((_, index) => acknowledgedAlerts.has(`insight-${index}`)) && (
+        <Card className="border-green-200 bg-green-50">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 text-green-800 font-medium mb-2">
+                <CheckCircle className="w-6 h-6" />
+                All Critical Issues Resolved
+              </div>
+              <div className="text-sm text-green-600 mb-3">
+                AI-guided actions completed successfully • Timeline recovery in progress • Estimated savings: 6-12 minutes
+              </div>
+              <div className="grid grid-cols-3 gap-4 text-xs">
+                <div className="p-2 bg-white rounded border">
+                  <div className="font-semibold text-green-700">Power</div>
+                  <div className="text-green-600">Optimized</div>
+                </div>
+                <div className="p-2 bg-white rounded border">
+                  <div className="font-semibold text-green-700">Efficiency</div>
+                  <div className="text-green-600">+15%</div>
+                </div>
+                <div className="p-2 bg-white rounded border">
+                  <div className="font-semibold text-green-700">Schedule</div>
+                  <div className="text-green-600">On Track</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {criticalInsights.length === 0 && (
         <div className="p-4 bg-green-100 rounded-lg text-center">

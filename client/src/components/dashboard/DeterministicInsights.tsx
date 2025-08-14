@@ -4,6 +4,13 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 
+interface ExpectedImpact {
+  kwhPerT: number;
+  timeMin: number;
+  cost: number;
+  description: string;
+}
+
 interface StaticInsight {
   title: string;
   why: string[];
@@ -11,6 +18,8 @@ interface StaticInsight {
   confidence: number;
   severity: 'low' | 'medium' | 'high' | 'critical';
   category: 'energy' | 'quality' | 'safety' | 'operational';
+  expectedImpact: ExpectedImpact;
+  applyable: boolean;
 }
 
 interface InsightResponse {
@@ -163,6 +172,71 @@ const DeterministicInsights: React.FC<DeterministicInsightsProps> = ({
                 ))}
               </ul>
             </div>
+            
+            {/* EXPECTED IMPACT section - Phase 2 requirement */}
+            <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <h4 className="text-sm font-medium text-blue-800 mb-2 flex items-center">
+                <Zap className="w-4 h-4 mr-1" />
+                EXPECTED IMPACT:
+              </h4>
+              <div className="grid grid-cols-3 gap-3 text-xs">
+                <div className="text-center">
+                  <div className={`font-bold text-lg ${insights.insight.expectedImpact.kwhPerT < 0 ? 'text-green-600' : insights.insight.expectedImpact.kwhPerT > 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                    {insights.insight.expectedImpact.kwhPerT > 0 ? '+' : ''}{insights.insight.expectedImpact.kwhPerT}
+                  </div>
+                  <div className="text-gray-600">kWh/t</div>
+                </div>
+                <div className="text-center">
+                  <div className={`font-bold text-lg ${insights.insight.expectedImpact.timeMin < 0 ? 'text-green-600' : insights.insight.expectedImpact.timeMin > 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                    {insights.insight.expectedImpact.timeMin > 0 ? '+' : ''}{insights.insight.expectedImpact.timeMin}
+                  </div>
+                  <div className="text-gray-600">min/heat</div>
+                </div>
+                <div className="text-center">
+                  <div className={`font-bold text-lg ${insights.insight.expectedImpact.cost > 0 ? 'text-green-600' : insights.insight.expectedImpact.cost < 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                    {insights.insight.expectedImpact.cost > 0 ? '+€' : '€'}{insights.insight.expectedImpact.cost}
+                  </div>
+                  <div className="text-gray-600">per heat</div>
+                </div>
+              </div>
+              <p className="text-xs text-blue-700 mt-2 text-center font-medium">
+                {insights.insight.expectedImpact.description}
+              </p>
+            </div>
+
+            {/* Apply Plan Button - Phase 2 requirement */}
+            {insights.insight.applyable && (
+              <div className="flex justify-center">
+                <button 
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/demo/apply-plan', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          insightId: insights.insight.title,
+                          expectedImpact: insights.insight.expectedImpact
+                        })
+                      });
+                      
+                      const result = await response.json();
+                      if (result.ok) {
+                        // Show success with expected timeline
+                        console.log('✅ Plan Applied:', result);
+                      } else {
+                        console.warn('⚠️ Plan Application Failed:', result.error);
+                      }
+                    } catch (error) {
+                      console.error('❌ Apply Plan Error:', error);
+                    }
+                  }}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium transition-colors duration-200 flex items-center space-x-2"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Apply Plan</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
         

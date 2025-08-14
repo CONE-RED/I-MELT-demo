@@ -1,12 +1,21 @@
 import type { HeatTick } from "../demo/heat-sim";
 
+export interface ExpectedImpact {
+  kwhPerT: number;        // Energy impact (delta)
+  timeMin: number;        // Time impact in minutes (delta)
+  cost: number;           // Cost impact per heat (delta €)
+  description: string;    // Human readable impact
+}
+
 export interface StaticInsight {
   title: string;
-  why: string[];
-  action: string[];
-  confidence: number;
+  why: string[];                    // WHY-now bullets (PF drift, THD↑, Foam↓)
+  action: string[];                 // Specific actions to take
+  confidence: number;               // 0.0 to 1.0
   severity: 'low' | 'medium' | 'high' | 'critical';
   category: 'energy' | 'quality' | 'safety' | 'operational';
+  expectedImpact: ExpectedImpact;   // Quantified impact for operators
+  applyable: boolean;               // Can this be applied automatically?
 }
 
 /**
@@ -32,7 +41,14 @@ export function insightFor(t: HeatTick): StaticInsight {
       ],
       confidence: 0.96,
       severity: 'critical',
-      category: 'safety'
+      category: 'safety',
+      expectedImpact: {
+        kwhPerT: 0,         // No energy impact - safety first
+        timeMin: 5.2,       // Extends heat by 5+ minutes
+        cost: -1850,        // High cost to avoid €50k+ refractory damage
+        description: "Prevents catastrophic caster damage (€50k+ avoided)"
+      },
+      applyable: true
     };
   }
   
@@ -52,7 +68,14 @@ export function insightFor(t: HeatTick): StaticInsight {
       ],
       confidence: 0.84,
       severity: 'high',
-      category: 'operational'
+      category: 'operational',
+      expectedImpact: {
+        kwhPerT: -12.5,     // Reduces energy by improving arc stability
+        timeMin: -1.8,      // Prevents 2min melt time extension
+        cost: 950,          // Save €950 through faster melt + lower energy
+        description: "Prevents foam collapse → saves 2min melt time"
+      },
+      applyable: true
     };
   }
   
@@ -72,7 +95,14 @@ export function insightFor(t: HeatTick): StaticInsight {
       ],
       confidence: 0.78,
       severity: 'medium',
-      category: 'energy'
+      category: 'energy',
+      expectedImpact: {
+        kwhPerT: -7.5,      // Reduces energy consumption by 7.5 kWh/t
+        timeMin: 0,         // No direct time impact
+        cost: 420,          // Save €420 through reduced energy cost
+        description: "Power factor optimization → 7.5 kWh/t energy reduction"
+      },
+      applyable: true
     };
   }
   
@@ -92,7 +122,14 @@ export function insightFor(t: HeatTick): StaticInsight {
       ],
       confidence: 0.81,
       severity: 'medium',
-      category: 'quality'
+      category: 'quality',
+      expectedImpact: {
+        kwhPerT: 3.2,       // Slight energy increase for higher temperature
+        timeMin: 4.5,       // Extends refining by ~4 minutes
+        cost: -280,         // Cost to avoid €5000+ grade rejection
+        description: "Prevents off-grade steel → avoids €5k+ rejection cost"
+      },
+      applyable: true
     };
   }
   
@@ -112,7 +149,14 @@ export function insightFor(t: HeatTick): StaticInsight {
       ],
       confidence: 0.87,
       severity: 'high',
-      category: 'operational'
+      category: 'operational',
+      expectedImpact: {
+        kwhPerT: -2.1,      // Stabilization reduces arc losses
+        timeMin: 0.8,       // Slight time extension for stabilization
+        cost: 320,          // Prevent grid penalties + equipment wear
+        description: "Arc stabilization → prevents grid penalties"
+      },
+      applyable: true
     };
   }
   
@@ -132,7 +176,14 @@ export function insightFor(t: HeatTick): StaticInsight {
       ],
       confidence: 0.79,
       severity: 'medium',
-      category: 'quality'
+      category: 'quality',
+      expectedImpact: {
+        kwhPerT: 0.8,       // Minor energy for alloy additions
+        timeMin: 2.3,       // Brief addition time
+        cost: -150,         // Material cost vs quality improvement
+        description: "Steel cleanliness → prevents inclusion-related rejections"
+      },
+      applyable: true
     };
   }
   
@@ -152,7 +203,14 @@ export function insightFor(t: HeatTick): StaticInsight {
       ],
       confidence: 0.89,
       severity: 'low',
-      category: 'operational'
+      category: 'operational',
+      expectedImpact: {
+        kwhPerT: -1.5,      // Earlier transition saves energy
+        timeMin: -2.8,      // Faster transition saves time
+        cost: 180,          // Faster heat = higher throughput
+        description: "Optimal transition timing → 3min time savings"
+      },
+      applyable: true
     };
   }
   
@@ -171,7 +229,14 @@ export function insightFor(t: HeatTick): StaticInsight {
     ],
     confidence: 0.92,
     severity: 'low',
-    category: 'operational'
+    category: 'operational',
+    expectedImpact: {
+      kwhPerT: 0,         // No change - maintaining baseline
+      timeMin: 0,         // No time impact
+      cost: 0,            // Baseline cost
+      description: "Maintaining optimal performance baseline"
+    },
+    applyable: false    // No action needed when nominal
   };
 }
 

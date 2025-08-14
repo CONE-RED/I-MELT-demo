@@ -14,6 +14,11 @@ interface AmbientDetailsGridProps {
   heatData: HeatData;
   className?: string;
   persona?: 'operator' | 'metallurgist' | 'manager' | 'cfo';
+  onShowControls?: () => void;
+  onShowAlerts?: () => void;
+  onShowGraphs?: () => void;
+  onShowChemistry?: () => void;
+  onShowReports?: () => void;
 }
 
 interface AmbientMetric {
@@ -31,7 +36,16 @@ interface AmbientMetric {
   };
 }
 
-export default function AmbientDetailsGrid({ heatData, className, persona = 'operator' }: AmbientDetailsGridProps) {
+export default function AmbientDetailsGrid({ 
+  heatData, 
+  className, 
+  persona = 'operator',
+  onShowControls,
+  onShowAlerts,
+  onShowGraphs,
+  onShowChemistry,
+  onShowReports
+}: AmbientDetailsGridProps) {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   
   // Auto-refresh every 5 seconds for live data
@@ -92,7 +106,13 @@ export default function AmbientDetailsGrid({ heatData, className, persona = 'ope
 
       {/* Quick Actions - Persona-specific */}
       <div className="grid grid-cols-3 gap-2">
-        {getPersonaActions(persona).map((action) => (
+        {getPersonaActions(persona, {
+          onShowControls,
+          onShowAlerts,
+          onShowGraphs,
+          onShowChemistry,
+          onShowReports
+        }).map((action) => (
           <QuickActionButton 
             key={action.label}
             icon={action.icon} 
@@ -815,29 +835,85 @@ function getPersonaTitle(section: string, persona: string): string {
 }
 
 /**
- * Get persona-specific quick actions
+ * Get persona-specific quick actions with working functionality
  */
-function getPersonaActions(persona: string) {
+function getPersonaActions(persona: string, callbacks: {
+  onShowControls?: () => void;
+  onShowAlerts?: () => void;
+  onShowGraphs?: () => void;
+  onShowChemistry?: () => void;
+  onShowReports?: () => void;
+}) {
+  const { onShowControls, onShowAlerts, onShowGraphs, onShowChemistry, onShowReports } = callbacks;
+  
   const actions = {
     operator: [
-      { icon: '🔧', label: 'Controls', onClick: () => console.log('Operator controls') },
-      { icon: '⚠️', label: 'Alerts', onClick: () => console.log('Active alerts') },
-      { icon: '📊', label: 'Graphs', onClick: () => console.log('Process graphs') }
+      { 
+        icon: '🔧', 
+        label: 'Controls', 
+        onClick: onShowControls || (() => console.log('Controls callback not provided'))
+      },
+      { 
+        icon: '⚠️', 
+        label: 'Alerts', 
+        onClick: onShowAlerts || (() => console.log('Alerts callback not provided'))
+      },
+      { 
+        icon: '📊', 
+        label: 'Graphs', 
+        onClick: onShowGraphs || (() => console.log('Graphs callback not provided'))
+      }
     ],
     metallurgist: [
-      { icon: '🧪', label: 'Chemistry', onClick: () => console.log('Chemistry analysis') },
-      { icon: '🌡️', label: 'Temp', onClick: () => console.log('Temperature control') },
-      { icon: '⚖️', label: 'Balance', onClick: () => console.log('Material balance') }
+      { 
+        icon: '🧪', 
+        label: 'Chemistry', 
+        onClick: onShowChemistry || (() => console.log('Chemistry callback not provided'))
+      },
+      { 
+        icon: '🌡️', 
+        label: 'Temp', 
+        onClick: onShowControls || (() => console.log('Temperature control'))
+      },
+      { 
+        icon: '⚖️', 
+        label: 'Balance', 
+        onClick: onShowGraphs || (() => console.log('Material balance'))
+      }
     ],
     manager: [
-      { icon: '📈', label: 'KPIs', onClick: () => console.log('KPI dashboard') },
-      { icon: '👥', label: 'Team', onClick: () => console.log('Team status') },
-      { icon: '📋', label: 'Reports', onClick: () => console.log('Shift reports') }
+      { 
+        icon: '📈', 
+        label: 'KPIs', 
+        onClick: onShowGraphs || (() => console.log('KPI dashboard'))
+      },
+      { 
+        icon: '👥', 
+        label: 'Team', 
+        onClick: onShowAlerts || (() => console.log('Team status'))
+      },
+      { 
+        icon: '📋', 
+        label: 'Reports', 
+        onClick: onShowReports || (() => console.log('Shift reports'))
+      }
     ],
     cfo: [
-      { icon: '💰', label: 'Costs', onClick: () => console.log('Cost analysis') },
-      { icon: '📊', label: 'ROI', onClick: () => console.log('ROI reports') },
-      { icon: '📈', label: 'Trends', onClick: () => console.log('Financial trends') }
+      { 
+        icon: '💰', 
+        label: 'Costs', 
+        onClick: onShowReports || (() => console.log('Cost analysis'))
+      },
+      { 
+        icon: '📊', 
+        label: 'ROI', 
+        onClick: onShowReports || (() => console.log('ROI reports'))
+      },
+      { 
+        icon: '📈', 
+        label: 'Trends', 
+        onClick: onShowGraphs || (() => console.log('Financial trends'))
+      }
     ]
   };
   

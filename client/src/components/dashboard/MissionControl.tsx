@@ -27,6 +27,13 @@ import { useGlobalPersona } from '@/context/PersonaContext';
 import { useHotkeys } from '@/hooks/useHotkeys';
 import CheatSheetOverlay from '@/components/ui/cheat-sheet-overlay';
 import AIChatWidget from '@/components/chat/AIChatWidget';
+import { 
+  ControlsOverlay, 
+  AlertsOverlay, 
+  GraphsOverlay, 
+  ChemistryOverlay,
+  ReportsOverlay 
+} from '@/components/ui/quick-action-overlays';
 
 export default function MissionControl() {
   const heat = useSelector((state: RootState) => state.heat);
@@ -45,6 +52,11 @@ export default function MissionControl() {
   const [resolvedIssues, setResolvedIssues] = useState<Set<string>>(new Set());
   const [isResolvingCrisis, setIsResolvingCrisis] = useState(false);
   const [recentlyExecutedActions, setRecentlyExecutedActions] = useState<Set<string>>(new Set());
+  const [showControlsOverlay, setShowControlsOverlay] = useState(false);
+  const [showAlertsOverlay, setShowAlertsOverlay] = useState(false);
+  const [showGraphsOverlay, setShowGraphsOverlay] = useState(false);
+  const [showChemistryOverlay, setShowChemistryOverlay] = useState(false);
+  const [showReportsOverlay, setShowReportsOverlay] = useState(false);
   
   // Phase 4: Persona management - now global via context
   const { currentPersona } = useGlobalPersona();
@@ -424,11 +436,12 @@ export default function MissionControl() {
             id: `action-${action.id}-${Date.now()}`,
             title: action.title,
             message: result.result.message || `${action.title} completed successfully`,
-            type: 'info' as const,
+            type: 'optimization' as const,
             severity: 'info' as const,
             timestamp: new Date().toISOString(),
             confidence: result.result.confidence || 95,
             acknowledged: false,
+            actionable: false,
             category: action.category,
             actionExecuted: true
           };
@@ -885,7 +898,15 @@ export default function MissionControl() {
            currentPersona === 'metallurgist' ? 'Process Parameters' : 
            'System Overview'}
         </h2>
-        <AmbientDetailsGrid heatData={heat} persona={currentPersona} />
+        <AmbientDetailsGrid 
+          heatData={heat} 
+          persona={currentPersona}
+          onShowControls={() => setShowControlsOverlay(true)}
+          onShowAlerts={() => setShowAlertsOverlay(true)}
+          onShowGraphs={() => setShowGraphsOverlay(true)}
+          onShowChemistry={() => setShowChemistryOverlay(true)}
+          onShowReports={() => setShowReportsOverlay(true)}
+        />
       </div>
 
       {/* Floating AI Chat Widget */}
@@ -895,6 +916,37 @@ export default function MissionControl() {
       <CheatSheetOverlay 
         isVisible={showCheatSheet}
         onClose={() => setShowCheatSheet(false)}
+      />
+
+      {/* Quick Action Overlays */}
+      <ControlsOverlay 
+        isVisible={showControlsOverlay}
+        onClose={() => setShowControlsOverlay(false)}
+        heatData={heat}
+      />
+      
+      <AlertsOverlay 
+        isVisible={showAlertsOverlay}
+        onClose={() => setShowAlertsOverlay(false)}
+        heatData={heat}
+      />
+      
+      <GraphsOverlay 
+        isVisible={showGraphsOverlay}
+        onClose={() => setShowGraphsOverlay(false)}
+        heatData={heat}
+      />
+      
+      <ChemistryOverlay 
+        isVisible={showChemistryOverlay}
+        onClose={() => setShowChemistryOverlay(false)}
+        heatData={heat}
+      />
+      
+      <ReportsOverlay 
+        isVisible={showReportsOverlay}
+        onClose={() => setShowReportsOverlay(false)}
+        heatData={heat}
       />
     </div>
   );

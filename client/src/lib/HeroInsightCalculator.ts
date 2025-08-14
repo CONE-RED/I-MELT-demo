@@ -34,6 +34,12 @@ export interface HeatData {
   chemSteel?: any;
   stages?: any[];
   buckets?: any[];
+  _simulationSeed?: number;
+  _lastActionExecuted?: {
+    actionId: string;
+    timestamp: string;
+    result: any;
+  };
 }
 
 export class HeroInsightCalculator {

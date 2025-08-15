@@ -13,6 +13,12 @@ export interface HeatData {
   insights: Insight[];
   modelStatus: 'idle' | 'training' | 'predicting';
   confidence: number;
+  _simulationSeed?: number;
+  _lastActionExecuted?: {
+    actionId: string;
+    timestamp: string;
+    result: any;
+  };
 }
 
 export interface Bucket {

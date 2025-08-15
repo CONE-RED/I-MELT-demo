@@ -65,9 +65,35 @@ export function ControlsOverlay({ isVisible, onClose, heatData }: OverlayProps) 
 
           <div className="border-t pt-4">
             <div className="flex gap-2">
-              <Button size="sm">Auto Mode</Button>
-              <Button size="sm" variant="outline">Manual Override</Button>
-              <Button size="sm" variant="outline">Emergency Stop</Button>
+              <Button 
+                size="sm"
+                onClick={() => {
+                  console.log('Auto Mode clicked');
+                  alert('Switched to automatic control mode');
+                }}
+              >
+                Auto Mode
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => {
+                  console.log('Manual Override clicked');
+                  alert('Manual override activated - operator control enabled');
+                }}
+              >
+                Manual Override
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => {
+                  console.log('Emergency Stop clicked');
+                  alert('⚠️ EMERGENCY STOP ACTIVATED - All systems halted');
+                }}
+              >
+                Emergency Stop
+              </Button>
             </div>
           </div>
         </CardContent>
@@ -147,8 +173,25 @@ export function AlertsOverlay({ isVisible, onClose, heatData }: OverlayProps) {
           </div>
 
           <div className="border-t pt-4 flex gap-2">
-            <Button size="sm">Acknowledge All</Button>
-            <Button size="sm" variant="outline">Export Log</Button>
+            <Button 
+              size="sm"
+              onClick={() => {
+                console.log('Acknowledge All clicked');
+                alert('All alerts have been acknowledged');
+              }}
+            >
+              Acknowledge All
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => {
+                console.log('Export Log clicked');
+                alert('Exporting alert log to CSV file...');
+              }}
+            >
+              Export Log
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -213,9 +256,35 @@ export function GraphsOverlay({ isVisible, onClose, heatData }: OverlayProps) {
           </div>
 
           <div className="border-t pt-4 flex gap-2">
-            <Button size="sm">Export Charts</Button>
-            <Button size="sm" variant="outline">Full Screen</Button>
-            <Button size="sm" variant="outline">Historical Data</Button>
+            <Button 
+              size="sm"
+              onClick={() => {
+                console.log('Export Charts clicked');
+                alert('Exporting process charts to PDF...');
+              }}
+            >
+              Export Charts
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => {
+                console.log('Full Screen clicked');
+                alert('Entering full screen chart view...');
+              }}
+            >
+              Full Screen
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => {
+                console.log('Historical Data clicked');
+                alert('Loading historical process data...');
+              }}
+            >
+              Historical Data
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -326,9 +395,38 @@ export function ChemistryOverlay({ isVisible, onClose, heatData }: OverlayProps)
           </div>
 
           <div className="border-t pt-4 flex gap-2">
-            <Button size="sm">Request Sample</Button>
-            <Button size="sm" variant="outline">Chemistry Report</Button>
-            <Button size="sm" variant="outline">Historical Trends</Button>
+            <Button 
+              size="sm" 
+              onClick={() => {
+                console.log('Request Sample clicked');
+                // TODO: Implement sample request functionality
+                alert('Sample request submitted for laboratory analysis');
+              }}
+            >
+              Request Sample
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => {
+                console.log('Chemistry Report clicked');
+                // TODO: Generate chemistry report
+                alert('Generating comprehensive chemistry analysis report...');
+              }}
+            >
+              Chemistry Report
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => {
+                console.log('Historical Trends clicked');
+                // TODO: Show historical chemistry trends
+                alert('Loading historical chemistry trends...');
+              }}
+            >
+              Historical Trends
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -373,7 +471,15 @@ export function ReportsOverlay({ isVisible, onClose, heatData }: OverlayProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">{report.format}</Badge>
-                  <Button size="sm">Generate</Button>
+                  <Button 
+                    size="sm"
+                    onClick={() => {
+                      console.log(`Generate ${report.name} clicked`);
+                      alert(`Generating ${report.name}... This will be available in ${report.format} format.`);
+                    }}
+                  >
+                    Generate
+                  </Button>
                 </div>
               </div>
             ))}

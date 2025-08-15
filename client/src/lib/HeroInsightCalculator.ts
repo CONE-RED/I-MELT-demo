@@ -6,6 +6,7 @@
  */
 
 import { RootState } from './store';
+import { HeatData } from '@/types';
 
 export interface HeroInsight {
   id: string;
@@ -24,23 +25,6 @@ export interface HeroInsight {
   source: 'ai' | 'physics' | 'operator' | 'system';
 }
 
-export interface HeatData {
-  heat?: number;
-  grade?: string;
-  confidence?: number;
-  modelStatus?: string;
-  ts?: string;
-  insights?: any[];
-  chemSteel?: any;
-  stages?: any[];
-  buckets?: any[];
-  _simulationSeed?: number;
-  _lastActionExecuted?: {
-    actionId: string;
-    timestamp: string;
-    result: any;
-  };
-}
 
 export class HeroInsightCalculator {
   

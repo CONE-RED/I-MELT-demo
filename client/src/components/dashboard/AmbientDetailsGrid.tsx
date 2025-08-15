@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { HeatData } from '@/lib/HeroInsightCalculator';
+import { HeatData } from '@/types';
 import ConfidenceRingIndicator from '@/components/ui/ConfidenceRingIndicator';
 
 interface AmbientDetailsGridProps {
@@ -47,6 +47,15 @@ export default function AmbientDetailsGrid({
   onShowReports
 }: AmbientDetailsGridProps) {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  // Debug persona value
+  console.log('AmbientDetailsGrid received props:', {
+    persona,
+    hasHeatData: !!heatData,
+    onShowControlsType: typeof onShowControls,
+    onShowAlertsType: typeof onShowAlerts,
+    onShowGraphsType: typeof onShowGraphs
+  });
   
   // Auto-refresh every 5 seconds for live data
   useEffect(() => {
@@ -112,14 +121,24 @@ export default function AmbientDetailsGrid({
           onShowGraphs,
           onShowChemistry,
           onShowReports
-        }).map((action) => (
-          <QuickActionButton 
-            key={action.label}
-            icon={action.icon} 
-            label={action.label} 
-            onClick={action.onClick} 
-          />
-        ))}
+        }).map((action, index) => {
+          console.log('Rendering QuickActionButton:', {
+            persona,
+            index,
+            label: action.label,
+            onClickType: typeof action.onClick,
+            hasOnClick: !!action.onClick
+          });
+          
+          return (
+            <QuickActionButton 
+              key={action.label}
+              icon={action.icon} 
+              label={action.label} 
+              onClick={action.onClick} 
+            />
+          );
+        })}
       </div>
     </div>
   );
@@ -336,9 +355,14 @@ function QuickActionButton({
   label: string; 
   onClick: () => void; 
 }) {
+  const handleClick = () => {
+    console.log(`QuickActionButton clicked: ${label}`, typeof onClick);
+    onClick();
+  };
+
   return (
     <button
-      onClick={onClick}
+      onClick={handleClick}
       className="flex flex-col items-center gap-1 p-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
     >
       <span className="text-lg">{icon}</span>
@@ -846,22 +870,37 @@ function getPersonaActions(persona: string, callbacks: {
 }) {
   const { onShowControls, onShowAlerts, onShowGraphs, onShowChemistry, onShowReports } = callbacks;
   
+  // Debug logging
+  console.log('getPersonaActions called with:', {
+    persona,
+    onShowControlsType: typeof onShowControls,
+    onShowAlertsType: typeof onShowAlerts,
+    onShowGraphsType: typeof onShowGraphs,
+    callbacksProvided: Object.keys(callbacks)
+  });
+  
   const actions = {
     operator: [
       { 
         icon: '🔧', 
         label: 'Controls', 
-        onClick: onShowControls || (() => console.log('Controls callback not provided'))
+        onClick: onShowControls || (() => {
+          console.log('Controls callback not provided');
+        })
       },
       { 
         icon: '⚠️', 
         label: 'Alerts', 
-        onClick: onShowAlerts || (() => console.log('Alerts callback not provided'))
+        onClick: onShowAlerts || (() => {
+          console.log('Alerts callback not provided');
+        })
       },
       { 
         icon: '📊', 
         label: 'Graphs', 
-        onClick: onShowGraphs || (() => console.log('Graphs callback not provided'))
+        onClick: onShowGraphs || (() => {
+          console.log('Graphs callback not provided');
+        })
       }
     ],
     metallurgist: [

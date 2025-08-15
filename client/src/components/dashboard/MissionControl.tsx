@@ -555,6 +555,34 @@ export default function MissionControl() {
         />
       </PersonaConditional>
       
+      {/* System Overview - Key metrics and quick actions */}
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          {currentPersona === 'cfo' ? 'Financial Overview' : 
+           currentPersona === 'manager' ? 'KPI Dashboard' : 
+           currentPersona === 'metallurgist' ? 'Process Parameters' : 
+           'System Overview'}
+        </h2>
+        <AmbientDetailsGrid 
+          heatData={heat} 
+          persona={currentPersona}
+          onShowControls={() => {
+            console.log('Controls callback triggered from MissionControl');
+            setShowControlsOverlay(true);
+          }}
+          onShowAlerts={() => {
+            console.log('Alerts callback triggered from MissionControl');
+            setShowAlertsOverlay(true);
+          }}
+          onShowGraphs={() => {
+            console.log('Graphs callback triggered from MissionControl');  
+            setShowGraphsOverlay(true);
+          }}
+          onShowChemistry={() => setShowChemistryOverlay(true)}
+          onShowReports={() => setShowReportsOverlay(true)}
+        />
+      </div>
+      
       {/* Hero Insight Section - The ONE thing that matters */}
       <Card className="border-l-4 border-l-blue-500 shadow-lg">
         <CardHeader className="pb-4">
@@ -890,24 +918,6 @@ export default function MissionControl() {
       </PersonaConditional>
 
 
-      {/* Ambient Details - Background context */}
-      <div className="bg-gray-50 rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          {currentPersona === 'cfo' ? 'Financial Overview' : 
-           currentPersona === 'manager' ? 'KPI Dashboard' : 
-           currentPersona === 'metallurgist' ? 'Process Parameters' : 
-           'System Overview'}
-        </h2>
-        <AmbientDetailsGrid 
-          heatData={heat} 
-          persona={currentPersona}
-          onShowControls={() => setShowControlsOverlay(true)}
-          onShowAlerts={() => setShowAlertsOverlay(true)}
-          onShowGraphs={() => setShowGraphsOverlay(true)}
-          onShowChemistry={() => setShowChemistryOverlay(true)}
-          onShowReports={() => setShowReportsOverlay(true)}
-        />
-      </div>
 
       {/* Floating AI Chat Widget */}
       <AIChatWidget heatData={heat} />

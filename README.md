@@ -153,4 +153,4 @@ This software is for demonstration purposes only. Do not use for actual steel pr
 
 *Made with ❤️ by people who think steel is cool but definitely shouldn't be trusted with actual molten metal*
 
-**Remember**: In Soviet Russia, steel melts you! But everywhere else, I-MELT helps you melt steel responsibly! 🇷🇺➡️🔥
+**Remember**: I-MELT helps you melt steel responsibly with cutting-edge AI technology! 🔥⚡
